@@ -11,8 +11,8 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 |---|---|---|---|
 | 1 | [Fundação](etapas/01-fundacao.md) | `feature/fundacao` | Concluída |
 | 2 | [Cadastro base](etapas/02-cadastro-base.md) | `feature/cadastro-base` | Concluída |
-| 3 | Login com JWT e separação por condomínio | — | Próxima |
-| 4 | Documentos: upload, categorias e busca | — | Pendente |
+| 3 | [Login com JWT e separação por condomínio](etapas/03-autenticacao.md) | `feature/autenticacao` | Concluída |
+| 4 | Documentos: upload, categorias e busca | — | Próxima |
 | 5 | Financeiro (consulta): histórico de pagamentos e balancete | — | Pendente |
 | 6 | Boletos e Pix pelo gateway, 2ª via e baixa automática | — | Pendente |
 | 7 | Reservas: espaços, agenda, regras e pagamento por Pix | — | Pendente |
@@ -38,6 +38,7 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 
 | Módulo | Responsabilidade |
 |---|---|
+| `compartilhado` | Peças comuns a todos os módulos (condomínio da requisição atual) |
 | `plataforma` | Condomínios (tenants), planos e assinaturas do Condomix |
 | `acesso` | Unidades, pessoas, usuários e perfis de acesso |
 | `documentos` | Convenção, regimento, leis e atas |
