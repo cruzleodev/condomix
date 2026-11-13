@@ -9,7 +9,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * Nos testes, sobe um PostgreSQL descartável em Docker (mesma versão do compose.yaml).
  */
 @TestConfiguration(proxyBeanMethods = false)
-class TestcontainersConfiguration {
+public class TestcontainersConfiguration {
 
 	@Bean
 	@ServiceConnection

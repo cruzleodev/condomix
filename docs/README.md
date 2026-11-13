@@ -12,14 +12,29 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 1 | [Fundação](etapas/01-fundacao.md) | `feature/fundacao` | Concluída |
 | 2 | [Cadastro base](etapas/02-cadastro-base.md) | `feature/cadastro-base` | Concluída |
 | 3 | [Login com JWT e separação por condomínio](etapas/03-autenticacao.md) | `feature/autenticacao` | Concluída |
-| 4 | Documentos: upload, categorias e busca | — | Próxima |
-| 5 | Financeiro (consulta): histórico de pagamentos e balancete | — | Pendente |
-| 6 | Boletos e Pix pelo gateway, 2ª via e baixa automática | — | Pendente |
-| 7 | Reservas: espaços, agenda, regras e pagamento por Pix | — | Pendente |
-| 8 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
-| 9 | Bot de WhatsApp | — | Pendente |
-| 10 | Frontend: PWA e depois app nas lojas | — | Pendente |
-| 11 | Cobrança da assinatura do Condomix | — | Pendente |
+| 4 | [Documentos: upload, categorias e busca](etapas/04-documentos.md) | `feature/documentos` | Concluída |
+| 5 | Cargos e mandatos: síndico, subsíndico e conselho | — | Próxima |
+| 6 | Administração da plataforma: condomínios, planos e assinaturas | — | Pendente |
+| 7 | Financeiro (consulta): histórico, balancete e desconto por mandato | — | Pendente (dúvidas sobre taxas e banco a esclarecer) |
+| 8 | Boletos e Pix pelo gateway, 2ª via e baixa automática | — | Pendente |
+| 9 | Reservas: espaços, agenda, regras e pagamento por Pix | — | Pendente |
+| 10 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
+| 11 | Bot de WhatsApp | — | Pendente |
+| 12 | Frontend: PWA e depois app nas lojas | — | Pendente |
+| 13 | Cobrança da assinatura do Condomix pelo gateway | — | Pendente |
+
+Futuro, sem data: assembleias online (convocação, pauta, votação e ata).
+
+## Decisões de negócio
+
+| Tema | Decisão |
+|---|---|
+| Síndico morador × profissional | Ser síndico é um cargo (perfil), não depende de morar. O síndico morador tem os perfis MORADOR e SINDICO; o profissional, só SINDICO, e pode atender vários condomínios com um único login |
+| Mandato e passagem | Cargos com mandato (posse, fim previsto, ata da eleição). Ao registrar a eleição, o mandato anterior se encerra na data de posse do sucessor; o histórico é mantido. Avisos 90, 60 e 30 dias antes do fim |
+| Mandato vencido sem eleição | **Prorrogar com aviso** até a posse do sucessor (padrão). Configurável por condomínio para "suspender", conforme a convenção |
+| Administrador da plataforma | Papel `ADMIN_PLATAFORMA`, fora dos condomínios: gerencia condomínios, planos, assinaturas e usuários pela aplicação, nunca direto no banco. Não vê dados internos dos condomínios, exceto em "modo suporte" temporário e auditado (LGPD) |
+| Desconto do síndico | Desconto ou isenção definidos no mandato, aplicados à unidade indicada só enquanto o mandato vigorar (proporcional aos dias). Síndico profissional recebe remuneração, que é despesa, não desconto. Implementado como uma `RegraDeDesconto` |
+| "Meus dados" | Telas como "minhas cobranças" e "minhas reservas" usam os vínculos da pessoa com unidades, não o perfil MORADOR |
 
 ## Decisões de arquitetura
 
@@ -32,7 +47,7 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | WhatsApp | API oficial da Meta (Cloud API) |
 | Pagamentos | Gateway com subcontas (ex.: Asaas): o dinheiro do morador cai na conta do condomínio |
 | Planos | Essencial (Documentos + Financeiro), Completo (+ Reservas) e WhatsApp como adicional |
-| Git | `main` sempre estável; uma branch `feature/*` por etapa |
+| Git | `desenvolvimento` → `homologacao` → `producao`, sempre por pull request; uma branch `feature/*` e um commit por etapa |
 
 ## Módulos
 
