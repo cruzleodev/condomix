@@ -23,3 +23,6 @@ O Spring Boot sobe o PostgreSQL definido em `compose.yaml` automaticamente.
 ## Testes
 `./mvnw test` — usa Testcontainers (precisa do Docker rodando).
 `ModularityTests` verifica que os módulos não acessam as partes internas uns dos outros.
+
+## Documentação
+Decisões de arquitetura e o registro de cada etapa estão em [docs/](docs/README.md).
