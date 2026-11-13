@@ -3,3 +3,5 @@ condomix:
   seguranca:
     jwt:
       segredo: segredo-dos-testes-automatizados-do-condomix
+  armazenamento:
+    diretorio: target/arquivos-de-teste

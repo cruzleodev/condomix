@@ -9,6 +9,11 @@ spring:
     problemdetails:
       enabled: true   # erros da API no formato padrão RFC 9457 (application/problem+json)
 
+  servlet:
+    multipart:
+      max-file-size: 20MB      # tamanho máximo de um arquivo enviado
+      max-request-size: 21MB
+
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/condomix}
     username: ${DB_USER:condomix}
@@ -45,3 +50,5 @@ condomix:
       segredo: ${JWT_SEGREDO:}   # obrigatório, mínimo 32 bytes. Em desenvolvimento vem do application-dev.yaml
       validade: 12h
       emissor: condomix
+  armazenamento:
+    diretorio: ${ARMAZENAMENTO_DIRETORIO:./dados/arquivos}   # onde os arquivos enviados ficam (desenvolvimento)

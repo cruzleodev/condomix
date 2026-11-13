@@ -12,8 +12,8 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 1 | [Fundação](etapas/01-fundacao.md) | `feature/fundacao` | Concluída |
 | 2 | [Cadastro base](etapas/02-cadastro-base.md) | `feature/cadastro-base` | Concluída |
 | 3 | [Login com JWT e separação por condomínio](etapas/03-autenticacao.md) | `feature/autenticacao` | Concluída |
-| 4 | Documentos: upload, categorias e busca | — | Próxima |
-| 5 | Financeiro (consulta): histórico de pagamentos e balancete | — | Pendente |
+| 4 | [Documentos: upload, categorias e busca](etapas/04-documentos.md) | `feature/documentos` | Concluída |
+| 5 | Financeiro (consulta): histórico de pagamentos e balancete | — | Próxima |
 | 6 | Boletos e Pix pelo gateway, 2ª via e baixa automática | — | Pendente |
 | 7 | Reservas: espaços, agenda, regras e pagamento por Pix | — | Pendente |
 | 8 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
@@ -32,7 +32,7 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | WhatsApp | API oficial da Meta (Cloud API) |
 | Pagamentos | Gateway com subcontas (ex.: Asaas): o dinheiro do morador cai na conta do condomínio |
 | Planos | Essencial (Documentos + Financeiro), Completo (+ Reservas) e WhatsApp como adicional |
-| Git | `main` sempre estável; uma branch `feature/*` por etapa |
+| Git | `desenvolvimento` → `homologacao` → `producao`, sempre por pull request; uma branch `feature/*` e um commit por etapa |
 
 ## Módulos
 

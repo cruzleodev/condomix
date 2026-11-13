@@ -103,6 +103,9 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
   entidade marca o campo com `@TenantId`. O Hibernate filtra sozinho.
 - O tenant vem de `TenantAtual`. O Hibernate lê o tenant **no início da transação**: `executarComo`
   e `comoSistema` envolvem a transação, **nunca** são chamados dentro de um `@Transactional`.
+- **Consultas em SQL puro (`nativeQuery = true`) NÃO passam pelo filtro do `@TenantId`.** Nelas, escreva
+  `tenant_id = :tenantId` (com `TenantAtual.obrigatorio()`) e, se a entidade usar `@SQLRestriction`, repita
+  a condição também. Prefira JPQL; use SQL puro só quando necessário (ex.: busca full-text).
 - `TenantAtual.comoSistema` só serve para rotinas internas de leitura (ex.: login). Nunca use
   para atender pedido de usuário.
 - Toda funcionalidade nova com dados de condomínio ganha um teste provando que outro condomínio
@@ -131,9 +134,23 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
 
 ## Git e documentação
 
-- `main` sempre estável. Uma branch `feature/*` por etapa, criada a partir da anterior.
-- Não abrir PR para a `main` sem o usuário pedir.
-- Mensagens de commit em português.
+### Branches de ambiente
+| Branch | Ambiente | Recebe código de |
+|---|---|---|
+| `desenvolvimento` | Integração das etapas | PR de uma `feature/*` |
+| `homologacao` | Testes de aceite antes de publicar | PR de `desenvolvimento` |
+| `producao` | O que está no ar | PR de `homologacao` |
+
+- Nunca faça commit direto nessas três branches: tudo entra por pull request.
+- Só abra PR para `homologacao` ou `producao` quando o usuário pedir. A `main` ficou só com o commit inicial.
+- Uma branch `feature/*` por etapa, criada a partir de `desenvolvimento`. Se o PR da etapa
+  anterior ainda não foi aceito, crie a partir da `feature/*` anterior.
+
+### Commits
+- **Um commit por etapa.** Ajustes durante a etapa entram no mesmo commit (`git commit --amend`)
+  ou são unidos antes do PR. Depois do amend, envie com `git push --force-with-lease`, que só é
+  permitido na própria `feature/*`.
+- Mensagens de commit em português: um título curto, e no corpo a lista do que mudou.
 - Ao terminar uma etapa, crie `docs/etapas/NN-nome.md` (objetivo, o que foi feito, decisões e
   porquê, como verificar, pendências) e atualize a tabela em `docs/README.md`.
 - O remoto do git se chama `main` (não `origin`). Para push use o `gh` como credencial:
