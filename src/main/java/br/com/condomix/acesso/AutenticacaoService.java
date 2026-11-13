@@ -1,11 +1,14 @@
 package br.com.condomix.acesso;
 
 import br.com.condomix.compartilhado.TenantAtual;
-import br.com.condomix.plataforma.Condominio;
-import br.com.condomix.plataforma.CondominioRepository;
+import br.com.condomix.acesso.persistencia.PerfilAcessoRepository;
+import br.com.condomix.acesso.persistencia.UsuarioRepository;
+import br.com.condomix.plataforma.ConsultaDeCondominios;
+import br.com.condomix.plataforma.ResumoCondominio;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -32,22 +35,25 @@ public class AutenticacaoService {
 
 	private final PerfilAcessoRepository perfis;
 
-	private final CondominioRepository condominios;
+	private final ConsultaDeCondominios condominios;
 
 	private final PasswordEncoder senhas;
 
 	private final EmissorDeToken emissor;
 
+	private final Clock relogio;
+
 	/** Usado quando o e-mail não existe, para a resposta demorar o mesmo que uma senha errada. */
 	private final String hashFicticio;
 
-	AutenticacaoService(UsuarioRepository usuarios, PerfilAcessoRepository perfis, CondominioRepository condominios,
-			PasswordEncoder senhas, EmissorDeToken emissor) {
+	AutenticacaoService(UsuarioRepository usuarios, PerfilAcessoRepository perfis, ConsultaDeCondominios condominios,
+			PasswordEncoder senhas, EmissorDeToken emissor, Clock relogio) {
 		this.usuarios = usuarios;
 		this.perfis = perfis;
 		this.condominios = condominios;
 		this.senhas = senhas;
 		this.emissor = emissor;
+		this.relogio = relogio;
 		this.hashFicticio = senhas.encode(UUID.randomUUID().toString());
 	}
 
@@ -60,7 +66,7 @@ public class AutenticacaoService {
 		if (!senhas.matches(senha, usuario.getSenhaHash()) || !usuario.isAtivo()) {
 			throw new CredenciaisInvalidasException();
 		}
-		usuario.registrarAcesso(Instant.now());
+		usuario.registrarAcesso(Instant.now(relogio));
 		usuarios.save(usuario);
 
 		List<Sessao.CondominioDisponivel> disponiveis = condominiosDo(usuario);
@@ -87,9 +93,8 @@ public class AutenticacaoService {
 				.collect(Collectors.groupingBy(PerfilAcesso::getTenantId,
 						Collectors.mapping(PerfilAcesso::getPerfil,
 								Collectors.toCollection(() -> EnumSet.noneOf(Perfil.class)))));
-		return condominios.findAllById(perfisPorCondominio.keySet()).stream()
-				.filter(Condominio::isAtivo)
-				.map(c -> new Sessao.CondominioDisponivel(c.getId(), c.getNome(), perfisPorCondominio.get(c.getId())))
+		return condominios.ativosEntre(perfisPorCondominio.keySet()).stream()
+				.map((ResumoCondominio c) -> new Sessao.CondominioDisponivel(c.id(), c.nome(), perfisPorCondominio.get(c.id())))
 				.sorted(Comparator.comparing(Sessao.CondominioDisponivel::nome))
 				.toList();
 	}

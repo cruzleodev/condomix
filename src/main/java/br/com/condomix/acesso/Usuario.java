@@ -45,11 +45,11 @@ public class Usuario {
 	}
 
 	public Usuario(String email, String senhaHash) {
-		this.email = normalizar(email);
+		this.email = normalizarEmail(email);
 		this.senhaHash = Objects.requireNonNull(senhaHash);
 	}
 
-	static String normalizar(String email) {
+	public static String normalizarEmail(String email) {
 		return Objects.requireNonNull(email).trim().toLowerCase(Locale.ROOT);
 	}
 

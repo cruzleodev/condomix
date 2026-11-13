@@ -7,6 +7,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
@@ -27,16 +28,19 @@ class EmissorDeToken {
 
 	private final PropriedadesJwt propriedades;
 
-	EmissorDeToken(JwtEncoder encoder, PropriedadesJwt propriedades) {
+	private final Clock relogio;
+
+	EmissorDeToken(JwtEncoder encoder, PropriedadesJwt propriedades, Clock relogio) {
 		this.encoder = encoder;
 		this.propriedades = propriedades;
+		this.relogio = relogio;
 	}
 
 	record TokenEmitido(String valor, Instant expiraEm) {
 	}
 
 	TokenEmitido emitir(Usuario usuario, UUID condominioId, Set<Perfil> perfis) {
-		Instant agora = Instant.now();
+		Instant agora = Instant.now(relogio);
 		Instant expiraEm = agora.plus(propriedades.validade());
 		var claims = JwtClaimsSet.builder()
 				.issuer(propriedades.emissor())

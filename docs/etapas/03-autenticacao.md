@@ -126,13 +126,25 @@ Criados automaticamente na primeira execução (`DadosDeDesenvolvimento`):
 ./mvnw test
 ```
 
-Resultado esperado: 15 testes passando, entre eles:
+Resultado esperado: 19 testes passando, entre eles:
 - `AutenticacaoTests`: senha errada, dados inválidos, sem token, login direto, escolha de condomínio,
   condomínio sem acesso e bloqueio de rotas sem condomínio;
 - `CadastroBaseTests`: um condomínio não enxerga nem grava dados de outro.
 
 Na aplicação rodando, abra o Swagger em http://localhost:8080/swagger-ui/index.html. Faça o login,
 copie o `token`, clique em **Authorize** e cole o token.
+
+## Ajustes de SOLID (após criar o CLAUDE.md)
+
+O [CLAUDE.md](../../CLAUDE.md) passou a exigir SOLID. Três pontos do código foram corrigidos:
+
+| Princípio | Antes | Depois |
+|---|---|---|
+| I | O `acesso` usava o `CondominioRepository` da `plataforma` | A `plataforma` oferece `ConsultaDeCondominios` (só o necessário: id e nome dos ativos). Os repositórios dos dois módulos foram para o subpacote interno `persistencia`; o `ModularityTests` agora barra quem tentar usá-los de fora |
+| S | Os dados de exemplo do `acesso` criavam condomínios e assinaturas da `plataforma` | O `acesso` cria só os seus dados e pede os condomínios ao caso de uso `CadastroDeCondominios` (que cria o condomínio com a assinatura em teste) |
+| D | `EmissorDeToken` e o login usavam `Instant.now()` direto | Recebem um `Clock` (bean em `compartilhado`, fuso `condomix.fuso-horario`, padrão `America/Sao_Paulo`). O `EmissorDeTokenTests` usa um relógio fixo e confere a expiração exata |
+
+Testes: 19 passando.
 
 ## Pendências para etapas futuras
 

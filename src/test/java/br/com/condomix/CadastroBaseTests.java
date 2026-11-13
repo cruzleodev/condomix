@@ -2,27 +2,30 @@ package br.com.condomix;
 
 import br.com.condomix.acesso.Perfil;
 import br.com.condomix.acesso.PerfilAcesso;
-import br.com.condomix.acesso.PerfilAcessoRepository;
+import br.com.condomix.acesso.persistencia.PerfilAcessoRepository;
 import br.com.condomix.acesso.Pessoa;
-import br.com.condomix.acesso.PessoaRepository;
+import br.com.condomix.acesso.persistencia.PessoaRepository;
 import br.com.condomix.acesso.TipoUnidade;
 import br.com.condomix.acesso.TipoVinculo;
 import br.com.condomix.acesso.Unidade;
-import br.com.condomix.acesso.UnidadeRepository;
+import br.com.condomix.acesso.persistencia.UnidadeRepository;
 import br.com.condomix.acesso.Usuario;
-import br.com.condomix.acesso.UsuarioRepository;
+import br.com.condomix.acesso.persistencia.UsuarioRepository;
 import br.com.condomix.acesso.VinculoUnidade;
-import br.com.condomix.acesso.VinculoUnidadeRepository;
+import br.com.condomix.acesso.persistencia.VinculoUnidadeRepository;
 import br.com.condomix.compartilhado.TenantAtual;
 import br.com.condomix.plataforma.Assinatura;
-import br.com.condomix.plataforma.AssinaturaRepository;
+import br.com.condomix.plataforma.CadastroDeCondominios;
+import br.com.condomix.plataforma.ConsultaDeCondominios;
+import br.com.condomix.plataforma.ResumoCondominio;
+import br.com.condomix.plataforma.persistencia.AssinaturaRepository;
 import br.com.condomix.plataforma.Condominio;
-import br.com.condomix.plataforma.CondominioRepository;
+import br.com.condomix.plataforma.persistencia.CondominioRepository;
 import br.com.condomix.plataforma.Endereco;
 import br.com.condomix.plataforma.Modulo;
 import br.com.condomix.plataforma.Periodicidade;
 import br.com.condomix.plataforma.Plano;
-import br.com.condomix.plataforma.PlanoRepository;
+import br.com.condomix.plataforma.persistencia.PlanoRepository;
 import br.com.condomix.plataforma.StatusAssinatura;
 import br.com.condomix.plataforma.TipoCondominio;
 import org.junit.jupiter.api.Test;
@@ -57,6 +60,8 @@ class CadastroBaseTests {
 	@Autowired VinculoUnidadeRepository vinculos;
 	@Autowired UsuarioRepository usuarios;
 	@Autowired PerfilAcessoRepository perfis;
+	@Autowired CadastroDeCondominios cadastroDeCondominios;
+	@Autowired ConsultaDeCondominios consultaDeCondominios;
 
 	@Test
 	void planosIniciaisLiberamOsModulosCertos() {
@@ -131,6 +136,29 @@ class CadastroBaseTests {
 				.as("gravar sem condomínio selecionado").isNotNull();
 		assertThat(TenantAtual.comoSistema(() -> unidades.findAll()))
 				.extracting(Unidade::getIdentificacao).doesNotContain("Sala 1", "Sala 2");
+	}
+
+	@Test
+	void cadastroDeCondominioCriaAssinaturaEmTeste() {
+		UUID id = cadastroDeCondominios.cadastrar("Novo Cliente", TipoCondominio.MISTO, "ESSENCIAL", Periodicidade.SEMESTRAL);
+
+		assertThat(TenantAtual.executarComo(id, () -> assinaturas.findByTenantId(id))).singleElement().satisfies(a -> {
+			assertThat(a.getStatus()).isEqualTo(StatusAssinatura.TESTE);
+			assertThat(a.getPeriodicidade()).isEqualTo(Periodicidade.SEMESTRAL);
+		});
+		assertThatThrownBy(() -> cadastroDeCondominios.cadastrar("X", TipoCondominio.MISTO, "WHATSAPP", Periodicidade.MENSAL))
+				.as("WhatsApp é adicional, não pode ser o plano base").isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	void consultaDeCondominiosIgnoraInativos() {
+		Condominio ativo = condominios.save(new Condominio("Ativo", TipoCondominio.COMERCIAL));
+		Condominio inativo = new Condominio("Inativo", TipoCondominio.COMERCIAL);
+		inativo.desativar();
+		condominios.save(inativo);
+
+		assertThat(consultaDeCondominios.ativosEntre(java.util.List.of(ativo.getId(), inativo.getId(), UUID.randomUUID())))
+				.extracting(ResumoCondominio::nome).containsExactly("Ativo");
 	}
 
 	@Test

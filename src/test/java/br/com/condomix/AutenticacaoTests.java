@@ -2,12 +2,12 @@ package br.com.condomix;
 
 import br.com.condomix.acesso.Perfil;
 import br.com.condomix.acesso.PerfilAcesso;
-import br.com.condomix.acesso.PerfilAcessoRepository;
+import br.com.condomix.acesso.persistencia.PerfilAcessoRepository;
 import br.com.condomix.acesso.Usuario;
-import br.com.condomix.acesso.UsuarioRepository;
+import br.com.condomix.acesso.persistencia.UsuarioRepository;
 import br.com.condomix.compartilhado.TenantAtual;
 import br.com.condomix.plataforma.Condominio;
-import br.com.condomix.plataforma.CondominioRepository;
+import br.com.condomix.plataforma.persistencia.CondominioRepository;
 import br.com.condomix.plataforma.TipoCondominio;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;

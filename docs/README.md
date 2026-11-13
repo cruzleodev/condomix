@@ -46,5 +46,7 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | `reservas` | Espaços comuns, agenda e aluguel |
 | `comunicacao` | WhatsApp, e-mail, push e bot |
 
+As regras de design (SOLID) e as convenções do código estão no [CLAUDE.md](../CLAUDE.md).
+
 Os módulos só se comunicam pelas classes públicas do pacote raiz de cada um.
 O teste `ModularityTests` falha se essa regra for quebrada.
