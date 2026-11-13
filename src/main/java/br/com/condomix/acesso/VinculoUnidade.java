@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.TenantId;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
@@ -27,6 +28,7 @@ public class VinculoUnidade {
 	@UuidGenerator(style = UuidGenerator.Style.VERSION_7)
 	private UUID id;
 
+	@TenantId
 	private UUID tenantId;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -1,5 +1,6 @@
-package br.com.condomix.acesso;
+package br.com.condomix.acesso.persistencia;
 
+import br.com.condomix.acesso.Unidade;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

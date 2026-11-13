@@ -1,0 +1,11 @@
+# Perfil de desenvolvimento (ativo por padrão na sua máquina).
+# NUNCA usar estes valores em produção.
+
+condomix:
+  seguranca:
+    jwt:
+      segredo: segredo-de-desenvolvimento-condomix-nao-usar-em-producao
+  dev:
+    # Cria condomínios e usuários de exemplo na primeira execução (ver DadosDeDesenvolvimento).
+    dados-exemplo: true
+    senha: condomix123
