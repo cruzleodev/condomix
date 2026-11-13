@@ -2,6 +2,7 @@ package br.com.condomix.acesso;
 
 import br.com.condomix.compartilhado.TenantAtual;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -39,6 +40,7 @@ class AutenticacaoController {
 	}
 
 	@Operation(summary = "Entrar com e-mail e senha")
+	@SecurityRequirements // o login não precisa de token
 	@PostMapping("/auth/login")
 	Sessao entrar(@Valid @RequestBody PedidoLogin pedido) {
 		return autenticacao.entrar(pedido.email(), pedido.senha());
