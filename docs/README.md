@@ -13,8 +13,8 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 2 | [Cadastro base](etapas/02-cadastro-base.md) | `feature/cadastro-base` | Concluída |
 | 3 | [Login com JWT e separação por condomínio](etapas/03-autenticacao.md) | `feature/autenticacao` | Concluída |
 | 4 | [Documentos: upload, categorias e busca](etapas/04-documentos.md) | `feature/documentos` | Concluída |
-| 5 | Cargos e mandatos: síndico, subsíndico e conselho | — | Próxima |
-| 6 | Administração da plataforma: condomínios, planos e assinaturas | — | Pendente |
+| 5 | [Cargos e mandatos: síndico, subsíndico e conselho](etapas/05-cargos-mandatos.md) | `feature/cargos-mandatos` | Concluída |
+| 6 | Administração da plataforma: condomínios, planos e assinaturas | — | Próxima |
 | 7 | Financeiro (consulta): histórico, balancete e desconto por mandato | — | Pendente (dúvidas sobre taxas e banco a esclarecer) |
 | 8 | Boletos e Pix pelo gateway, 2ª via e baixa automática | — | Pendente |
 | 9 | Reservas: espaços, agenda, regras e pagamento por Pix | — | Pendente |

@@ -15,7 +15,7 @@ O Spring Boot sobe o PostgreSQL definido em `compose.yaml` automaticamente.
 
 ### Logins de exemplo (perfil dev)
 Criados na primeira execução. Senha: `condomix123`.
-- `sindico@condomix.dev`: síndico de 2 condomínios
+- `sindico@condomix.dev`: síndico profissional de 2 condomínios (mandato "a vencer" em um, "prorrogado" no outro)
 - `morador@condomix.dev`: morador de 1 condomínio
 
 ## Banco (DBeaver)
@@ -25,6 +25,12 @@ Criados na primeira execução. Senha: `condomix123`.
 | Porta | 5432 |
 | Banco | condomix |
 | Usuário / senha | condomix / condomix |
+
+### Recriar o banco de desenvolvimento
+Apaga **todos** os dados locais (inclusive os arquivos enviados) e recria os dados de exemplo na próxima execução:
+```bash
+docker compose down -v && rm -rf dados/
+```
 
 ## Testes
 `./mvnw test` — usa Testcontainers (precisa do Docker rodando).

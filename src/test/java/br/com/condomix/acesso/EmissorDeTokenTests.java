@@ -38,14 +38,14 @@ class EmissorDeTokenTests {
 		Usuario usuario = usuarioComId("sindico@teste.com");
 		UUID condominio = UUID.randomUUID();
 
-		var emitido = emissor.emitir(usuario, condominio, Set.of(Perfil.SINDICO, Perfil.CONSELHO));
+		var emitido = emissor.emitir(usuario, condominio, Set.of(Perfil.SINDICO, Perfil.MORADOR));
 		Jwt jwt = decodificar(emitido.valor());
 
 		assertThat(emitido.expiraEm()).isEqualTo(AGORA.plus(Duration.ofHours(2)));
 		assertThat(jwt.getIssuedAt()).isEqualTo(AGORA);
 		assertThat(jwt.getSubject()).isEqualTo(usuario.getId().toString());
 		assertThat(jwt.getClaimAsString("condominio")).isEqualTo(condominio.toString());
-		assertThat(jwt.getClaimAsStringList("perfis")).containsExactly("CONSELHO", "SINDICO");
+		assertThat(jwt.getClaimAsStringList("perfis")).containsExactly("MORADOR", "SINDICO");
 	}
 
 	@Test

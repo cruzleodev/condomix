@@ -36,6 +36,9 @@ public class Pessoa {
 
 	private String email;
 
+	/** O login desta pessoa no sistema; vazio enquanto ela não tiver acesso. */
+	private UUID usuarioId;
+
 	/** Formato E.164 (ex.: 5591999999999); usado no WhatsApp. */
 	private String telefone;
 
@@ -57,6 +60,10 @@ public class Pessoa {
 		this.documento = documento;
 	}
 
+	public void vincularUsuario(UUID usuarioId) {
+		this.usuarioId = Objects.requireNonNull(usuarioId);
+	}
+
 	public void alterarContato(String email, String telefone) {
 		this.email = email;
 		this.telefone = telefone;
@@ -68,6 +75,7 @@ public class Pessoa {
 	public String getDocumento() { return documento; }
 	public String getEmail() { return email; }
 	public String getTelefone() { return telefone; }
+	public UUID getUsuarioId() { return usuarioId; }
 	public Instant getCriadoEm() { return criadoEm; }
 	public Instant getAtualizadoEm() { return atualizadoEm; }
 

@@ -1,15 +1,8 @@
 package br.com.condomix.documentos;
 
+import br.com.condomix.CenarioDeTeste;
 import br.com.condomix.TestcontainersConfiguration;
 import br.com.condomix.acesso.Perfil;
-import br.com.condomix.acesso.PerfilAcesso;
-import br.com.condomix.acesso.Usuario;
-import br.com.condomix.acesso.persistencia.PerfilAcessoRepository;
-import br.com.condomix.acesso.persistencia.UsuarioRepository;
-import br.com.condomix.compartilhado.TenantAtual;
-import br.com.condomix.plataforma.CadastroDeCondominios;
-import br.com.condomix.plataforma.Periodicidade;
-import br.com.condomix.plataforma.TipoCondominio;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +12,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.test.context.event.RecordApplicationEvents;
@@ -35,7 +27,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -43,22 +34,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** A API de documentos de ponta a ponta: publicação, permissões, busca, download e isolamento. */
-@Import(TestcontainersConfiguration.class)
+@Import({ TestcontainersConfiguration.class, CenarioDeTeste.class })
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @RecordApplicationEvents
 class DocumentosTests {
 
-	private static final String SENHA = "senha-de-teste";
-
 	private static final byte[] PDF = "%PDF-1.7\nconteúdo de teste".getBytes(StandardCharsets.UTF_8);
 
 	@Autowired MockMvc mvc;
-	@Autowired CadastroDeCondominios cadastroDeCondominios;
-	@Autowired UsuarioRepository usuarios;
-	@Autowired PerfilAcessoRepository perfis;
-	@Autowired PasswordEncoder senhas;
+	@Autowired CenarioDeTeste cenario;
 	@Autowired ApplicationEvents eventos;
 
 	String sindico;
@@ -67,10 +53,8 @@ class DocumentosTests {
 
 	@BeforeEach
 	void prepararCondominios() throws Exception {
-		UUID condominio = cadastroDeCondominios.cadastrar("Residencial Teste", TipoCondominio.RESIDENCIAL_VERTICAL,
-				"ESSENCIAL", Periodicidade.MENSAL);
-		UUID outro = cadastroDeCondominios.cadastrar("Outro Condomínio", TipoCondominio.COMERCIAL,
-				"ESSENCIAL", Periodicidade.MENSAL);
+		UUID condominio = cenario.condominio("Residencial Teste");
+		UUID outro = cenario.condominio("Outro Condomínio");
 		sindico = tokenDe(condominio, Perfil.SINDICO);
 		morador = tokenDe(condominio, Perfil.MORADOR);
 		sindicoDeOutroCondominio = tokenDe(outro, Perfil.SINDICO);
@@ -206,16 +190,8 @@ class DocumentosTests {
 		return org.hamcrest.Matchers.matchesPattern("[0-9a-f]{64}");
 	}
 
-	/** Cria um usuário com o perfil no condomínio, faz o login e devolve "Bearer <token>". */
-	private String tokenDe(UUID condominio, Perfil perfil) throws Exception {
-		String email = perfil.name().toLowerCase() + "-" + UUID.randomUUID() + "@teste.com";
-		Usuario usuario = usuarios.save(new Usuario(email, senhas.encode(SENHA)));
-		TenantAtual.executarComo(condominio, () -> perfis.save(new PerfilAcesso(condominio, usuario, perfil, null)));
-		String resposta = mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{"email": "%s", "senha": "%s"}""".formatted(email, SENHA)))
-				.andReturn().getResponse().getContentAsString();
-		return "Bearer " + JsonPath.read(resposta, "$.token");
+	private String tokenDe(UUID condominio, Perfil papel) throws Exception {
+		return cenario.token(cenario.comPapel(condominio, papel));
 	}
 
 }

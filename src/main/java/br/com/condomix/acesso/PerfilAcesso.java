@@ -51,6 +51,9 @@ public class PerfilAcesso {
 	}
 
 	public PerfilAcesso(UUID tenantId, Usuario usuario, Perfil perfil, Pessoa pessoa) {
+		if (perfil.atribuidoPorMandato()) {
+			throw new IllegalArgumentException(perfil + " é um cargo eleito: registre um mandato em vez de um perfil");
+		}
 		if (pessoa != null && !pessoa.getTenantId().equals(tenantId)) {
 			throw new IllegalArgumentException("A pessoa é de outro condomínio");
 		}
