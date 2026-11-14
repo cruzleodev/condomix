@@ -1,11 +1,10 @@
 package br.com.condomix;
 
+import br.com.condomix.acesso.Cargo;
 import br.com.condomix.acesso.Perfil;
-import br.com.condomix.acesso.PerfilAcesso;
 import br.com.condomix.acesso.persistencia.PerfilAcessoRepository;
 import br.com.condomix.acesso.Usuario;
 import br.com.condomix.acesso.persistencia.UsuarioRepository;
-import br.com.condomix.compartilhado.TenantAtual;
 import br.com.condomix.plataforma.Condominio;
 import br.com.condomix.plataforma.persistencia.CondominioRepository;
 import br.com.condomix.plataforma.TipoCondominio;
@@ -33,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** Login, seleção de condomínio e as regras de acesso da API, de ponta a ponta. */
-@Import(TestcontainersConfiguration.class)
+@Import({ TestcontainersConfiguration.class, CenarioDeTeste.class })
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -46,6 +45,7 @@ class AutenticacaoTests {
 	@Autowired PerfilAcessoRepository perfis;
 	@Autowired CondominioRepository condominios;
 	@Autowired PasswordEncoder senhas;
+	@Autowired CenarioDeTeste cenario;
 
 	UUID condominioA;
 	UUID condominioB;
@@ -64,12 +64,12 @@ class AutenticacaoTests {
 		Usuario morador = usuarios.save(new Usuario(emailMorador, senhas.encode(SENHA)));
 		Usuario sindico = usuarios.save(new Usuario(emailSindico, senhas.encode(SENHA)));
 
-		TenantAtual.executarComo(condominioA, () -> {
-			perfis.save(new PerfilAcesso(condominioA, morador, Perfil.MORADOR, null));
-			perfis.save(new PerfilAcesso(condominioA, sindico, Perfil.SINDICO, null));
-			return null;
-		});
-		TenantAtual.executarComo(condominioB, () -> perfis.save(new PerfilAcesso(condominioB, sindico, Perfil.SINDICO, null)));
+		cenario.perfil(condominioA, morador, Perfil.MORADOR);
+		// Síndico profissional de A e B: o cargo vem do mandato, não de um perfil gravado.
+		for (UUID condominio : new UUID[] { condominioA, condominioB }) {
+			var pessoa = cenario.pessoa(condominio, "Síndico Profissional", sindico);
+			cenario.mandato(condominio, pessoa, Cargo.SINDICO, cenario.hoje().minusMonths(1), cenario.hoje().plusMonths(11));
+		}
 	}
 
 	@Test

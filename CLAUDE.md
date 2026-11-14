@@ -106,6 +106,8 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
 - **Consultas em SQL puro (`nativeQuery = true`) NÃO passam pelo filtro do `@TenantId`.** Nelas, escreva
   `tenant_id = :tenantId` (com `TenantAtual.obrigatorio()`) e, se a entidade usar `@SQLRestriction`, repita
   a condição também. Prefira JPQL; use SQL puro só quando necessário (ex.: busca full-text).
+- **Cargos eleitos (SINDICO, SUBSINDICO, CONSELHEIRO) vêm só de mandatos vigentes** (`Mandato`), nunca de
+  `PerfilAcesso`. Para checar permissão, use os papéis do token (`hasRole`), que já juntam as duas fontes.
 - `TenantAtual.comoSistema` só serve para rotinas internas de leitura (ex.: login). Nunca use
   para atender pedido de usuário.
 - Toda funcionalidade nova com dados de condomínio ganha um teste provando que outro condomínio
@@ -119,7 +121,8 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
 - IDs `UUID` v7 (`@UuidGenerator(style = VERSION_7)`). Datas e horas em `Instant`/`timestamptz`.
   Valores em dinheiro em `BigDecimal`/`numeric`.
 - `@Transactional` fica nos serviços, nunca nos controllers.
-- Erros da API como `ErrorResponseException` (formato RFC 9457).
+- Erros da API como `ErrorResponseException` (formato RFC 9457). Para os casos comuns, use
+  `NaoEncontradoException` (404) e `RegraDeNegocioException` (400/409) do `compartilhado`.
 - **Banco:**
   - O Hibernate só valida o esquema; quem cria e altera tabelas é o Flyway.
   - Uma migração nunca é editada depois de commitada: crie uma nova `V{n}__descricao.sql`.
@@ -130,6 +133,7 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
 - Toda funcionalidade vem com testes. Testes de integração usam Testcontainers e `@ActiveProfiles("test")`.
 - Testes que mexem com dados de condomínio **não** usam `@Transactional` (ver multi-tenant).
   Cada teste cria os próprios dados, com e-mails e nomes únicos.
+- Use o `CenarioDeTeste` (`@Import`) para montar condomínio, usuário, perfil, mandato e login.
 - Rode `./mvnw test` antes de qualquer commit.
 
 ## Git e documentação

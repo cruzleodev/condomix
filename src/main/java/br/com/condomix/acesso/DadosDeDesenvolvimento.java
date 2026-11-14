@@ -1,5 +1,6 @@
 package br.com.condomix.acesso;
 
+import br.com.condomix.acesso.mandato.RegistroDeMandatos;
 import br.com.condomix.acesso.persistencia.PerfilAcessoRepository;
 import br.com.condomix.acesso.persistencia.PessoaRepository;
 import br.com.condomix.acesso.persistencia.UnidadeRepository;
@@ -27,7 +28,8 @@ import java.util.UUID;
  * Só no perfil dev: na primeira execução, cria dados para testar o login.
  *
  * <ul>
- *   <li><b>sindico@condomix.dev</b>: síndico de dois condomínios (precisa escolher um após o login)</li>
+ *   <li><b>sindico@condomix.dev</b>: síndico profissional de dois condomínios (precisa escolher um após o login);
+ *       mandato "a vencer" no Residencial e "prorrogado" no Comercial</li>
  *   <li><b>morador@condomix.dev</b>: morador do apto A-101 do Residencial Exemplo (entra direto)</li>
  * </ul>
  * A senha dos dois está em {@code condomix.dev.senha} (application-dev.yaml).
@@ -52,13 +54,14 @@ class DadosDeDesenvolvimento implements ApplicationRunner {
 	private final VinculoUnidadeRepository vinculos;
 	private final UsuarioRepository usuarios;
 	private final PerfilAcessoRepository perfis;
+	private final RegistroDeMandatos mandatos;
 	private final PasswordEncoder senhas;
 	private final Clock relogio;
 	private final String senha;
 
 	DadosDeDesenvolvimento(CadastroDeCondominios cadastroDeCondominios, UnidadeRepository unidades,
 			PessoaRepository pessoas, VinculoUnidadeRepository vinculos, UsuarioRepository usuarios,
-			PerfilAcessoRepository perfis, PasswordEncoder senhas, Clock relogio,
+			PerfilAcessoRepository perfis, RegistroDeMandatos mandatos, PasswordEncoder senhas, Clock relogio,
 			@Value("${condomix.dev.senha}") String senha) {
 		this.cadastroDeCondominios = cadastroDeCondominios;
 		this.unidades = unidades;
@@ -66,6 +69,7 @@ class DadosDeDesenvolvimento implements ApplicationRunner {
 		this.vinculos = vinculos;
 		this.usuarios = usuarios;
 		this.perfis = perfis;
+		this.mandatos = mandatos;
 		this.senhas = senhas;
 		this.relogio = relogio;
 		this.senha = senha;
@@ -84,17 +88,32 @@ class DadosDeDesenvolvimento implements ApplicationRunner {
 		UUID comercial = cadastroDeCondominios.cadastrar("Centro Comercial Exemplo",
 				TipoCondominio.COMERCIAL, "ESSENCIAL", Periodicidade.ANUAL);
 
+		LocalDate hoje = LocalDate.now(relogio);
 		TenantAtual.executarComo(residencial, () -> {
 			Unidade apto101 = unidades.save(new Unidade(residencial, "A", "101", TipoUnidade.APARTAMENTO));
-			Pessoa ana = pessoas.save(new Pessoa(residencial, "Ana Moradora"));
-			vinculos.save(new VinculoUnidade(ana, apto101, TipoVinculo.PROPRIETARIO, LocalDate.now(relogio)));
-			perfis.save(new PerfilAcesso(residencial, morador, Perfil.MORADOR, ana));
-			return perfis.save(new PerfilAcesso(residencial, sindico, Perfil.SINDICO, null));
+			Pessoa ana = new Pessoa(residencial, "Ana Moradora");
+			ana.vincularUsuario(morador.getId());
+			pessoas.save(ana);
+			vinculos.save(new VinculoUnidade(ana, apto101, TipoVinculo.PROPRIETARIO, hoje));
+			return perfis.save(new PerfilAcesso(residencial, morador, Perfil.MORADOR, ana));
 		});
-		TenantAtual.executarComo(comercial, () -> perfis.save(new PerfilAcesso(comercial, sindico, Perfil.SINDICO, null)));
+		// Síndico profissional (sem unidade): no Residencial o mandato está perto do fim ("a vencer");
+		// no Comercial já venceu sem eleição ("prorrogado"). Assim os dois avisos aparecem.
+		sindicoProfissional(residencial, sindico, hoje.minusDays(300));
+		sindicoProfissional(comercial, sindico, hoje.minusDays(400));
 
 		log.info("Dados de exemplo criados. Logins: {} (2 condomínios) e {} (1 condomínio); senha em condomix.dev.senha",
 				EMAIL_SINDICO, EMAIL_MORADOR);
+	}
+
+	private void sindicoProfissional(UUID condominio, Usuario usuario, LocalDate posse) {
+		TenantAtual.executarComo(condominio, () -> {
+			Pessoa carlos = new Pessoa(condominio, "Carlos Síndico Profissional");
+			carlos.vincularUsuario(usuario.getId());
+			pessoas.save(carlos);
+			return mandatos.registrar(new RegistroDeMandatos.NovoMandato(carlos.getId(), Cargo.SINDICO, posse,
+					posse.plusYears(1).minusDays(1), null, null, null), null);
+		});
 	}
 
 }

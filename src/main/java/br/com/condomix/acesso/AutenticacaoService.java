@@ -1,7 +1,5 @@
 package br.com.condomix.acesso;
 
-import br.com.condomix.compartilhado.TenantAtual;
-import br.com.condomix.acesso.persistencia.PerfilAcessoRepository;
 import br.com.condomix.acesso.persistencia.UsuarioRepository;
 import br.com.condomix.plataforma.ConsultaDeCondominios;
 import br.com.condomix.plataforma.ResumoCondominio;
@@ -11,12 +9,10 @@ import org.springframework.stereotype.Service;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Login e seleção de condomínio.
@@ -33,7 +29,7 @@ public class AutenticacaoService {
 
 	private final UsuarioRepository usuarios;
 
-	private final PerfilAcessoRepository perfis;
+	private final PapeisDoUsuario papeis;
 
 	private final ConsultaDeCondominios condominios;
 
@@ -46,10 +42,10 @@ public class AutenticacaoService {
 	/** Usado quando o e-mail não existe, para a resposta demorar o mesmo que uma senha errada. */
 	private final String hashFicticio;
 
-	AutenticacaoService(UsuarioRepository usuarios, PerfilAcessoRepository perfis, ConsultaDeCondominios condominios,
+	AutenticacaoService(UsuarioRepository usuarios, PapeisDoUsuario papeis, ConsultaDeCondominios condominios,
 			PasswordEncoder senhas, EmissorDeToken emissor, Clock relogio) {
 		this.usuarios = usuarios;
-		this.perfis = perfis;
+		this.papeis = papeis;
 		this.condominios = condominios;
 		this.senhas = senhas;
 		this.emissor = emissor;
@@ -85,16 +81,11 @@ public class AutenticacaoService {
 		return montarSessao(usuario, disponiveis, condominioId);
 	}
 
-	/** Condomínios ativos em que o usuário tem algum perfil ativo, com os perfis de cada um. */
+	/** Condomínios ativos em que o usuário tem algum papel hoje, com os papéis de cada um. */
 	private List<Sessao.CondominioDisponivel> condominiosDo(Usuario usuario) {
-		Map<UUID, Set<Perfil>> perfisPorCondominio = TenantAtual
-				.comoSistema(() -> perfis.findByUsuarioIdAndAtivoTrue(usuario.getId()))
-				.stream()
-				.collect(Collectors.groupingBy(PerfilAcesso::getTenantId,
-						Collectors.mapping(PerfilAcesso::getPerfil,
-								Collectors.toCollection(() -> EnumSet.noneOf(Perfil.class)))));
-		return condominios.ativosEntre(perfisPorCondominio.keySet()).stream()
-				.map((ResumoCondominio c) -> new Sessao.CondominioDisponivel(c.id(), c.nome(), perfisPorCondominio.get(c.id())))
+		Map<UUID, Set<Perfil>> papeis = this.papeis.porCondominio(usuario.getId());
+		return condominios.ativosEntre(papeis.keySet()).stream()
+				.map((ResumoCondominio c) -> new Sessao.CondominioDisponivel(c.id(), c.nome(), papeis.get(c.id())))
 				.sorted(Comparator.comparing(Sessao.CondominioDisponivel::nome))
 				.toList();
 	}
