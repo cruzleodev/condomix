@@ -97,6 +97,8 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
   O que for interno vai em subpacotes. O teste `ModularityTests` falha se essa regra for quebrada.
 - Prefira **eventos** (`ApplicationEventPublisher` + `@ApplicationModuleListener`) quando um módulo
   só precisa avisar outro que algo aconteceu (ex.: "pagamento confirmado" → comunicação envia WhatsApp).
+  Dentro do mesmo módulo, quando a reação precisa ser na mesma transação (tudo ou nada), use `@EventListener`
+  (ex.: pagamento de cobrança → lançamentos no caixa).
 - Sem dependência circular entre módulos. `compartilhado` não depende de ninguém.
 
 ## Multi-tenant — regras obrigatórias
