@@ -24,6 +24,14 @@ public interface MandatoRepository extends JpaRepository<Mandato, UUID> {
 	@Query("select m from Mandato m join fetch m.pessoa where m.cargo = :cargo and m.encerradoEm is null")
 	List<Mandato> emAberto(@Param("cargo") Cargo cargo);
 
+	/** Mandatos com desconto na taxa que valeram em algum dia do período. */
+	@Query("""
+			select m from Mandato m
+			where m.beneficio.unidadeId is not null
+			  and m.inicio <= :fim and (m.encerradoEm is null or m.encerradoEm >= :inicio)
+			""")
+	List<Mandato> comBeneficioNoPeriodo(@Param("inicio") LocalDate inicio, @Param("fim") LocalDate fim);
+
 	/**
 	 * Mandatos que dão acesso ao usuário na data, em todos os condomínios. Inclui os prorrogados
 	 * (prazo vencido, sem encerramento). Usado pelo login, em modo sistema.
