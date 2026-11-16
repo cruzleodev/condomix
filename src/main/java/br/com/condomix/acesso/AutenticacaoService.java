@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,11 +92,14 @@ public class AutenticacaoService {
 	}
 
 	private Sessao montarSessao(Usuario usuario, List<Sessao.CondominioDisponivel> disponiveis, UUID selecionado) {
-		Set<Perfil> perfisNoSelecionado = disponiveis.stream()
+		Set<Perfil> perfisNoSelecionado = EnumSet.noneOf(Perfil.class);
+		disponiveis.stream()
 				.filter(c -> c.id().equals(selecionado))
 				.findFirst()
-				.map(Sessao.CondominioDisponivel::perfis)
-				.orElse(Set.of());
+				.ifPresent(c -> perfisNoSelecionado.addAll(c.perfis()));
+		if (usuario.isAdminPlataforma()) {
+			perfisNoSelecionado.add(Perfil.ADMIN_PLATAFORMA);
+		}
 		var token = emissor.emitir(usuario, selecionado, perfisNoSelecionado);
 		return new Sessao(token.valor(), "Bearer", token.expiraEm(), selecionado, perfisNoSelecionado, disponiveis);
 	}

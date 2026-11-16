@@ -14,14 +14,15 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 3 | [Login com JWT e separação por condomínio](etapas/03-autenticacao.md) | `feature/autenticacao` | Concluída |
 | 4 | [Documentos: upload, categorias e busca](etapas/04-documentos.md) | `feature/documentos` | Concluída |
 | 5 | [Cargos e mandatos: síndico, subsíndico e conselho](etapas/05-cargos-mandatos.md) | `feature/cargos-mandatos` | Concluída |
-| 6 | Administração da plataforma: condomínios, planos e assinaturas | — | Próxima |
-| 7 | Financeiro (consulta): histórico, balancete e desconto por mandato | — | Pendente (dúvidas sobre taxas e banco a esclarecer) |
-| 8 | Boletos e Pix pelo gateway, 2ª via e baixa automática | — | Pendente |
-| 9 | Reservas: espaços, agenda, regras e pagamento por Pix | — | Pendente |
-| 10 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
-| 11 | Bot de WhatsApp | — | Pendente |
-| 12 | Frontend: PWA e depois app nas lojas | — | Pendente |
-| 13 | Cobrança da assinatura do Condomix pelo gateway | — | Pendente |
+| 6 | [Administração da plataforma: condomínios, planos e assinaturas](etapas/06-administracao-plataforma.md) | `feature/administracao-plataforma` | Concluída |
+| 7 | Cadastro de unidades, pessoas e moradores pelo síndico | — | Próxima |
+| 8 | Financeiro (consulta): histórico, balancete e desconto por mandato | — | Pendente (dúvidas sobre taxas e banco a esclarecer) |
+| 9 | Boletos e Pix pelo gateway, 2ª via e baixa automática | — | Pendente |
+| 10 | Reservas: espaços, agenda, regras e pagamento por Pix | — | Pendente |
+| 11 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
+| 12 | Bot de WhatsApp | — | Pendente |
+| 13 | Frontend: PWA e depois app nas lojas | — | Pendente |
+| 14 | Cobrança da assinatura do Condomix pelo gateway | — | Pendente |
 
 Futuro, sem data: assembleias online (convocação, pauta, votação e ata).
 
@@ -53,7 +54,8 @@ Futuro, sem data: assembleias online (convocação, pauta, votação e ata).
 
 | Módulo | Responsabilidade |
 |---|---|
-| `compartilhado` | Peças comuns a todos os módulos (condomínio da requisição atual) |
+| `compartilhado` | Peças comuns a todos os módulos (condomínio da requisição atual, erros, paginação, relógio) |
+| `administracao` | Painel do dono do Condomix: clientes, planos, assinaturas e suporte (`/api/plataforma/**`) |
 | `plataforma` | Condomínios (tenants), planos e assinaturas do Condomix |
 | `acesso` | Unidades, pessoas, usuários e perfis de acesso |
 | `documentos` | Convenção, regimento, leis e atas |

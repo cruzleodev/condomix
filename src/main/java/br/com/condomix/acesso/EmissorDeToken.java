@@ -8,7 +8,9 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -40,8 +42,17 @@ class EmissorDeToken {
 	}
 
 	TokenEmitido emitir(Usuario usuario, UUID condominioId, Set<Perfil> perfis) {
+		return emitir(usuario, condominioId, perfis, propriedades.validade(), Map.of());
+	}
+
+	/**
+	 * @param validade       por quanto tempo o token vale
+	 * @param camposExtras   outros campos do token (ex.: o id do acesso de suporte)
+	 */
+	TokenEmitido emitir(Usuario usuario, UUID condominioId, Set<Perfil> perfis, Duration validade,
+			Map<String, String> camposExtras) {
 		Instant agora = Instant.now(relogio);
-		Instant expiraEm = agora.plus(propriedades.validade());
+		Instant expiraEm = agora.plus(validade);
 		var claims = JwtClaimsSet.builder()
 				.issuer(propriedades.emissor())
 				.subject(usuario.getId().toString())
@@ -52,6 +63,7 @@ class EmissorDeToken {
 		if (condominioId != null) {
 			claims.claim(ConfiguracaoSeguranca.CLAIM_CONDOMINIO, condominioId.toString());
 		}
+		camposExtras.forEach(claims::claim);
 		var cabecalho = JwsHeader.with(MacAlgorithm.HS256).build();
 		String valor = encoder.encode(JwtEncoderParameters.from(cabecalho, claims.build())).getTokenValue();
 		return new TokenEmitido(valor, expiraEm);

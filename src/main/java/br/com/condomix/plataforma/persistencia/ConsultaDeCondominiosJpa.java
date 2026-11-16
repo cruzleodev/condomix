@@ -26,4 +26,9 @@ class ConsultaDeCondominiosJpa implements ConsultaDeCondominios {
 				.toList();
 	}
 
+	@Override
+	public boolean existe(UUID id) {
+		return condominios.existsById(id);
+	}
+
 }

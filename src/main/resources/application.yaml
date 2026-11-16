@@ -52,3 +52,12 @@ condomix:
       emissor: condomix
   armazenamento:
     diretorio: ${ARMAZENAMENTO_DIRETORIO:./dados/arquivos}   # onde os arquivos enviados ficam (desenvolvimento)
+  admin:
+    # Primeiro administrador da plataforma, criado ao subir se ainda não houver nenhum.
+    email: ${CONDOMIX_ADMIN_EMAIL:}
+    senha: ${CONDOMIX_ADMIN_SENHA:}
+  convite:
+    validade: 7d
+    endereco-do-app: ${CONDOMIX_ENDERECO_CONVITE:http://localhost:5173/convite}
+  suporte:
+    validade: 1h

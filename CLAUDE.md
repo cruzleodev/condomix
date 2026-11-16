@@ -89,7 +89,9 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
 
 ## Módulos (Spring Modulith)
 
-`compartilhado`, `plataforma`, `acesso`, `documentos`, `financeiro`, `reservas`, `comunicacao`.
+`compartilhado`, `plataforma`, `acesso`, `administracao`, `documentos`, `financeiro`, `reservas`, `comunicacao`.
+
+- `administracao` fica acima de `plataforma` e `acesso` (painel do dono do Condomix, `/api/plataforma/**`).
 
 - Só as classes públicas do **pacote raiz** de um módulo podem ser usadas por outro.
   O que for interno vai em subpacotes. O teste `ModularityTests` falha se essa regra for quebrada.
@@ -106,10 +108,12 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
 - **Consultas em SQL puro (`nativeQuery = true`) NÃO passam pelo filtro do `@TenantId`.** Nelas, escreva
   `tenant_id = :tenantId` (com `TenantAtual.obrigatorio()`) e, se a entidade usar `@SQLRestriction`, repita
   a condição também. Prefira JPQL; use SQL puro só quando necessário (ex.: busca full-text).
+- Cada `Perfil` tem uma origem: `MANDATO`, `PERFIL` (gravado em `perfil_acesso`) ou `PLATAFORMA`.
 - **Cargos eleitos (SINDICO, SUBSINDICO, CONSELHEIRO) vêm só de mandatos vigentes** (`Mandato`), nunca de
   `PerfilAcesso`. Para checar permissão, use os papéis do token (`hasRole`), que já juntam as duas fontes.
-- `TenantAtual.comoSistema` só serve para rotinas internas de leitura (ex.: login). Nunca use
-  para atender pedido de usuário.
+- `TenantAtual.comoSistema` só serve para leituras internas (ex.: login) e para o administrador da
+  plataforma ler **dados da plataforma** (condomínio, plano, assinatura). Nunca para dados internos dos
+  condomínios (documentos, pessoas, finanças): para isso existe o modo suporte, auditado.
 - Toda funcionalidade nova com dados de condomínio ganha um teste provando que outro condomínio
   não enxerga esses dados.
 

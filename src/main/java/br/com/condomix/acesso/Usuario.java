@@ -33,6 +33,9 @@ public class Usuario {
 
 	private boolean ativo = true;
 
+	/** Administrador do Condomix (ver {@link Perfil#ADMIN_PLATAFORMA}). */
+	private boolean adminPlataforma;
+
 	private Instant ultimoAcesso;
 
 	@CreationTimestamp
@@ -61,6 +64,10 @@ public class Usuario {
 		this.senhaHash = Objects.requireNonNull(novoHash);
 	}
 
+	public void tornarAdministradorDaPlataforma() {
+		this.adminPlataforma = true;
+	}
+
 	public void desativar() {
 		this.ativo = false;
 	}
@@ -69,6 +76,7 @@ public class Usuario {
 	public String getEmail() { return email; }
 	public String getSenhaHash() { return senhaHash; }
 	public boolean isAtivo() { return ativo; }
+	public boolean isAdminPlataforma() { return adminPlataforma; }
 	public Instant getUltimoAcesso() { return ultimoAcesso; }
 	public Instant getCriadoEm() { return criadoEm; }
 	public Instant getAtualizadoEm() { return atualizadoEm; }
