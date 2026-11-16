@@ -16,13 +16,14 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 5 | [Cargos e mandatos: síndico, subsíndico e conselho](etapas/05-cargos-mandatos.md) | `feature/cargos-mandatos` | Concluída |
 | 6 | [Administração da plataforma: condomínios, planos e assinaturas](etapas/06-administracao-plataforma.md) | `feature/administracao-plataforma` | Concluída |
 | 7 | [Cadastro de unidades, pessoas e moradores pelo síndico](etapas/07-cadastro-unidades-pessoas.md) | `feature/cadastro-unidades-pessoas` | Concluída |
-| 8 | Financeiro (consulta): histórico, balancete e desconto por mandato | — | Próxima (dúvidas sobre taxas e banco a esclarecer) |
-| 9 | Boletos e Pix pelo gateway, 2ª via e baixa automática | — | Pendente |
-| 10 | Reservas: espaços, agenda, regras e pagamento por Pix | — | Pendente |
-| 11 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
-| 12 | Bot de WhatsApp | — | Pendente |
-| 13 | Frontend: PWA e depois app nas lojas | — | Pendente |
-| 14 | Cobrança da assinatura do Condomix pelo gateway | — | Pendente |
+| 8 | [Financeiro: cobranças, rateio, inadimplência e importação da administradora](etapas/08-financeiro-cobrancas.md) | `feature/financeiro-cobrancas` | Concluída |
+| 9 | Financeiro: caixa, despesas e balancete | — | Próxima |
+| 10 | Boletos e Pix pelo gateway, 2ª via e baixa automática | — | Pendente |
+| 11 | Cobrança da assinatura do Condomix pelo gateway | — | Pendente |
+| 12 | Reservas: espaços, agenda, regras e aluguel (Pix ou na taxa do mês) | — | Pendente |
+| 13 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
+| 14 | Frontend: PWA e depois app nas lojas | — | Pendente |
+| 15 | Bot de WhatsApp | — | Pendente |
 
 Futuro, sem data: assembleias online (convocação, pauta, votação e ata).
 

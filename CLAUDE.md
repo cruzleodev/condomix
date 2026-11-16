@@ -134,6 +134,9 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
   - O Hibernate só valida o esquema; quem cria e altera tabelas é o Flyway.
   - Uma migração nunca é editada depois de commitada: crie uma nova `V{n}__descricao.sql`.
   - Enums ficam como `varchar` com `CHECK`.
+  - Filtros opcionais em consultas: use `Specification` (o PostgreSQL recusa `:param is null` com valor nulo sem tipo).
+- **Dinheiro:** `BigDecimal` com 2 casas (`Dinheiro.reais`). Ao dividir um total entre unidades, use
+  `DistribuicaoDeCentavos` para a soma fechar no centavo. Multa e juros são calculados na data, não gravados.
 
 ## Testes
 
