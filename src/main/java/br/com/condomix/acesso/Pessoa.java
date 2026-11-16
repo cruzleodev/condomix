@@ -1,5 +1,7 @@
 package br.com.condomix.acesso;
 
+import br.com.condomix.compartilhado.DocumentoBrasileiro;
+import br.com.condomix.compartilhado.TelefoneBrasileiro;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -10,6 +12,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -53,11 +56,19 @@ public class Pessoa {
 
 	public Pessoa(UUID tenantId, String nome) {
 		this.tenantId = Objects.requireNonNull(tenantId);
-		this.nome = Objects.requireNonNull(nome);
+		alterarNome(nome);
 	}
 
+	public void alterarNome(String nome) {
+		if (nome == null || nome.isBlank()) {
+			throw new IllegalArgumentException("Informe o nome");
+		}
+		this.nome = nome.strip();
+	}
+
+	/** CPF ou CNPJ (inclusive alfanumérico), com ou sem pontuação. Inválido lança IllegalArgumentException. */
 	public void definirDocumento(String documento) {
-		this.documento = documento;
+		this.documento = DocumentoBrasileiro.normalizar(documento);
 	}
 
 	public void vincularUsuario(UUID usuarioId) {
@@ -65,8 +76,11 @@ public class Pessoa {
 	}
 
 	public void alterarContato(String email, String telefone) {
-		this.email = email;
-		this.telefone = telefone;
+		if (email != null && !email.isBlank() && !email.contains("@")) {
+			throw new IllegalArgumentException("E-mail inválido");
+		}
+		this.email = email == null || email.isBlank() ? null : email.strip().toLowerCase(Locale.ROOT);
+		this.telefone = TelefoneBrasileiro.normalizar(telefone);
 	}
 
 	public UUID getId() { return id; }

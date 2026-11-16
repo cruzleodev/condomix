@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -115,7 +116,8 @@ class AutenticacaoTests {
 
 		// Sem condomínio, só as rotas de autenticação funcionam.
 		mvc.perform(get("/api/qualquer-coisa").header("Authorization", "Bearer " + tokenSemCondominio))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.detail").value(containsString("Escolha um condomínio")));
 
 		String tokenB = token(escolher(tokenSemCondominio, condominioB)
 				.andExpect(status().isOk())

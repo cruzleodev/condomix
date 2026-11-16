@@ -15,8 +15,8 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 4 | [Documentos: upload, categorias e busca](etapas/04-documentos.md) | `feature/documentos` | Concluída |
 | 5 | [Cargos e mandatos: síndico, subsíndico e conselho](etapas/05-cargos-mandatos.md) | `feature/cargos-mandatos` | Concluída |
 | 6 | [Administração da plataforma: condomínios, planos e assinaturas](etapas/06-administracao-plataforma.md) | `feature/administracao-plataforma` | Concluída |
-| 7 | Cadastro de unidades, pessoas e moradores pelo síndico | — | Próxima |
-| 8 | Financeiro (consulta): histórico, balancete e desconto por mandato | — | Pendente (dúvidas sobre taxas e banco a esclarecer) |
+| 7 | [Cadastro de unidades, pessoas e moradores pelo síndico](etapas/07-cadastro-unidades-pessoas.md) | `feature/cadastro-unidades-pessoas` | Concluída |
+| 8 | Financeiro (consulta): histórico, balancete e desconto por mandato | — | Próxima (dúvidas sobre taxas e banco a esclarecer) |
 | 9 | Boletos e Pix pelo gateway, 2ª via e baixa automática | — | Pendente |
 | 10 | Reservas: espaços, agenda, regras e pagamento por Pix | — | Pendente |
 | 11 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |

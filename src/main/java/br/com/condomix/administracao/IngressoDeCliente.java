@@ -2,6 +2,7 @@ package br.com.condomix.administracao;
 
 import br.com.condomix.acesso.ConviteGerado;
 import br.com.condomix.acesso.IngressoDeSindico;
+import br.com.condomix.compartilhado.DocumentoBrasileiro;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
 import br.com.condomix.plataforma.CadastroDeCondominios;
 import br.com.condomix.plataforma.PainelDeCondominios;
@@ -43,6 +44,13 @@ class IngressoDeCliente {
 	ClienteNovo registrar(CadastroDeCondominios.NovoCondominio condominio, IngressoDeSindico.NovoSindico sindico,
 			UUID administradorId) {
 		conferirMandato(sindico.inicioMandato(), sindico.fimMandato());
+		try {
+			DocumentoBrasileiro.normalizar(condominio.cnpj());
+			DocumentoBrasileiro.normalizar(sindico.documento());
+		}
+		catch (IllegalArgumentException e) {
+			throw RegraDeNegocioException.invalido(e.getMessage());
+		}
 		UUID condominioId;
 		try {
 			condominioId = cadastro.cadastrar(condominio);
