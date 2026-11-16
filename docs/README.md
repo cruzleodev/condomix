@@ -17,8 +17,8 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 6 | [Administração da plataforma: condomínios, planos e assinaturas](etapas/06-administracao-plataforma.md) | `feature/administracao-plataforma` | Concluída |
 | 7 | [Cadastro de unidades, pessoas e moradores pelo síndico](etapas/07-cadastro-unidades-pessoas.md) | `feature/cadastro-unidades-pessoas` | Concluída |
 | 8 | [Financeiro: cobranças, rateio, inadimplência e importação da administradora](etapas/08-financeiro-cobrancas.md) | `feature/financeiro-cobrancas` | Concluída |
-| 9 | Financeiro: caixa, despesas e balancete | — | Próxima |
-| 10 | Boletos e Pix pelo gateway, 2ª via e baixa automática | — | Pendente |
+| 9 | [Financeiro: caixa, despesas e balancete](etapas/09-financeiro-caixa.md) | `feature/financeiro-caixa` | Concluída |
+| 10 | Boletos e Pix pelo gateway, 2ª via e baixa automática | — | Próxima |
 | 11 | Cobrança da assinatura do Condomix pelo gateway | — | Pendente |
 | 12 | Reservas: espaços, agenda, regras e aluguel (Pix ou na taxa do mês) | — | Pendente |
 | 13 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |

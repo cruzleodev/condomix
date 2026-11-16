@@ -4,7 +4,10 @@ import br.com.condomix.compartilhado.NaoEncontradoException;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
 import br.com.condomix.financeiro.dominio.Cobranca;
 import br.com.condomix.financeiro.dominio.FormaDePagamento;
+import br.com.condomix.financeiro.dominio.PagamentoDeCobrancaEstornado;
+import br.com.condomix.financeiro.dominio.PagamentoDeCobrancaRegistrado;
 import br.com.condomix.financeiro.persistencia.CobrancaRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,9 @@ import java.util.UUID;
 /**
  * Caso de uso: o síndico registra que recebeu (baixa manual), desfaz uma baixa feita por engano ou cancela
  * uma cobrança. A baixa automática pelo banco vem na etapa do gateway.
+ *
+ * <p>Publica {@link PagamentoDeCobrancaRegistrado} e {@link PagamentoDeCobrancaEstornado}: o caixa reage
+ * na mesma transação (se a entrada no caixa falhar, a baixa também não acontece).
  */
 @Service
 @Transactional
@@ -24,10 +30,13 @@ public class BaixaDeCobrancas {
 
 	private final CobrancaRepository cobrancas;
 
+	private final ApplicationEventPublisher eventos;
+
 	private final Clock relogio;
 
-	public BaixaDeCobrancas(CobrancaRepository cobrancas, Clock relogio) {
+	public BaixaDeCobrancas(CobrancaRepository cobrancas, ApplicationEventPublisher eventos, Clock relogio) {
 		this.cobrancas = cobrancas;
+		this.eventos = eventos;
 		this.relogio = relogio;
 	}
 
@@ -40,12 +49,14 @@ public class BaixaDeCobrancas {
 			throw RegraDeNegocioException.invalido("A data do pagamento não pode ser no futuro");
 		}
 		Regras.aplicar(() -> cobranca.registrarPagamento(pagoEm, valorPago, forma, observacao, registradoPor));
+		eventos.publishEvent(new PagamentoDeCobrancaRegistrado(cobranca.getId()));
 		return cobranca;
 	}
 
 	public Cobranca estornarPagamento(UUID id) {
 		Cobranca cobranca = buscar(id);
 		Regras.aplicar(cobranca::estornarPagamento);
+		eventos.publishEvent(new PagamentoDeCobrancaEstornado(cobranca.getId()));
 		return cobranca;
 	}
 
