@@ -11,6 +11,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
 	/** O e-mail é gravado sempre em minúsculas (ver {@link Usuario#normalizarEmail}). */
 	Optional<Usuario> findByEmail(String email);
 
+	boolean existsByAdminPlataformaTrue();
+
 	default Optional<Usuario> buscarPorEmail(String email) {
 		return findByEmail(Usuario.normalizarEmail(email));
 	}

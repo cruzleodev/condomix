@@ -68,6 +68,21 @@ public class Assinatura {
 		this.fim = fim;
 	}
 
+	/** Muda a situação (teste, ativa, suspensa). Para cancelar, use {@link #cancelar}. */
+	public void alterarStatus(StatusAssinatura novo) {
+		if (novo == StatusAssinatura.CANCELADA) {
+			throw new IllegalArgumentException("Para cancelar, use cancelar(fim)");
+		}
+		if (this.status == StatusAssinatura.CANCELADA) {
+			throw new IllegalStateException("Assinatura cancelada não muda de situação");
+		}
+		this.status = novo;
+	}
+
+	public boolean isVigente() {
+		return status != StatusAssinatura.CANCELADA;
+	}
+
 	public UUID getId() { return id; }
 	public UUID getTenantId() { return tenantId; }
 	public Plano getPlano() { return plano; }

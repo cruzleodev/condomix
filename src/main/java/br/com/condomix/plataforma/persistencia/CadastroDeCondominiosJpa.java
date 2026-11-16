@@ -4,10 +4,8 @@ import br.com.condomix.compartilhado.TenantAtual;
 import br.com.condomix.plataforma.Assinatura;
 import br.com.condomix.plataforma.CadastroDeCondominios;
 import br.com.condomix.plataforma.Condominio;
-import br.com.condomix.plataforma.Periodicidade;
 import br.com.condomix.plataforma.Plano;
 import br.com.condomix.plataforma.StatusAssinatura;
-import br.com.condomix.plataforma.TipoCondominio;
 import br.com.condomix.plataforma.TipoPlano;
 import org.springframework.stereotype.Component;
 
@@ -40,13 +38,17 @@ class CadastroDeCondominiosJpa implements CadastroDeCondominios {
 	 * uma depois; quando houver cadastro pela API (etapa de cobrança), isso vira uma única operação.
 	 */
 	@Override
-	public UUID cadastrar(String nome, TipoCondominio tipo, String codigoPlano, Periodicidade periodicidade) {
-		Plano plano = planos.findByCodigo(codigoPlano)
+	public UUID cadastrar(NovoCondominio novo) {
+		Plano plano = planos.findByCodigo(novo.codigoPlano())
 				.filter(p -> p.isAtivo() && p.getTipo() == TipoPlano.BASE)
-				.orElseThrow(() -> new IllegalArgumentException("Plano base inexistente: " + codigoPlano));
-		Condominio condominio = condominios.save(new Condominio(nome, tipo));
+				.orElseThrow(() -> new IllegalArgumentException("Plano base inexistente: " + novo.codigoPlano()));
+		Condominio novoCondominio = new Condominio(novo.nome(), novo.tipo());
+		if (novo.cnpj() != null && !novo.cnpj().isBlank()) {
+			novoCondominio.definirCnpj(novo.cnpj().replaceAll("\\D", ""));
+		}
+		Condominio condominio = condominios.save(novoCondominio);
 		TenantAtual.executarComo(condominio.getId(), () -> assinaturas.save(
-				new Assinatura(condominio, plano, periodicidade, StatusAssinatura.TESTE, LocalDate.now(relogio))));
+				new Assinatura(condominio, plano, novo.periodicidade(), StatusAssinatura.TESTE, LocalDate.now(relogio))));
 		return condominio.getId();
 	}
 

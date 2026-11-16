@@ -72,6 +72,13 @@ public class CenarioDeTeste {
 		return usuarios.save(new Usuario(email, senhas.encode(SENHA)));
 	}
 
+	/** Administrador da plataforma (fora dos condomínios). */
+	public Usuario administrador() {
+		Usuario usuario = usuario("admin");
+		usuario.tornarAdministradorDaPlataforma();
+		return usuarios.save(usuario);
+	}
+
 	/** Pessoa do condomínio; com {@code usuario}, ela tem login. */
 	public Pessoa pessoa(UUID condominio, String nome, Usuario usuario) {
 		return TenantAtual.executarComo(condominio, () -> {

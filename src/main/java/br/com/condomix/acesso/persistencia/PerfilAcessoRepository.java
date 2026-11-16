@@ -1,5 +1,6 @@
 package br.com.condomix.acesso.persistencia;
 
+import br.com.condomix.acesso.Perfil;
 import br.com.condomix.acesso.PerfilAcesso;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -9,5 +10,7 @@ import java.util.UUID;
 public interface PerfilAcessoRepository extends JpaRepository<PerfilAcesso, UUID> {
 
 	List<PerfilAcesso> findByUsuarioIdAndAtivoTrue(UUID usuarioId);
+
+	boolean existsByUsuarioIdAndPerfil(UUID usuarioId, Perfil perfil);
 
 }

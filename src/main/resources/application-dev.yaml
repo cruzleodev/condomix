@@ -2,6 +2,9 @@
 # NUNCA usar estes valores em produção.
 
 condomix:
+  admin:
+    email: admin@condomix.dev
+    senha: condomix123
   seguranca:
     jwt:
       segredo: segredo-de-desenvolvimento-condomix-nao-usar-em-producao

@@ -6,9 +6,17 @@ import java.util.UUID;
 public interface CadastroDeCondominios {
 
 	/**
+	 * @param cnpj        só dígitos; opcional
 	 * @param codigoPlano código de um plano BASE, ex.: "ESSENCIAL" ou "COMPLETO"
-	 * @return o id do condomínio, que é o tenant_id dos dados dele
 	 */
-	UUID cadastrar(String nome, TipoCondominio tipo, String codigoPlano, Periodicidade periodicidade);
+	record NovoCondominio(String nome, TipoCondominio tipo, String cnpj, String codigoPlano, Periodicidade periodicidade) {
+	}
+
+	/** @return o id do condomínio, que é o tenant_id dos dados dele */
+	UUID cadastrar(NovoCondominio novo);
+
+	default UUID cadastrar(String nome, TipoCondominio tipo, String codigoPlano, Periodicidade periodicidade) {
+		return cadastrar(new NovoCondominio(nome, tipo, null, codigoPlano, periodicidade));
+	}
 
 }

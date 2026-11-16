@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.EnumSet;
 import java.util.Set;
@@ -46,6 +47,16 @@ public class Plano {
 	@Enumerated(EnumType.STRING)
 	private Set<Modulo> modulos = EnumSet.noneOf(Modulo.class);
 
+	/** Preços definidos pelo administrador; vazios enquanto não forem definidos. */
+	@Column(precision = 10, scale = 2)
+	private BigDecimal precoMensal;
+
+	@Column(precision = 10, scale = 2)
+	private BigDecimal precoSemestral;
+
+	@Column(precision = 10, scale = 2)
+	private BigDecimal precoAnual;
+
 	@CreationTimestamp
 	private Instant criadoEm;
 
@@ -56,6 +67,18 @@ public class Plano {
 		return ativo && modulos.contains(modulo);
 	}
 
+	/** Define os preços de cada periodicidade. Valores em reais, sem negativos. */
+	public void definirPrecos(BigDecimal mensal, BigDecimal semestral, BigDecimal anual) {
+		for (BigDecimal preco : new BigDecimal[] { mensal, semestral, anual }) {
+			if (preco != null && preco.signum() < 0) {
+				throw new IllegalArgumentException("Preço não pode ser negativo");
+			}
+		}
+		this.precoMensal = mensal;
+		this.precoSemestral = semestral;
+		this.precoAnual = anual;
+	}
+
 	public UUID getId() { return id; }
 	public String getCodigo() { return codigo; }
 	public String getNome() { return nome; }
@@ -64,5 +87,8 @@ public class Plano {
 	public boolean isAtivo() { return ativo; }
 	public Set<Modulo> getModulos() { return Set.copyOf(modulos); }
 	public Instant getCriadoEm() { return criadoEm; }
+	public BigDecimal getPrecoMensal() { return precoMensal; }
+	public BigDecimal getPrecoSemestral() { return precoSemestral; }
+	public BigDecimal getPrecoAnual() { return precoAnual; }
 
 }

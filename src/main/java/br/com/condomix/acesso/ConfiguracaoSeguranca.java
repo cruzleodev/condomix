@@ -36,7 +36,10 @@ import java.nio.charset.StandardCharsets;
  *   <li>Sem sessão no servidor: cada requisição traz o token no cabeçalho {@code Authorization: Bearer ...}.</li>
  *   <li>Abertos: login, health, info e a documentação (Swagger).</li>
  *   <li>{@code /api/auth/**} e {@code /api/eu}: basta estar logado.</li>
- *   <li>Todo o resto: precisa estar logado <b>e</b> com um condomínio selecionado no token.</li>
+ *   <li>{@code /api/plataforma/**}: só o administrador da plataforma.</li>
+ *   <li>Aceitar convite: aberto (quem tem o código do convite ainda não tem login).</li>
+ *   <li>Todo o resto: precisa estar logado <b>e</b> com um condomínio selecionado no token.
+ *       O token de suporte só pode fazer leituras (GET).</li>
  * </ul>
  */
 @Configuration
@@ -50,27 +53,36 @@ class ConfiguracaoSeguranca {
 
 	static final String CLAIM_EMAIL = "email";
 
+	/** Presente só no token de suporte: o id do registro de auditoria. */
+	static final String CLAIM_SUPORTE = "suporte";
+
 	@Bean
 	SecurityFilterChain seguranca(HttpSecurity http) throws Exception {
 		return http
 				.csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(regras -> regras
-						.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/convites/consulta", "/api/convites/aceite")
+								.permitAll()
 						.requestMatchers("/actuator/health/**", "/actuator/info", "/error",
 								"/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 						.requestMatchers("/api/auth/**", "/api/eu").authenticated()
+						.requestMatchers("/api/plataforma/**").hasRole(Perfil.ADMIN_PLATAFORMA.name())
 						.anyRequest().access(comCondominioSelecionado()))
 				.oauth2ResourceServer(rs -> rs.jwt(jwt -> jwt.jwtAuthenticationConverter(conversorDeToken())))
 				.addFilterAfter(new FiltroDeTenant(), BearerTokenAuthenticationFilter.class)
 				.build();
 	}
 
-	/** Libera só tokens que têm o condomínio definido. */
+	/** Libera só tokens com condomínio definido. O token de suporte só pode ler (GET). */
 	private static AuthorizationManager<RequestAuthorizationContext> comCondominioSelecionado() {
-		return (autenticacao, contexto) -> new AuthorizationDecision(
-				autenticacao.get() instanceof JwtAuthenticationToken token
-						&& token.getToken().hasClaim(CLAIM_CONDOMINIO));
+		return (autenticacao, contexto) -> {
+			if (!(autenticacao.get() instanceof JwtAuthenticationToken token) || !token.getToken().hasClaim(CLAIM_CONDOMINIO)) {
+				return new AuthorizationDecision(false);
+			}
+			boolean suporte = token.getToken().hasClaim(CLAIM_SUPORTE);
+			return new AuthorizationDecision(!suporte || HttpMethod.GET.matches(contexto.getRequest().getMethod()));
+		};
 	}
 
 	/** Transforma os perfis do token em papéis do Spring Security: SINDICO vira ROLE_SINDICO. */

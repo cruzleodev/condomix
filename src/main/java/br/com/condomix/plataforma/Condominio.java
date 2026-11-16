@@ -71,8 +71,13 @@ public class Condominio {
 		this.cnpj = cnpj;
 	}
 
+	/** Suspende o condomínio: ninguém dele consegue mais entrar no sistema. */
 	public void desativar() {
 		this.ativo = false;
+	}
+
+	public void reativar() {
+		this.ativo = true;
 	}
 
 	public UUID getId() { return id; }

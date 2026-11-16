@@ -17,6 +17,7 @@ O Spring Boot sobe o PostgreSQL definido em `compose.yaml` automaticamente.
 Criados na primeira execução. Senha: `condomix123`.
 - `sindico@condomix.dev`: síndico profissional de 2 condomínios (mandato "a vencer" em um, "prorrogado" no outro)
 - `morador@condomix.dev`: morador de 1 condomínio
+- `admin@condomix.dev`: administrador da plataforma (rotas `/api/plataforma/**`)
 
 ## Banco (DBeaver)
 | Campo | Valor |

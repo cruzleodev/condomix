@@ -10,4 +10,7 @@ public interface ConsultaDeCondominios {
 	/** Os condomínios ativos entre os ids informados. Ids inexistentes ou inativos são ignorados. */
 	List<ResumoCondominio> ativosEntre(Collection<UUID> ids);
 
+	/** Se o condomínio existe (ativo ou suspenso). */
+	boolean existe(UUID id);
+
 }
