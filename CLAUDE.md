@@ -125,6 +125,9 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
 - IDs `UUID` v7 (`@UuidGenerator(style = VERSION_7)`). Datas e horas em `Instant`/`timestamptz`.
   Valores em dinheiro em `BigDecimal`/`numeric`.
 - `@Transactional` fica nos serviços, nunca nos controllers.
+- Permissões: use as constantes de `Permissoes` (`GESTAO`, `CONSULTA_DO_CADASTRO`) nos `@PreAuthorize`.
+- CPF/CNPJ e telefone: sempre por `DocumentoBrasileiro` e `TelefoneBrasileiro` (aceitam o CNPJ alfanumérico).
+- "Meus dados" (minhas unidades, meus boletos...): pelos vínculos da **pessoa** ligada ao login, nunca pelo perfil.
 - Erros da API como `ErrorResponseException` (formato RFC 9457). Para os casos comuns, use
   `NaoEncontradoException` (404) e `RegraDeNegocioException` (400/409) do `compartilhado`.
 - **Banco:**

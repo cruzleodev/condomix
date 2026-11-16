@@ -1,5 +1,6 @@
 package br.com.condomix.plataforma.persistencia;
 
+import br.com.condomix.compartilhado.DocumentoBrasileiro;
 import br.com.condomix.compartilhado.TenantAtual;
 import br.com.condomix.plataforma.Assinatura;
 import br.com.condomix.plataforma.CadastroDeCondominios;
@@ -43,8 +44,12 @@ class CadastroDeCondominiosJpa implements CadastroDeCondominios {
 				.filter(p -> p.isAtivo() && p.getTipo() == TipoPlano.BASE)
 				.orElseThrow(() -> new IllegalArgumentException("Plano base inexistente: " + novo.codigoPlano()));
 		Condominio novoCondominio = new Condominio(novo.nome(), novo.tipo());
-		if (novo.cnpj() != null && !novo.cnpj().isBlank()) {
-			novoCondominio.definirCnpj(novo.cnpj().replaceAll("\\D", ""));
+		String cnpj = DocumentoBrasileiro.normalizar(novo.cnpj());
+		if (cnpj != null) {
+			if (!DocumentoBrasileiro.ehCnpj(cnpj)) {
+				throw new IllegalArgumentException("O documento do condomínio deve ser um CNPJ");
+			}
+			novoCondominio.definirCnpj(cnpj);
 		}
 		Condominio condominio = condominios.save(novoCondominio);
 		TenantAtual.executarComo(condominio.getId(), () -> assinaturas.save(

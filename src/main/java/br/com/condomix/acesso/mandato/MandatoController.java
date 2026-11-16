@@ -1,6 +1,7 @@
 package br.com.condomix.acesso.mandato;
 
 import br.com.condomix.acesso.Cargo;
+import br.com.condomix.acesso.Permissoes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,8 +29,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/mandatos")
 class MandatoController {
-
-	private static final String QUEM_GERENCIA = "hasAnyRole('SINDICO', 'ADMINISTRADORA')";
 
 	private final RegistroDeMandatos registro;
 
@@ -69,7 +68,7 @@ class MandatoController {
 	@Operation(summary = "Registrar eleição (síndico ou administradora)",
 			description = "Para síndico e subsíndico, o mandato do antecessor é encerrado no dia anterior à posse. "
 					+ "Mandato de no máximo 2 anos. Desconto: informe percentual e unidade juntos.")
-	@PreAuthorize(QUEM_GERENCIA)
+	@PreAuthorize(Permissoes.GESTAO)
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	MandatoResposta registrar(@Valid @RequestBody PedidoMandato pedido, @AuthenticationPrincipal Jwt jwt) {
@@ -80,7 +79,7 @@ class MandatoController {
 	}
 
 	@Operation(summary = "Encerrar antes do prazo: renúncia, destituição... (síndico ou administradora)")
-	@PreAuthorize(QUEM_GERENCIA)
+	@PreAuthorize(Permissoes.GESTAO)
 	@PostMapping("/{id}/encerramento")
 	MandatoResposta encerrar(@PathVariable UUID id, @Valid @RequestBody PedidoEncerramento pedido) {
 		registro.encerrar(id, pedido.ultimoDia(), pedido.motivo(), pedido.ataId());

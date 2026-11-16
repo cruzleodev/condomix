@@ -2,6 +2,7 @@ package br.com.condomix.acesso.convite;
 
 import br.com.condomix.acesso.ConviteGerado;
 import br.com.condomix.acesso.Perfil;
+import br.com.condomix.acesso.Permissoes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -53,7 +54,7 @@ class ConviteController {
 	@Operation(summary = "Convidar uma pessoa do condomínio (síndico ou administradora)",
 			description = "perfil: MORADOR, ADMINISTRADORA ou PORTARIA. Deixe vazio para quem já tem um mandato "
 					+ "(ex.: síndico). A resposta traz o link para repassar à pessoa; vale 7 dias.")
-	@PreAuthorize("hasAnyRole('SINDICO', 'ADMINISTRADORA')")
+	@PreAuthorize(Permissoes.GESTAO)
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	ConviteGerado convidar(@Valid @RequestBody PedidoConvite pedido, @AuthenticationPrincipal Jwt jwt) {

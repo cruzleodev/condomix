@@ -47,7 +47,7 @@ class CondominiosDaPlataformaController {
 	record PedidoClienteNovo(
 			@NotBlank @Size(max = 150) String nome,
 			@NotNull TipoCondominio tipo,
-			@Size(max = 18) String cnpj,
+			@Size(max = 20) String cnpj,
 			@NotBlank String plano,
 			@NotNull Periodicidade periodicidade,
 			@NotNull @Valid Sindico sindico) {

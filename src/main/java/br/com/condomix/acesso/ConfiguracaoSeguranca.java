@@ -69,7 +69,10 @@ class ConfiguracaoSeguranca {
 						.requestMatchers("/api/auth/**", "/api/eu").authenticated()
 						.requestMatchers("/api/plataforma/**").hasRole(Perfil.ADMIN_PLATAFORMA.name())
 						.anyRequest().access(comCondominioSelecionado()))
-				.oauth2ResourceServer(rs -> rs.jwt(jwt -> jwt.jwtAuthenticationConverter(conversorDeToken())))
+				.oauth2ResourceServer(rs -> rs
+						.jwt(jwt -> jwt.jwtAuthenticationConverter(conversorDeToken()))
+						.accessDeniedHandler(new RespostaDeAcessoNegado()))
+				.exceptionHandling(erros -> erros.accessDeniedHandler(new RespostaDeAcessoNegado()))
 				.addFilterAfter(new FiltroDeTenant(), BearerTokenAuthenticationFilter.class)
 				.build();
 	}

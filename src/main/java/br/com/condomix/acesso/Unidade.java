@@ -56,12 +56,37 @@ public class Unidade {
 
 	public Unidade(UUID tenantId, String bloco, String identificacao, TipoUnidade tipo) {
 		this.tenantId = Objects.requireNonNull(tenantId);
-		this.bloco = bloco;
-		this.identificacao = Objects.requireNonNull(identificacao);
-		this.tipo = Objects.requireNonNull(tipo);
+		alterar(bloco, identificacao, tipo);
 	}
 
+	/** Corrige bloco, identificação ou tipo. Bloco vazio vira "sem bloco". */
+	public void alterar(String bloco, String identificacao, TipoUnidade tipo) {
+		if (identificacao == null || identificacao.isBlank()) {
+			throw new IllegalArgumentException("Informe a identificação da unidade (ex.: 101, Casa 12)");
+		}
+		this.bloco = bloco == null || bloco.isBlank() ? null : bloco.strip();
+		this.identificacao = identificacao.strip();
+		this.tipo = Objects.requireNonNull(tipo, "Informe o tipo da unidade");
+	}
+
+	/** Ex.: "A-101" ou "Casa 12" (sem bloco). */
+	public String descricao() {
+		return bloco == null ? identificacao : bloco + "-" + identificacao;
+	}
+
+	public void desativar() {
+		this.ativo = false;
+	}
+
+	public void reativar() {
+		this.ativo = true;
+	}
+
+	/** Parte da unidade no condomínio, entre 0 e 1 (ex.: 0,025 = 2,5%). Vazio: ainda não definida. */
 	public void definirFracaoIdeal(BigDecimal fracaoIdeal) {
+		if (fracaoIdeal != null && (fracaoIdeal.signum() <= 0 || fracaoIdeal.compareTo(BigDecimal.ONE) > 0)) {
+			throw new IllegalArgumentException("A fração ideal deve ser maior que 0 e no máximo 1 (ex.: 0.025 = 2,5%)");
+		}
 		this.fracaoIdeal = fracaoIdeal;
 	}
 

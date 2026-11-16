@@ -62,6 +62,7 @@ class AdministracaoTests {
 	void clienteNovoComSindicoQueAceitaOConviteEEntra() throws Exception {
 		String email = "sindica-" + UUID.randomUUID() + "@teste.com";
 		String resposta = clienteNovo("Residencial Primavera", email).andExpect(status().isCreated())
+				.andExpect(jsonPath("$.condominio.cnpj").value("12ABC34501DE35"))
 				.andExpect(jsonPath("$.condominio.assinatura.plano").value("COMPLETO"))
 				.andExpect(jsonPath("$.condominio.assinatura.status").value("TESTE"))
 				.andExpect(jsonPath("$.conviteDoSindico.email").value(email))
@@ -185,7 +186,8 @@ class AdministracaoTests {
 		mvc.perform(multipart("/api/documentos")
 						.file(new MockMultipartFile("arquivo", "x.pdf", "application/pdf", "%PDF-1.7".getBytes()))
 						.param("titulo", "Tentativa").param("categoria", "OUTRO").header("Authorization", suporte))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.detail").value("O acesso de suporte é somente leitura"));
 		mvc.perform(get("/api/plataforma/suporte").header("Authorization", admin))
 				.andExpect(jsonPath("$[0].motivo").value(containsString("convenção")))
 				.andExpect(jsonPath("$[0].condominioId").value(condominio.toString()));
@@ -198,7 +200,7 @@ class AdministracaoTests {
 
 	private ResultActions clienteNovo(String nome, String emailDoSindico) throws Exception {
 		return postJson("/api/plataforma/condominios", admin, """
-				{"nome": "%s", "tipo": "RESIDENCIAL_VERTICAL", "cnpj": "12.345.678/0001-90", "plano": "COMPLETO",
+				{"nome": "%s", "tipo": "RESIDENCIAL_VERTICAL", "cnpj": "12.ABC.345/01DE-35", "plano": "COMPLETO",
 				 "periodicidade": "MENSAL",
 				 "sindico": {"nome": "Sílvia Síndica", "email": "%s", "inicioMandato": "%s", "fimMandato": "%s"}}"""
 				.formatted(nome, emailDoSindico, cenario.hoje(), cenario.hoje().plusYears(1).minusDays(1)));

@@ -63,7 +63,14 @@ public class VinculoUnidade {
 		this.inicio = Objects.requireNonNull(inicio);
 	}
 
+	/** {@code fim} é o último dia do vínculo. */
 	public void encerrar(LocalDate fim) {
+		if (this.fim != null) {
+			throw new IllegalStateException("Este vínculo já foi encerrado");
+		}
+		if (fim.isBefore(inicio)) {
+			throw new IllegalArgumentException("O fim do vínculo não pode ser antes do início (" + inicio + ")");
+		}
 		this.fim = fim;
 	}
 
