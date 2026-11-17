@@ -56,18 +56,18 @@ class UnidadeController {
 	}
 
 	record UnidadeResposta(UUID id, String bloco, String identificacao, String descricao, TipoUnidade tipo,
-			BigDecimal fracaoIdeal, boolean ativo, List<Ocupante> ocupantes) {
+			BigDecimal fracaoIdeal, boolean ativo, List<OcupanteDaUnidade> ocupantes) {
 
-		record Ocupante(UUID vinculoId, UUID pessoaId, String nome, TipoVinculo vinculo) {
+		record OcupanteDaUnidade(UUID vinculoId, UUID pessoaId, String nome, TipoVinculo vinculo) {
 		}
 
 		static UnidadeResposta de(ConsultaDeUnidades.UnidadeComOcupantes u) {
 			return de(u.unidade(), u.vinculos().stream()
-					.map(v -> new Ocupante(v.getId(), v.getPessoa().getId(), v.getPessoa().getNome(), v.getTipo()))
+					.map(v -> new OcupanteDaUnidade(v.getId(), v.getPessoa().getId(), v.getPessoa().getNome(), v.getTipo()))
 					.toList());
 		}
 
-		static UnidadeResposta de(Unidade u, List<Ocupante> ocupantes) {
+		static UnidadeResposta de(Unidade u, List<OcupanteDaUnidade> ocupantes) {
 			return new UnidadeResposta(u.getId(), u.getBloco(), u.getIdentificacao(), u.descricao(), u.getTipo(),
 					u.getFracaoIdeal(), u.isAtivo(), ocupantes);
 		}

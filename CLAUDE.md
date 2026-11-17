@@ -1,15 +1,26 @@
 # Condomix — instruções para o Claude
 
 Sistema web de gestão de condomínios, vendido como SaaS. Backend em Java 25, Spring Boot 4.1,
-Spring Modulith, PostgreSQL 18 e Flyway. Visão geral, decisões e etapas: [docs/README.md](docs/README.md).
+Spring Modulith, PostgreSQL 18 e Flyway. Frontend em React + TypeScript (PWA), na pasta `frontend/` deste
+mesmo repositório. Visão geral, decisões e etapas: [docs/README.md](docs/README.md).
+
+## Como as etapas são entregues: fatias verticais
+Cada etapa entrega uma funcionalidade **de ponta a ponta**: banco → API → **tela**, num único PR.
+Nada de "todo o backend primeiro, telas no final": a tela revela problemas na API cedo, quando ainda
+são baratos de corrigir, e o usuário consegue testar de verdade.
+- Ao criar ou mudar um endpoint, atualize os tipos do frontend (`npm run api:tipos`) e a tela que o usa.
+- Uma etapa só é concluída com a tela funcionando no navegador, no tamanho de celular.
 
 Fale sempre em **português** com o usuário, e escreva o código e a documentação em português.
 
 ## Comandos
 
 ```bash
-./mvnw test              # todos os testes (precisa do Docker rodando)
-./mvnw spring-boot:run   # roda a aplicação (perfil dev); o Postgres sobe sozinho pelo compose.yaml
+./mvnw test              # todos os testes do backend (precisa do Docker rodando)
+./mvnw spring-boot:run   # roda a API (perfil dev); o Postgres sobe sozinho pelo compose.yaml
+cd frontend && npm run dev        # app em http://localhost:5173 (a API precisa estar rodando)
+cd frontend && npm test           # testes do frontend
+cd frontend && npm run api:tipos  # gera os tipos TypeScript a partir do OpenAPI da API rodando
 ```
 
 - Swagger: http://localhost:8080/swagger-ui/index.html
@@ -140,13 +151,24 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
 - **Dinheiro:** `BigDecimal` com 2 casas (`Dinheiro.reais`). Ao dividir um total entre unidades, use
   `DistribuicaoDeCentavos` para a soma fechar no centavo. Multa e juros são calculados na data, não gravados.
 
+## Frontend (`frontend/`)
+
+- React + TypeScript + Vite, Tailwind, React Router, TanStack Query. Detalhes em `frontend/README.md`.
+- **Tipos da API sempre gerados** (`npm run api:tipos`), nunca escritos à mão.
+- **Records da API com nomes únicos** em todo o backend: o OpenAPI usa o nome simples do record como nome do
+  tipo (o `ContratoDaApiTests` garante).
+- Uma tela por arquivo em `src/paginas`. Componentes visuais em `src/componentes`. Formatação brasileira em `src/util/formato.ts`.
+- Pensado primeiro para o celular (375 px). Textos para o usuário em português, sem códigos internos (use rótulos).
+- Verifique no navegador, em tamanho de celular, antes de concluir uma etapa.
+
 ## Testes
 
 - Toda funcionalidade vem com testes. Testes de integração usam Testcontainers e `@ActiveProfiles("test")`.
 - Testes que mexem com dados de condomínio **não** usam `@Transactional` (ver multi-tenant).
   Cada teste cria os próprios dados, com e-mails e nomes únicos.
 - Use o `CenarioDeTeste` (`@Import`) para montar condomínio, usuário, perfil, mandato e login.
-- Rode `./mvnw test` antes de qualquer commit.
+- Frontend: Vitest + Testing Library (`cd frontend && npm test`), para regras de tela e fluxos importantes.
+- Rode `./mvnw test` e `cd frontend && npm test` antes de qualquer commit.
 
 ## Git e documentação
 

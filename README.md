@@ -19,6 +19,10 @@ Criados na primeira execução. Senha: `condomix123`.
 - `morador@condomix.dev`: morador de 1 condomínio
 - `admin@condomix.dev`: administrador da plataforma (rotas `/api/plataforma/**`)
 
+### App (frontend)
+Com a API rodando: `cd frontend && npm install && npm run dev` → http://localhost:5173.
+Detalhes em [frontend/README.md](frontend/README.md).
+
 ## Banco (DBeaver)
 | Campo | Valor |
 |---|---|

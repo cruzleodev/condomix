@@ -54,7 +54,7 @@ class GeracaoController {
 	record PedidoTaxaExtra(@NotBlank String descricao, @NotNull BigDecimal valorTotal, TipoDeRateio rateio) {
 	}
 
-	record PedidoCancelamento(String motivo) {
+	record PedidoCancelamentoDeGeracao(String motivo) {
 	}
 
 	record GeracaoResumo(UUID id, YearMonth competencia, TipoDeRateio tipoRateio, BigDecimal valorOrdinariaTotal,
@@ -66,7 +66,7 @@ class GeracaoController {
 					+ "taxasExtras: [{\"descricao\": \"Pintura da fachada\", \"valorTotal\": 30000, \"rateio\": \"FRACAO_IDEAL\"}].")
 	@PreAuthorize(Permissoes.GESTAO)
 	@PostMapping("/simulacao")
-	GeracaoMensal.Resultado simular(@Valid @RequestBody PedidoGeracao pedido) {
+	GeracaoMensal.ResultadoDaGeracao simular(@Valid @RequestBody PedidoGeracao pedido) {
 		return geracao.simular(pedido.paraPedido());
 	}
 
@@ -74,7 +74,7 @@ class GeracaoController {
 	@PreAuthorize(Permissoes.GESTAO)
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	GeracaoMensal.Resultado gerar(@Valid @RequestBody PedidoGeracao pedido, @AuthenticationPrincipal Jwt jwt) {
+	GeracaoMensal.ResultadoDaGeracao gerar(@Valid @RequestBody PedidoGeracao pedido, @AuthenticationPrincipal Jwt jwt) {
 		return geracao.gerar(pedido.paraPedido(), UUID.fromString(jwt.getSubject()));
 	}
 
@@ -90,7 +90,7 @@ class GeracaoController {
 	@PreAuthorize(Permissoes.GESTAO)
 	@PostMapping("/{id}/cancelamento")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	void cancelar(@PathVariable UUID id, @RequestBody(required = false) PedidoCancelamento pedido) {
+	void cancelar(@PathVariable UUID id, @RequestBody(required = false) PedidoCancelamentoDeGeracao pedido) {
 		geracao.cancelar(id, pedido == null ? null : pedido.motivo());
 	}
 

@@ -92,22 +92,22 @@ public class GeracaoMensal {
 	public record Linha(UUID unidadeId, String unidade, String responsavel, List<ItemDeCobranca> itens, BigDecimal total) {
 	}
 
-	public record Resultado(UUID geracaoId, YearMonth competencia, LocalDate vencimento, TipoDeRateio rateio,
+	public record ResultadoDaGeracao(UUID geracaoId, YearMonth competencia, LocalDate vencimento, TipoDeRateio rateio,
 			List<Linha> cobrancas, List<String> isentas, BigDecimal totalGeral, List<String> avisos) {
 	}
 
 	@Transactional(readOnly = true)
-	public Resultado simular(Pedido pedido) {
+	public ResultadoDaGeracao simular(Pedido pedido) {
 		return calcular(pedido, configuracoes.atual());
 	}
 
-	public Resultado gerar(Pedido pedido, UUID geradaPor) {
+	public ResultadoDaGeracao gerar(Pedido pedido, UUID geradaPor) {
 		if (geracoes.existeValida(pedido.competencia().atDay(1))) {
 			throw RegraDeNegocioException.conflito("A taxa de " + pedido.competencia()
 					+ " já foi gerada. Para gerar de novo, cancele a geração anterior.");
 		}
 		ConfiguracaoDaCobranca regras = configuracoes.atual();
-		Resultado calculo = calcular(pedido, regras);
+		ResultadoDaGeracao calculo = calcular(pedido, regras);
 		UUID tenant = TenantAtual.obrigatorio();
 		GeracaoDeCobranca geracao = geracoes.save(new GeracaoDeCobranca(tenant, pedido.competencia(),
 				regras.getTipoRateio(), pedido.valorOrdinariaTotal(), geradaPor));
@@ -120,7 +120,7 @@ public class GeracaoMensal {
 					pedido.competencia(), "Taxa condominial " + pedido.competencia(), calculo.vencimento(), linha.itens(),
 					regras, geradaPor)));
 		}
-		return new Resultado(geracao.getId(), calculo.competencia(), calculo.vencimento(), calculo.rateio(),
+		return new ResultadoDaGeracao(geracao.getId(), calculo.competencia(), calculo.vencimento(), calculo.rateio(),
 				calculo.cobrancas(), calculo.isentas(), calculo.totalGeral(), calculo.avisos());
 	}
 
@@ -144,7 +144,7 @@ public class GeracaoMensal {
 		return geracoes.historico();
 	}
 
-	private Resultado calcular(Pedido pedido, ConfiguracaoDaCobranca regras) {
+	private ResultadoDaGeracao calcular(Pedido pedido, ConfiguracaoDaCobranca regras) {
 		YearMonth mes = pedido.competencia();
 		LocalDate vencimento = pedido.vencimento() != null ? pedido.vencimento() : mes.atDay(regras.getDiaVencimento());
 		List<UnidadeCobravel> unidades = cadastro.unidadesAtivas(mes.atDay(1));
@@ -210,7 +210,7 @@ public class GeracaoMensal {
 			linhas.add(new Linha(u.id(), u.descricao(), u.responsavel() == null ? null : u.responsavel().nome(), itens, total));
 		}
 		BigDecimal totalGeral = linhas.stream().map(Linha::total).reduce(BigDecimal.ZERO, BigDecimal::add);
-		return new Resultado(null, mes, vencimento, regras.getTipoRateio(), linhas, isentas, totalGeral, avisos);
+		return new ResultadoDaGeracao(null, mes, vencimento, regras.getTipoRateio(), linhas, isentas, totalGeral, avisos);
 	}
 
 	/** Soma dos descontos de mandato, proporcional aos dias do mês em que cada mandato valeu; no máximo a taxa ordinária. */

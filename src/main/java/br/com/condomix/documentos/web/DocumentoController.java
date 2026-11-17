@@ -93,13 +93,13 @@ class DocumentoController {
 
 	}
 
-	record CategoriaResposta(Categoria codigo, String rotulo) {
+	record CategoriaDeDocumento(Categoria codigo, String rotulo) {
 	}
 
 	@Operation(summary = "Categorias de documento, com o nome para exibir")
 	@GetMapping("/categorias")
-	List<CategoriaResposta> categorias() {
-		return Arrays.stream(Categoria.values()).map(c -> new CategoriaResposta(c, c.rotulo())).toList();
+	List<CategoriaDeDocumento> categorias() {
+		return Arrays.stream(Categoria.values()).map(c -> new CategoriaDeDocumento(c, c.rotulo())).toList();
 	}
 
 	@Operation(summary = "Listar ou buscar documentos",

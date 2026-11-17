@@ -80,10 +80,10 @@ class CaixaController {
 	record PedidoCategoria(@NotBlank String nome, @NotNull Natureza natureza) {
 	}
 
-	record CategoriaResposta(UUID id, String nome, Natureza natureza, CategoriaPadrao codigo, boolean ativa) {
+	record CategoriaFinanceiraResposta(UUID id, String nome, Natureza natureza, CategoriaPadrao codigo, boolean ativa) {
 
-		static CategoriaResposta de(CategoriaFinanceira c) {
-			return new CategoriaResposta(c.getId(), c.getNome(), c.getNatureza(), c.getCodigo(), c.isAtiva());
+		static CategoriaFinanceiraResposta de(CategoriaFinanceira c) {
+			return new CategoriaFinanceiraResposta(c.getId(), c.getNome(), c.getNatureza(), c.getCodigo(), c.isAtiva());
 		}
 
 	}
@@ -96,7 +96,7 @@ class CaixaController {
 			@NotNull BigDecimal valor, String descricao) {
 	}
 
-	record PedidoCancelamento(@NotBlank String motivo) {
+	record PedidoCancelamentoDeLancamento(@NotBlank String motivo) {
 	}
 
 	record LancamentoResposta(UUID id, LocalDate data, TipoDeLancamento tipo, OrigemDoLancamento origem, UUID contaId,
@@ -160,16 +160,16 @@ class CaixaController {
 	@Operation(summary = "Plano de contas: categorias de receita e despesa", description = "O plano padrão é criado no primeiro acesso.")
 	@PreAuthorize(Permissoes.CONSULTA_DO_CADASTRO)
 	@GetMapping("/categorias")
-	List<CategoriaResposta> categorias() {
-		return plano.categorias().stream().map(CategoriaResposta::de).toList();
+	List<CategoriaFinanceiraResposta> categorias() {
+		return plano.categorias().stream().map(CategoriaFinanceiraResposta::de).toList();
 	}
 
 	@Operation(summary = "Criar categoria")
 	@PreAuthorize(Permissoes.GESTAO)
 	@PostMapping("/categorias")
 	@ResponseStatus(HttpStatus.CREATED)
-	CategoriaResposta criarCategoria(@Valid @RequestBody PedidoCategoria p) {
-		return CategoriaResposta.de(plano.criarCategoria(p.nome(), p.natureza()));
+	CategoriaFinanceiraResposta criarCategoria(@Valid @RequestBody PedidoCategoria p) {
+		return CategoriaFinanceiraResposta.de(plano.criarCategoria(p.nome(), p.natureza()));
 	}
 
 	@Operation(summary = "Desativar categoria criada pelo condomínio")
@@ -206,7 +206,7 @@ class CaixaController {
 	@PreAuthorize(Permissoes.GESTAO)
 	@PostMapping("/lancamentos/{id}/cancelamento")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	void cancelar(@PathVariable UUID id, @Valid @RequestBody PedidoCancelamento p) {
+	void cancelar(@PathVariable UUID id, @Valid @RequestBody PedidoCancelamentoDeLancamento p) {
 		movimentacao.cancelar(id, p.motivo());
 	}
 

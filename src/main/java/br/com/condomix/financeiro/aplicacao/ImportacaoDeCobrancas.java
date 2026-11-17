@@ -71,14 +71,14 @@ public class ImportacaoDeCobrancas {
 		this.relogio = relogio;
 	}
 
-	public record Resultado(int importadas, int pagas, int abertas) {
+	public record ResultadoDaImportacao(int importadas, int pagas, int abertas) {
 	}
 
 	private record LinhaValida(UnidadeCobravel unidade, YearMonth competencia, LocalDate vencimento, BigDecimal valor,
 			boolean paga, LocalDate pagoEm, BigDecimal valorPago, String descricao) {
 	}
 
-	public Resultado importar(byte[] arquivo, UUID importadoPor) {
+	public ResultadoDaImportacao importar(byte[] arquivo, UUID importadoPor) {
 		List<String> linhas = texto(arquivo).lines().filter(l -> !l.isBlank()).toList();
 		if (linhas.size() < 2) {
 			throw RegraDeNegocioException.invalido("A planilha está vazia: precisa do cabeçalho e de pelo menos uma linha");
@@ -131,7 +131,7 @@ public class ImportacaoDeCobrancas {
 			}
 			cobrancas.save(c);
 		}
-		return new Resultado(validas.size(), pagas, validas.size() - pagas);
+		return new ResultadoDaImportacao(validas.size(), pagas, validas.size() - pagas);
 	}
 
 	private static LinhaValida ler(String[] campos, Map<String, Integer> colunas, Map<String, UnidadeCobravel> unidades) {
