@@ -7,7 +7,7 @@ export function Conta() {
   const { email, condominio, condominios, perfis, sair } = useSessao()
   const navegar = useNavigate()
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 md:max-w-xl">
       <TituloDaPagina>Conta</TituloDaPagina>
       <Cartao titulo="Você">
         <p className="break-all">{email}</p>

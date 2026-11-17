@@ -158,7 +158,12 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
 - **Records da API com nomes únicos** em todo o backend: o OpenAPI usa o nome simples do record como nome do
   tipo (o `ContratoDaApiTests` garante).
 - Uma tela por arquivo em `src/paginas`. Componentes visuais em `src/componentes`. Formatação brasileira em `src/util/formato.ts`.
-- Pensado primeiro para o celular (375 px). Textos para o usuário em português, sem códigos internos (use rótulos).
+- **Responsivo para todos os usuários:** pensado primeiro para o celular (375 px) e adaptado ao computador (a partir de
+  768 px: menu lateral, conteúdo largo, `Tabela` em vez de cartões, formulários em 2 colunas). Verifique os dois tamanhos.
+- Navegação por papel em `layout/navegacao.ts`; telas restritas ficam dentro de `RotaComPapel`.
+- Chaves do TanStack Query: uma por formato de dado (ex.: `['unidades', 'ativas']` ≠ `['unidades', 'lista', bloco]`).
+- Textos para o usuário em português, sem códigos internos (use rótulos) e datas no formato 19/01/2027, inclusive nas
+  mensagens que vêm da API.
 - Verifique no navegador, em tamanho de celular, antes de concluir uma etapa.
 
 ## Testes

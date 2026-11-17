@@ -22,3 +22,25 @@ describe('formato', () => {
     expect(tamanhoDeArquivo(1572864)).toBe('1,5 MB')
   })
 })
+
+import { documento, faixa, percentual, separarIdentificacoes, telefone, umAnoDepoisMenosUmDia } from './formato'
+
+describe('formato da gestão', () => {
+  it('separa a lista do cadastro em lote e gera sequências', () => {
+    expect(separarIdentificacoes('101, 102\n201 202;101')).toEqual(['101', '102', '201', '202'])
+    expect(faixa(101, 104)).toEqual(['101', '102', '103', '104'])
+    expect(faixa(10, 5)).toEqual([])
+  })
+
+  it('mostra fração em %, telefone e documento formatados', () => {
+    expect(percentual(0.025)).toBe('2,5%')
+    expect(telefone('5591999998888')).toBe('(91) 99999-8888')
+    expect(documento('52998224725')).toBe('529.982.247-25')
+    expect(documento('12ABC34501DE35')).toBe('12.ABC.345/01DE-35')
+  })
+
+  it('calcula o fim de um mandato de 1 ano, inclusive em ano bissexto', () => {
+    expect(umAnoDepoisMenosUmDia('2026-11-17')).toBe('2027-11-16')
+    expect(umAnoDepoisMenosUmDia('2028-03-01')).toBe('2029-02-28')
+  })
+})

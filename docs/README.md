@@ -19,15 +19,17 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 8 | [Financeiro: cobranças, rateio, inadimplência e importação da administradora](etapas/08-financeiro-cobrancas.md) | `feature/financeiro-cobrancas` | Concluída |
 | 9 | [Financeiro: caixa, despesas e balancete](etapas/09-financeiro-caixa.md) | `feature/financeiro-caixa` | Concluída |
 | 10 | [Frontend parte 1: base do app (PWA), login, telas do morador e documentos](etapas/10-frontend-base.md) | `feature/frontend-base` | Concluída |
-| 11 | Frontend parte 2: telas do síndico (cadastro, cobranças, caixa, mandatos) e do administrador | — | Próxima |
-| 12 | Boletos e Pix pelo gateway, 2ª via e baixa automática (backend e telas) | — | Pendente |
-| 13 | Cobrança da assinatura do Condomix pelo gateway (backend e telas) | — | Pendente |
-| 14 | Reservas: espaços, agenda, regras e aluguel (backend e telas) | — | Pendente |
-| 15 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
-| 16 | App nas lojas (Capacitor) | — | Pendente |
-| 17 | Bot de WhatsApp | — | Pendente |
+| 11 | [Frontend parte 2: layout para computador (todos os usuários) e gestão do condomínio](etapas/11-frontend-gestao.md) | `feature/frontend-gestao` | Concluída |
+| 12 | Frontend parte 3: financeiro do síndico (taxa, geração, cobranças, inadimplência, caixa) | — | Próxima |
+| 13 | Frontend parte 4: painel do administrador da plataforma | — | Pendente |
+| 14 | Boletos e Pix pelo gateway, 2ª via e baixa automática (backend e telas) | — | Pendente |
+| 15 | Cobrança da assinatura do Condomix pelo gateway (backend e telas) | — | Pendente |
+| 16 | Reservas: espaços, agenda, regras e aluguel (backend e telas) | — | Pendente |
+| 17 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
+| 18 | App nas lojas (Capacitor) | — | Pendente |
+| 19 | Bot de WhatsApp | — | Pendente |
 
-A partir da etapa 12, cada etapa é uma **fatia vertical**: entrega o backend **e** as telas juntos.
+A partir da etapa 14, cada etapa é uma **fatia vertical**: entrega o backend **e** as telas juntos.
 
 Futuro, sem data: assembleias online (convocação, pauta, votação e ata).
 
