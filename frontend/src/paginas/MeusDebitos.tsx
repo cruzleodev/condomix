@@ -20,12 +20,12 @@ export function MeusDebitos() {
         <div className="space-y-6">
           <section>
             <h2 className="mb-2 text-sm font-semibold uppercase text-slate-500">Em aberto ({abertas.length})</h2>
-            {abertas.length === 0 ? <Vazio>Nada em aberto. 👍</Vazio> : <ul className="space-y-3">{abertas.map((c) => <ItemDeCobranca key={c.id} cobranca={c} />)}</ul>}
+            {abertas.length === 0 ? <Vazio>Nada em aberto. 👍</Vazio> : <ul className="grid gap-3 md:grid-cols-2">{abertas.map((c) => <ItemDeCobranca key={c.id} cobranca={c} />)}</ul>}
           </section>
           {pagas.length > 0 && (
             <section>
               <h2 className="mb-2 text-sm font-semibold uppercase text-slate-500">Pagas nos últimos 12 meses</h2>
-              <ul className="space-y-3">{pagas.map((c) => <ItemDeCobranca key={c.id} cobranca={c} />)}</ul>
+              <ul className="grid gap-3 md:grid-cols-2">{pagas.map((c) => <ItemDeCobranca key={c.id} cobranca={c} />)}</ul>
             </section>
           )}
         </div>

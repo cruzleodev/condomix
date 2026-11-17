@@ -19,10 +19,12 @@ export function Inicio() {
         <div className="mt-1 flex flex-wrap gap-1">{perfis.map((p) => <Etiqueta key={p} cor="marca">{perfil(p)}</Etiqueta>)}</div>
       </div>
       {acompanha && <AvisosDeMandato />}
-      <ResumoDosDebitos />
-      <MinhasUnidades />
-      <DocumentosRecentes />
-      <ResumoDoCaixa />
+      <div className="grid gap-4 md:grid-cols-2">
+        <ResumoDosDebitos />
+        <ResumoDoCaixa />
+        <MinhasUnidades />
+        <DocumentosRecentes />
+      </div>
     </div>
   )
 }

@@ -1,15 +1,20 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
 import { LayoutDoApp } from './layout/LayoutDoApp'
-import { RotaDoCondominio, RotaLogada } from './layout/Rotas'
+import { RotaComPapel, RotaDoCondominio, RotaLogada } from './layout/Rotas'
 import { AceitarConvite } from './paginas/AceitarConvite'
 import { Balancete } from './paginas/Balancete'
 import { Conta } from './paginas/Conta'
 import { Documentos } from './paginas/Documentos'
 import { Entrar } from './paginas/Entrar'
+import { Gestao } from './paginas/gestao/Gestao'
+import { Mandatos } from './paginas/gestao/Mandatos'
+import { Moradores } from './paginas/gestao/Moradores'
+import { Unidades } from './paginas/gestao/Unidades'
 import { EscolherCondominio } from './paginas/EscolherCondominio'
 import { Inicio } from './paginas/Inicio'
 import { MeusDebitos } from './paginas/MeusDebitos'
 import { Plataforma } from './paginas/Plataforma'
+import { ACOMPANHAMENTO } from './sessao/papeis'
 
 const rotas = [
   { path: '/entrar', element: <Entrar /> },
@@ -31,6 +36,15 @@ const rotas = [
         { path: '/documentos', element: <Documentos /> },
         { path: '/balancete', element: <Balancete /> },
         { path: '/conta', element: <Conta /> },
+        {
+          element: <RotaComPapel papeis={ACOMPANHAMENTO} />,
+          children: [
+            { path: '/gestao', element: <Gestao /> },
+            { path: '/gestao/unidades', element: <Unidades /> },
+            { path: '/gestao/moradores', element: <Moradores /> },
+            { path: '/gestao/mandatos', element: <Mandatos /> },
+          ],
+        },
       ],
     }],
   },

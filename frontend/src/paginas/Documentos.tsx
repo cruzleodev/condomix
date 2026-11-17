@@ -28,9 +28,9 @@ export function Documentos() {
       <TituloDaPagina subtitulo="Convenção, regimento, atas, leis e comunicados.">Documentos</TituloDaPagina>
       {tem(...GESTAO) && (
         publicando ? <FormularioDePublicacao aoTerminar={() => setPublicando(false)} categorias={categorias.data ?? []} />
-          : <Botao className="mb-4 w-full" onClick={() => setPublicando(true)}>Publicar documento</Botao>
+          : <Botao className="mb-4 w-full md:w-auto" onClick={() => setPublicando(true)}>Publicar documento</Botao>
       )}
-      <form className="mb-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); setTermo(busca.trim()) }}>
+      <form className="mb-3 flex gap-2 md:max-w-xl" onSubmit={(e) => { e.preventDefault(); setTermo(busca.trim()) }}>
         <input
           type="search" placeholder="Buscar (ex.: convenção, piscina)" value={busca} onChange={(e) => setBusca(e.target.value)}
           className="min-h-11 flex-1 rounded-xl border border-slate-300 bg-white px-3 outline-none focus:border-marca-600"
@@ -46,7 +46,7 @@ export function Documentos() {
       </div>
       {documentos.isPending ? <Carregando /> : documentos.isError ? <MensagemDeErro erro={documentos.error} /> :
         (documentos.data?.itens ?? []).length === 0 ? <Vazio>{termo ? `Nada encontrado para "${termo}".` : 'Nenhum documento publicado.'}</Vazio> : (
-          <ul className="space-y-3">{(documentos.data?.itens ?? []).map((d) => <ItemDeDocumento key={d.id} documento={d} />)}</ul>
+          <ul className="grid gap-3 md:grid-cols-2">{(documentos.data?.itens ?? []).map((d) => <ItemDeDocumento key={d.id} documento={d} />)}</ul>
         )}
     </div>
   )

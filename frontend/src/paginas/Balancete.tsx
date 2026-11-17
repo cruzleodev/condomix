@@ -21,9 +21,9 @@ export function Balancete() {
           className="min-h-11 rounded-xl border border-slate-300 bg-white px-3" />
       </label>
       {balancete.isPending ? <Carregando /> : balancete.isError ? <MensagemDeErro erro={balancete.error} /> : b && (
-        <div className="space-y-4">
-          <Cartao titulo={`Resumo de ${competencia(b.competencia)}`}>
-            <dl className="grid grid-cols-2 gap-3 text-sm">
+        <div className="grid gap-4 md:grid-cols-2">
+          <Cartao titulo={`Resumo de ${competencia(b.competencia)}`} className="md:col-span-2">
+            <dl className="grid grid-cols-2 gap-3 text-sm md:grid-cols-5">
               <Valor rotulo="Receitas" valor={b.totalReceitas} cor="text-emerald-700" />
               <Valor rotulo="Despesas" valor={b.totalDespesas} cor="text-red-700" />
               <Valor rotulo="Resultado do mês" valor={b.resultado} />
@@ -33,7 +33,7 @@ export function Balancete() {
           </Cartao>
           <Lista titulo="Receitas por categoria" itens={b.receitas ?? []} />
           <Lista titulo="Despesas por categoria" itens={b.despesas ?? []} />
-          <Cartao titulo="Contas">
+          <Cartao titulo="Contas" className="md:col-span-2">
             {(b.contas ?? []).length === 0 ? <Vazio>Nenhuma conta cadastrada.</Vazio> : (
               <ul className="divide-y divide-slate-100 text-sm">
                 {(b.contas ?? []).map((c) => (

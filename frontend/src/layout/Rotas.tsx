@@ -20,3 +20,9 @@ export function RotaLogada() {
   const { logado } = useSessao()
   return logado ? <Outlet /> : <Navigate to="/entrar" replace />
 }
+
+/** Telas só para alguns papéis (ex.: gestão). Quem não tem o papel volta ao início. */
+export function RotaComPapel({ papeis }: { papeis: string[] }) {
+  const { tem } = useSessao()
+  return tem(...papeis) ? <Outlet /> : <Navigate to="/" replace />
+}
