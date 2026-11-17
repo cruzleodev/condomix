@@ -1,0 +1,46 @@
+/// <reference types="vitest/config" />
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import { VitePWA } from 'vite-plugin-pwa'
+
+// Em desenvolvimento, /api vai para o backend (Spring Boot na porta 8080): o navegador vê tudo
+// na mesma origem e não é preciso liberar CORS.
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['icone.svg'],
+      manifest: {
+        name: 'Condomix',
+        short_name: 'Condomix',
+        description: 'Gestão de condomínios: documentos, cobranças e prestação de contas.',
+        lang: 'pt-BR',
+        theme_color: '#0f766e',
+        background_color: '#f8fafc',
+        display: 'standalone',
+        start_url: '/',
+        icons: [
+          { src: 'icone-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icone-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icone-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
+      },
+      workbox: {
+        // A API nunca vai para o cache: dados financeiros têm que estar sempre atualizados.
+        navigateFallbackDenylist: [/^\/api\//],
+      },
+    }),
+  ],
+  server: {
+    port: 5173,
+    proxy: { '/api': process.env.API_URL ?? 'http://localhost:8080' },
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/testes/preparacao.ts'],
+    css: false,
+  },
+})

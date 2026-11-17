@@ -49,7 +49,7 @@ class MandatoController {
 			UUID unidadeBeneficiadaId) {
 	}
 
-	record PedidoEncerramento(@NotNull LocalDate ultimoDia, @NotNull MotivoEncerramento motivo, UUID ataId) {
+	record PedidoEncerramentoDeMandato(@NotNull LocalDate ultimoDia, @NotNull MotivoEncerramento motivo, UUID ataId) {
 	}
 
 	@Operation(summary = "Histórico de mandatos do condomínio",
@@ -81,7 +81,7 @@ class MandatoController {
 	@Operation(summary = "Encerrar antes do prazo: renúncia, destituição... (síndico ou administradora)")
 	@PreAuthorize(Permissoes.GESTAO)
 	@PostMapping("/{id}/encerramento")
-	MandatoResposta encerrar(@PathVariable UUID id, @Valid @RequestBody PedidoEncerramento pedido) {
+	MandatoResposta encerrar(@PathVariable UUID id, @Valid @RequestBody PedidoEncerramentoDeMandato pedido) {
 		registro.encerrar(id, pedido.ultimoDia(), pedido.motivo(), pedido.ataId());
 		return MandatoResposta.de(consulta.obter(id));
 	}

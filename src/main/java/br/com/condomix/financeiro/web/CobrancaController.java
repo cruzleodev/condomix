@@ -65,7 +65,7 @@ class CobrancaController {
 	record PedidoPagamento(LocalDate data, BigDecimal valorPago, @NotNull FormaDePagamento forma, String observacao) {
 	}
 
-	record PedidoCancelamento(@NotBlank String motivo) {
+	record PedidoCancelamentoDeCobranca(@NotBlank String motivo) {
 	}
 
 	@Operation(summary = "Cobranças do condomínio (filtros opcionais)", description = "competencia: \"2026-12\"; status: ABERTA, PAGA, CANCELADA.")
@@ -121,7 +121,7 @@ class CobrancaController {
 	@Operation(summary = "Cancelar uma cobrança em aberto")
 	@PreAuthorize(Permissoes.GESTAO)
 	@PostMapping("/cobrancas/{id}/cancelamento")
-	CobrancaResposta cancelar(@PathVariable UUID id, @Valid @RequestBody PedidoCancelamento p) {
+	CobrancaResposta cancelar(@PathVariable UUID id, @Valid @RequestBody PedidoCancelamentoDeCobranca p) {
 		baixa.cancelar(id, p.motivo());
 		return obter(id);
 	}
@@ -132,7 +132,7 @@ class CobrancaController {
 	@PreAuthorize(Permissoes.GESTAO)
 	@PostMapping(value = "/cobrancas/importacao", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
-	ImportacaoDeCobrancas.Resultado importar(@RequestPart("arquivo") MultipartFile arquivo, @AuthenticationPrincipal Jwt jwt)
+	ImportacaoDeCobrancas.ResultadoDaImportacao importar(@RequestPart("arquivo") MultipartFile arquivo, @AuthenticationPrincipal Jwt jwt)
 			throws IOException {
 		return importacao.importar(arquivo.getBytes(), UUID.fromString(jwt.getSubject()));
 	}

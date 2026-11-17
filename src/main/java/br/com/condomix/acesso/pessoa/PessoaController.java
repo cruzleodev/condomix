@@ -60,7 +60,7 @@ class PessoaController {
 	record PedidoVinculo(@NotNull UUID unidadeId, @NotNull TipoVinculo tipo, LocalDate inicio) {
 	}
 
-	record PedidoEncerramento(@NotNull LocalDate fim) {
+	record PedidoEncerramentoDeVinculo(@NotNull LocalDate fim) {
 	}
 
 	record PedidoMorador(@NotNull @Valid PedidoPessoa pessoa, @NotNull UUID unidadeId, @NotNull TipoVinculo vinculo,
@@ -134,7 +134,7 @@ class PessoaController {
 	@PreAuthorize(Permissoes.GESTAO)
 	@PostMapping("/pessoas/{id}/vinculos/{vinculoId}/encerramento")
 	PessoaResposta encerrarVinculo(@PathVariable UUID id, @PathVariable UUID vinculoId,
-			@Valid @RequestBody PedidoEncerramento pedido) {
+			@Valid @RequestBody PedidoEncerramentoDeVinculo pedido) {
 		cadastro.encerrarVinculo(id, vinculoId, pedido.fim());
 		return obter(id);
 	}
