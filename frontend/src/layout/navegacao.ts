@@ -24,6 +24,9 @@ export const ITENS: ItemDeNavegacao[] = [
   { para: '/gestao/unidades', rotulo: 'Unidades', icone: '▦', papeis: ACOMPANHAMENTO, secao: 'gestao' },
   { para: '/gestao/moradores', rotulo: 'Moradores', icone: '☺', papeis: ACOMPANHAMENTO, secao: 'gestao' },
   { para: '/gestao/mandatos', rotulo: 'Cargos e mandatos', icone: '★', papeis: ACOMPANHAMENTO, secao: 'gestao' },
+  { para: '/gestao/taxa', rotulo: 'Taxa do mês', icone: '%', papeis: ACOMPANHAMENTO, secao: 'gestao' },
+  { para: '/gestao/cobrancas', rotulo: 'Cobranças', icone: '$', papeis: ACOMPANHAMENTO, secao: 'gestao' },
+  { para: '/gestao/caixa', rotulo: 'Caixa', icone: '⊟', papeis: ACOMPANHAMENTO, secao: 'gestao' },
   { para: '/conta', rotulo: 'Conta', icone: '●', noCelular: true },
 ]
 

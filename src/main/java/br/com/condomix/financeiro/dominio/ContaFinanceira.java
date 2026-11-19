@@ -1,5 +1,6 @@
 package br.com.condomix.financeiro.dominio;
 
+import br.com.condomix.compartilhado.FormatoBrasileiro;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -79,7 +80,7 @@ public class ContaFinanceira {
 	/** Lançamentos só podem ser de a partir da data do saldo inicial (antes dela, o saldo inicial já resume tudo). */
 	public void conferirData(LocalDate data) {
 		if (data.isBefore(dataSaldoInicial)) {
-			throw new IllegalArgumentException("A conta " + nome + " começa em " + dataSaldoInicial
+			throw new IllegalArgumentException("A conta " + nome + " começa em " + FormatoBrasileiro.data(dataSaldoInicial)
 					+ ": lançamentos anteriores já estão no saldo inicial");
 		}
 		if (!ativa) {

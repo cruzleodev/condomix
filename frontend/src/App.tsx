@@ -6,9 +6,12 @@ import { Balancete } from './paginas/Balancete'
 import { Conta } from './paginas/Conta'
 import { Documentos } from './paginas/Documentos'
 import { Entrar } from './paginas/Entrar'
+import { Caixa } from './paginas/gestao/Caixa'
+import { Cobrancas } from './paginas/gestao/Cobrancas'
 import { Gestao } from './paginas/gestao/Gestao'
 import { Mandatos } from './paginas/gestao/Mandatos'
 import { Moradores } from './paginas/gestao/Moradores'
+import { TaxaDoMes } from './paginas/gestao/TaxaDoMes'
 import { Unidades } from './paginas/gestao/Unidades'
 import { EscolherCondominio } from './paginas/EscolherCondominio'
 import { Inicio } from './paginas/Inicio'
@@ -43,6 +46,9 @@ const rotas = [
             { path: '/gestao/unidades', element: <Unidades /> },
             { path: '/gestao/moradores', element: <Moradores /> },
             { path: '/gestao/mandatos', element: <Mandatos /> },
+            { path: '/gestao/taxa', element: <TaxaDoMes /> },
+            { path: '/gestao/cobrancas', element: <Cobrancas /> },
+            { path: '/gestao/caixa', element: <Caixa /> },
           ],
         },
       ],

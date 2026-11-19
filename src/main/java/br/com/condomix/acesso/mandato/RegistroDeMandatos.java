@@ -1,5 +1,6 @@
 package br.com.condomix.acesso.mandato;
 
+import br.com.condomix.compartilhado.FormatoBrasileiro;
 import br.com.condomix.acesso.Cargo;
 import br.com.condomix.acesso.Pessoa;
 import br.com.condomix.acesso.persistencia.MandatoRepository;
@@ -78,7 +79,7 @@ public class RegistroDeMandatos {
 		for (Mandato atual : mandatos.emAberto(pedido.cargo())) {
 			if (!atual.getInicio().isBefore(pedido.inicio())) {
 				throw RegraDeNegocioException.conflito("Já existe um mandato de " + pedido.cargo().rotulo().toLowerCase()
-						+ " com posse em " + atual.getInicio() + ". A posse do novo deve ser depois dessa data.");
+						+ " com posse em " + FormatoBrasileiro.data(atual.getInicio()) + ". A posse do novo deve ser depois dessa data.");
 			}
 			atual.encerrar(pedido.inicio().minusDays(1), MotivoEncerramento.SUCESSAO, pedido.ataEleicaoId());
 		}

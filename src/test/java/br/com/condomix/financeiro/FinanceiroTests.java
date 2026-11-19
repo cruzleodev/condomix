@@ -189,6 +189,7 @@ class FinanceiroTests {
 		mvc.perform(get("/api/eu/cobrancas").header("Authorization", cenario.token(ana)))
 				.andExpect(jsonPath("$", hasSize(1)))
 				.andExpect(jsonPath("$[0].unidade").value("A-101"))
+				.andExpect(jsonPath("$[0].descricao").value("Taxa condominial %02d/%d".formatted(proximoMes.getMonthValue(), proximoMes.getYear())))
 				.andExpect(jsonPath("$[0].valorAtualizado").value(500.00));
 		mvc.perform(get("/api/eu/cobrancas").header("Authorization", sindico)).andExpect(jsonPath("$", hasSize(0)));
 	}

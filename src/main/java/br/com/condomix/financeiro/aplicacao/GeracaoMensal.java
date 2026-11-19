@@ -1,5 +1,6 @@
 package br.com.condomix.financeiro.aplicacao;
 
+import br.com.condomix.compartilhado.FormatoBrasileiro;
 import br.com.condomix.acesso.CadastroParaCobranca;
 import br.com.condomix.acesso.CadastroParaCobranca.BeneficioDeMandato;
 import br.com.condomix.acesso.CadastroParaCobranca.UnidadeCobravel;
@@ -103,7 +104,7 @@ public class GeracaoMensal {
 
 	public ResultadoDaGeracao gerar(Pedido pedido, UUID geradaPor) {
 		if (geracoes.existeValida(pedido.competencia().atDay(1))) {
-			throw RegraDeNegocioException.conflito("A taxa de " + pedido.competencia()
+			throw RegraDeNegocioException.conflito("A taxa de " + FormatoBrasileiro.mes(pedido.competencia())
 					+ " já foi gerada. Para gerar de novo, cancele a geração anterior.");
 		}
 		ConfiguracaoDaCobranca regras = configuracoes.atual();
@@ -117,7 +118,7 @@ public class GeracaoMensal {
 			var responsavel = unidades.get(linha.unidadeId()).responsavel();
 			cobrancas.save(new Cobranca(new Cobranca.Emissao(tenant, linha.unidadeId(),
 					responsavel == null ? null : responsavel.pessoaId(), OrigemCobranca.GERACAO_MENSAL, geracao.getId(),
-					pedido.competencia(), "Taxa condominial " + pedido.competencia(), calculo.vencimento(), linha.itens(),
+					pedido.competencia(), "Taxa condominial " + FormatoBrasileiro.mes(pedido.competencia()), calculo.vencimento(), linha.itens(),
 					regras, geradaPor)));
 		}
 		return new ResultadoDaGeracao(geracao.getId(), calculo.competencia(), calculo.vencimento(), calculo.rateio(),

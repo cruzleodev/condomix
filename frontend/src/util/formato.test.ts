@@ -44,3 +44,20 @@ describe('formato da gestão', () => {
     expect(umAnoDepoisMenosUmDia('2028-03-01')).toBe('2029-02-28')
   })
 })
+
+import { lerReais, periodoDoMes, proximoMes } from './formato'
+
+describe('formato do financeiro', () => {
+  it('lê valores digitados em reais', () => {
+    expect(lerReais('1.234,56')).toBe(1234.56)
+    expect(lerReais('1234.56')).toBe(1234.56)
+    expect(lerReais('R$ 850')).toBe(850)
+    expect(lerReais('')).toBeUndefined()
+    expect(lerReais('abc')).toBeUndefined()
+  })
+
+  it('calcula o período do mês e o mês seguinte', () => {
+    expect(periodoDoMes('2028-02')).toEqual(['2028-02-01', '2028-02-29'])
+    expect(proximoMes('2026-12')).toBe('2027-01')
+  })
+})
