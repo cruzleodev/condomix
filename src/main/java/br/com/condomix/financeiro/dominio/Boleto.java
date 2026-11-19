@@ -1,7 +1,7 @@
 package br.com.condomix.financeiro.dominio;
 
-import br.com.condomix.financeiro.gateway.GatewayDePagamento.BoletoEmitido;
-import br.com.condomix.financeiro.TipoDeGateway;
+import br.com.condomix.pagamentos.GatewayDePagamento.BoletoEmitido;
+import br.com.condomix.pagamentos.TipoDeGateway;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

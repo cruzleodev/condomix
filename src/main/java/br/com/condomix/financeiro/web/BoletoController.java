@@ -1,8 +1,8 @@
 package br.com.condomix.financeiro.web;
 
 import br.com.condomix.acesso.Permissoes;
-import br.com.condomix.financeiro.AmbienteDoGateway;
-import br.com.condomix.financeiro.TipoDeGateway;
+import br.com.condomix.pagamentos.AmbienteDoGateway;
+import br.com.condomix.pagamentos.TipoDeGateway;
 import br.com.condomix.financeiro.aplicacao.ConsultaDeBoletos;
 import br.com.condomix.financeiro.aplicacao.ContaDoGateway;
 import br.com.condomix.financeiro.aplicacao.SolicitacaoDeBoletos;

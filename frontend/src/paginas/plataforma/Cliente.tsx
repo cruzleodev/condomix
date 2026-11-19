@@ -5,11 +5,12 @@ import { api, dados } from '../../api/cliente'
 import type { AlteracaoDaAssinatura, CondominioNaPlataforma } from '../../api/tipos'
 import { Selecao } from '../../componentes/formulario'
 import { Tabela } from '../../componentes/Tabela'
-import { Botao, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina } from '../../componentes/ui'
-import { data, dataHora, documento, opcoes, ROTULOS } from '../../util/formato'
+import { Botao, Campo, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina } from '../../componentes/ui'
+import { data, dataHora, documento, opcoes, ROTULOS, telefone } from '../../util/formato'
 import { Linha, SecaoDoSindico } from './SindicoDoCliente'
 import { COR_DO_STATUS, descricaoDaAssinatura, usePlanosBase } from './comum'
 import { GatewayDoCliente } from './GatewayDoCliente'
+import { TabelaDeFaturas } from './TabelaDeFaturas'
 
 type Periodicidade = NonNullable<NonNullable<CondominioNaPlataforma['assinatura']>['periodicidade']>
 type Status = NonNullable<NonNullable<CondominioNaPlataforma['assinatura']>['status']>
@@ -42,8 +43,10 @@ export function Cliente() {
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <SecaoDoSindico condominioId={id} />
-        <GatewayDoCliente condominioId={id} />
+        <SecaoDosDados cliente={c} />
       </div>
+      <FaturasDoCliente condominioId={id} />
+      <GatewayDoCliente condominioId={id} />
       <Historico condominioId={id} />
     </div>
   )
@@ -69,9 +72,106 @@ function SecaoDaAssinatura({ cliente }: { cliente: CondominioNaPlataforma }) {
           <Linha rotulo="Plano">{a.nomeDoPlano} · {ROTULOS.periodicidade[a.periodicidade ?? 'MENSAL']}</Linha>
           <Linha rotulo="Situação">{a.status && <Etiqueta cor={COR_DO_STATUS[a.status]}>{ROTULOS.statusDaAssinatura[a.status]}</Etiqueta>}</Linha>
           <Linha rotulo="Desde">{data(a.inicio)}</Linha>
+          {a.status === 'TESTE' && <PrazoDoTeste cliente={cliente} />}
         </dl>
       ) : <p className="text-sm text-slate-600">Sem assinatura vigente.</p>}
     </Cartao>
+  )
+}
+
+/** O fim do teste grátis: ao chegar, a assinatura fica ativa sozinha e a primeira fatura sai. */
+function PrazoDoTeste({ cliente }: { cliente: CondominioNaPlataforma }) {
+  const atualizar = useAtualizarCliente(cliente.id!)
+  const atual = cliente.assinatura?.fimDoTeste ?? ''
+  const [editando, setEditando] = useState(false)
+  const [fim, setFim] = useState(atual)
+  const salvar = useMutation({
+    mutationFn: async (fimDoTeste: string | undefined) => dados(await api.PUT('/api/plataforma/condominios/{id}/fim-do-teste', {
+      params: { path: { id: cliente.id! } }, body: { fimDoTeste },
+    })),
+    onSuccess: () => { atualizar(); setEditando(false) },
+  })
+  if (!editando) {
+    return (
+      <Linha rotulo="Teste grátis até">
+        {atual ? data(atual) : 'sem prazo'}{' '}
+        <button className="ml-1 text-marca-700 underline" onClick={() => { setFim(atual); setEditando(true) }}>mudar</button>
+      </Linha>
+    )
+  }
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); salvar.mutate(fim || undefined) }} className="space-y-2 pt-2">
+      <Campo rotulo="Fim do teste grátis" type="date" value={fim} onChange={(e) => setFim(e.target.value)}
+        ajuda="Ao chegar, a assinatura fica ativa e a primeira fatura sai. Deixe vazio para um teste sem prazo." />
+      <MensagemDeErro erro={salvar.error} />
+      <div className="flex flex-col gap-2 md:flex-row">
+        <Botao type="submit" carregando={salvar.isPending}>Salvar o prazo</Botao>
+        <Botao type="button" variante="secundario" onClick={() => setEditando(false)}>Cancelar</Botao>
+      </div>
+    </form>
+  )
+}
+
+/** CNPJ, e-mail e telefone do condomínio: o boleto da fatura sai no CNPJ. */
+function SecaoDosDados({ cliente }: { cliente: CondominioNaPlataforma }) {
+  const atualizar = useAtualizarCliente(cliente.id!)
+  const [editando, setEditando] = useState(false)
+  const [cnpj, setCnpj] = useState('')
+  const [email, setEmail] = useState('')
+  const [fone, setFone] = useState('')
+  const salvar = useMutation({
+    mutationFn: async () => dados(await api.PUT('/api/plataforma/condominios/{id}/dados', {
+      params: { path: { id: cliente.id! } }, body: { cnpj: cnpj || undefined, email: email || undefined, telefone: fone || undefined },
+    })),
+    onSuccess: () => { atualizar(); setEditando(false) },
+  })
+  function editar() {
+    setCnpj(cliente.cnpj ? documento(cliente.cnpj) : '')
+    setEmail(cliente.email ?? '')
+    setFone(cliente.telefone ? telefone(cliente.telefone) : '')
+    setEditando(true)
+  }
+  if (editando) {
+    return (
+      <Cartao titulo="Dados para a fatura">
+        <form onSubmit={(e) => { e.preventDefault(); salvar.mutate() }} className="space-y-3">
+          <Campo rotulo="CNPJ do condomínio" value={cnpj} onChange={(e) => setCnpj(e.target.value)} ajuda="O banco exige no boleto da fatura." />
+          <div className="grid gap-3 md:grid-cols-2">
+            <Campo rotulo="E-mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Campo rotulo="Telefone" type="tel" value={fone} onChange={(e) => setFone(e.target.value)} />
+          </div>
+          <MensagemDeErro erro={salvar.error} />
+          <div className="flex flex-col gap-2 md:flex-row">
+            <Botao type="submit" carregando={salvar.isPending}>Salvar</Botao>
+            <Botao type="button" variante="secundario" onClick={() => setEditando(false)}>Cancelar</Botao>
+          </div>
+        </form>
+      </Cartao>
+    )
+  }
+  return (
+    <Cartao titulo="Dados para a fatura" acao={<button className="text-sm text-marca-700 underline" onClick={editar}>Alterar</button>}>
+      <dl className="space-y-1 text-sm">
+        <Linha rotulo="CNPJ">{cliente.cnpj ? documento(cliente.cnpj) : <span className="text-red-700">Falta: o boleto não sai sem ele</span>}</Linha>
+        <Linha rotulo="E-mail">{cliente.email || '—'}</Linha>
+        <Linha rotulo="Telefone">{cliente.telefone ? telefone(cliente.telefone) : '—'}</Linha>
+      </dl>
+    </Cartao>
+  )
+}
+
+function FaturasDoCliente({ condominioId }: { condominioId: string }) {
+  const faturas = useQuery({
+    queryKey: ['plataforma', 'faturas', 'cliente', condominioId],
+    queryFn: async () => dados(await api.GET('/api/plataforma/faturas', { params: { query: { condominioId } } })),
+    refetchInterval: (q) => q.state.data?.some((f) => f.situacao === 'A_EMITIR' || f.situacao === 'A_CANCELAR') ? 5000 : false,
+  })
+  return (
+    <section>
+      <h2 className="mb-2 text-sm font-semibold uppercase text-slate-500">Faturas da assinatura</h2>
+      {faturas.isPending ? <Carregando /> : faturas.isError ? <MensagemDeErro erro={faturas.error} />
+        : <TabelaDeFaturas faturas={faturas.data} mostrarCliente={false} />}
+    </section>
   )
 }
 
@@ -128,8 +228,14 @@ function SecaoDoAcesso({ cliente }: { cliente: CondominioNaPlataforma }) {
   return (
     <Cartao titulo="Acesso ao app">
       <p className="mb-3 text-sm">
-        {cliente.ativo ? <Etiqueta cor="verde">Liberado</Etiqueta> : <Etiqueta cor="vermelho">Suspenso</Etiqueta>}
-        <span className="ml-2 text-slate-600">{cliente.ativo ? 'Moradores e gestão entram normalmente.' : 'Ninguém do condomínio consegue entrar.'}</span>
+        {cliente.ativo ? <Etiqueta cor="verde">Liberado</Etiqueta>
+          : <Etiqueta cor="vermelho">{ROTULOS.motivoDaSuspensao[cliente.motivoSuspensao ?? 'MANUAL']}</Etiqueta>}
+        <span className="ml-2 text-slate-600">
+          {cliente.ativo ? 'Moradores e gestão entram normalmente.'
+            : cliente.motivoSuspensao === 'FALTA_DE_PAGAMENTO'
+              ? 'Só a gestão entra, para pagar a fatura. Paga a fatura, o acesso volta sozinho.'
+              : 'Ninguém do condomínio consegue entrar.'}
+        </span>
       </p>
       <MensagemDeErro erro={acao.error} />
       <div className="flex flex-col gap-2 md:flex-row">

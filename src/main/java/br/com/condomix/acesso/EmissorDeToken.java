@@ -45,6 +45,11 @@ class EmissorDeToken {
 		return emitir(usuario, condominioId, perfis, propriedades.validade(), Map.of());
 	}
 
+	/** Com uma marca no token (ex.: pagamento pendente), na validade normal. */
+	TokenEmitido emitir(Usuario usuario, UUID condominioId, Set<Perfil> perfis, String marca) {
+		return emitir(usuario, condominioId, perfis, propriedades.validade(), Map.of(marca, "true"));
+	}
+
 	/**
 	 * @param validade       por quanto tempo o token vale
 	 * @param camposExtras   outros campos do token (ex.: o id do acesso de suporte)

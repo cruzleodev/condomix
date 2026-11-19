@@ -1,17 +1,23 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { useSessao } from '../sessao/contexto'
 
+const ROTAS_COM_PAGAMENTO_PENDENTE = ['/gestao/assinatura', '/conta']
+
 /**
  * Só deixa passar quem está logado e já escolheu o condomínio. Se o token venceu no meio do uso, o login
  * devolve a pessoa à tela em que estava; se ela clicou em "Sair", não (o próximo login pode ser de outra pessoa).
  */
 export function RotaDoCondominio() {
-  const { logado, condominioId, tem, saiuPorVontade, condominios } = useSessao()
+  const { logado, condominioId, condominio, tem, saiuPorVontade, condominios } = useSessao()
   const local = useLocation()
   if (!logado) return <Navigate to="/entrar" replace state={saiuPorVontade ? null : { de: local.pathname }} />
   if (!condominioId) {
     const destino = tem('ADMIN_PLATAFORMA') ? '/plataforma' : condominios.length > 0 ? '/condominio' : '/sem-acesso'
     return <Navigate to={destino} replace />
+  }
+  // Suspenso por falta de pagamento: a gestão só consegue pagar a assinatura.
+  if (condominio?.pagamentoPendente && !ROTAS_COM_PAGAMENTO_PENDENTE.includes(local.pathname)) {
+    return <Navigate to="/gestao/assinatura" replace />
   }
   return <Outlet />
 }

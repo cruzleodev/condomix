@@ -1,5 +1,7 @@
 package br.com.condomix.financeiro;
 
+import br.com.condomix.pagamentos.TipoDeGateway;
+
 import br.com.condomix.CenarioDeTeste;
 import br.com.condomix.TestcontainersConfiguration;
 import br.com.condomix.acesso.Perfil;

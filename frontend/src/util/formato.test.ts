@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { competencia, data, mesAtual, moeda, tamanhoDeArquivo } from './formato'
+import { competencia, data, mesAtual, moeda, tamanhoDeArquivo, periodoDaFatura } from './formato'
 
 describe('formato', () => {
   it('formata reais no padrão brasileiro', () => {
@@ -59,5 +59,11 @@ describe('formato do financeiro', () => {
   it('calcula o período do mês e o mês seguinte', () => {
     expect(periodoDoMes('2028-02')).toEqual(['2028-02-01', '2028-02-29'])
     expect(proximoMes('2026-12')).toBe('2027-01')
+  })
+
+  it('mostra o período da fatura até o dia anterior ao fim', () => {
+    expect(periodoDaFatura('2026-11-19', '2026-12-19')).toBe('19/11/2026 a 18/12/2026')
+    expect(periodoDaFatura('2026-12-01', '2027-01-01')).toBe('01/12/2026 a 31/12/2026')
+    expect(periodoDaFatura(null, '2027-01-01')).toBe('—')
   })
 })

@@ -7,6 +7,7 @@ import { Balancete } from './paginas/Balancete'
 import { Conta } from './paginas/Conta'
 import { Documentos } from './paginas/Documentos'
 import { Entrar } from './paginas/Entrar'
+import { Assinatura } from './paginas/gestao/Assinatura'
 import { Caixa } from './paginas/gestao/Caixa'
 import { Cobrancas } from './paginas/gestao/Cobrancas'
 import { Gestao } from './paginas/gestao/Gestao'
@@ -19,11 +20,12 @@ import { Inicio } from './paginas/Inicio'
 import { MeusDebitos } from './paginas/MeusDebitos'
 import { Cliente } from './paginas/plataforma/Cliente'
 import { Clientes } from './paginas/plataforma/Clientes'
+import { Faturas } from './paginas/plataforma/Faturas'
 import { Logins } from './paginas/plataforma/Logins'
 import { Planos } from './paginas/plataforma/Planos'
 import { Suporte } from './paginas/plataforma/Suporte'
 import { SemAcesso } from './paginas/SemAcesso'
-import { ACOMPANHAMENTO, PLATAFORMA } from './sessao/papeis'
+import { ACOMPANHAMENTO, GESTAO, PLATAFORMA } from './sessao/papeis'
 
 const rotas = [
   { path: '/entrar', element: <Entrar /> },
@@ -41,6 +43,7 @@ const rotas = [
             { path: '/plataforma', element: <Clientes /> },
             { path: '/plataforma/clientes/:id', element: <Cliente /> },
             { path: '/plataforma/planos', element: <Planos /> },
+            { path: '/plataforma/faturas', element: <Faturas /> },
             { path: '/plataforma/logins', element: <Logins /> },
             { path: '/plataforma/suporte', element: <Suporte /> },
           ],
@@ -69,6 +72,10 @@ const rotas = [
             { path: '/gestao/cobrancas', element: <Cobrancas /> },
             { path: '/gestao/caixa', element: <Caixa /> },
           ],
+        },
+        {
+          element: <RotaComPapel papeis={GESTAO} />,
+          children: [{ path: '/gestao/assinatura', element: <Assinatura /> }],
         },
       ],
     }],

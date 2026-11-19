@@ -1,6 +1,6 @@
 package br.com.condomix.financeiro.asaas;
 
-import br.com.condomix.financeiro.TipoDeGateway;
+import br.com.condomix.pagamentos.TipoDeGateway;
 import br.com.condomix.financeiro.aplicacao.RecebimentoPeloGateway;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.Operation;

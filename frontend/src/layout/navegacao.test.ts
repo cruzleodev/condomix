@@ -19,4 +19,14 @@ describe('navegação por papel', () => {
   it('a barra do celular nunca passa de 5 itens', () => {
     expect(itensDoCelular(['SINDICO', 'MORADOR', 'ADMINISTRADORA']).length).toBeLessThanOrEqual(5)
   })
+
+  it('só o síndico e a administradora veem a assinatura do Condomix', () => {
+    expect(rotas(itensVisiveis(['SINDICO']))).toContain('/gestao/assinatura')
+    expect(rotas(itensVisiveis(['CONSELHEIRO']))).not.toContain('/gestao/assinatura')
+  })
+
+  it('com o condomínio suspenso por falta de pagamento, sobram a assinatura e a conta', () => {
+    expect(rotas(itensVisiveis(['SINDICO', 'MORADOR'], true))).toEqual(['/gestao/assinatura', '/conta'])
+    expect(rotas(itensDoCelular(['SINDICO', 'MORADOR'], true))).toEqual(['/gestao/assinatura', '/conta'])
+  })
 })

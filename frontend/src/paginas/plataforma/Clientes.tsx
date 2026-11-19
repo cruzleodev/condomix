@@ -43,7 +43,7 @@ export function Clientes() {
             { titulo: 'Assinatura', valor: (c) => c.assinatura?.status
               ? <Etiqueta cor={COR_DO_STATUS[c.assinatura.status]}>{ROTULOS.statusDaAssinatura[c.assinatura.status]}</Etiqueta> : '—' },
             { titulo: 'Cliente desde', valor: (c) => data(c.criadoEm) },
-            { titulo: 'Acesso', valor: (c) => c.ativo ? <Etiqueta cor="verde">Liberado</Etiqueta> : <Etiqueta cor="vermelho">Suspenso</Etiqueta> },
+            { titulo: 'Acesso', valor: (c) => c.ativo ? <Etiqueta cor="verde">Liberado</Etiqueta> : <Etiqueta cor="vermelho">{c.motivoSuspensao === 'FALTA_DE_PAGAMENTO' ? 'Suspenso (pagamento)' : 'Suspenso'}</Etiqueta> },
             { titulo: 'Ações', direita: true, valor: (c) => (
               <span className="flex flex-wrap justify-end gap-3 text-sm">
                 <Link className="text-marca-700 underline" to={`/plataforma/clientes/${c.id}`}>Abrir</Link>

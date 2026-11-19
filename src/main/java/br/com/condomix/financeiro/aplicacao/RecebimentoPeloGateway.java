@@ -1,14 +1,14 @@
 package br.com.condomix.financeiro.aplicacao;
 
 import br.com.condomix.compartilhado.TenantAtual;
-import br.com.condomix.financeiro.TipoDeGateway;
+import br.com.condomix.pagamentos.TipoDeGateway;
 import br.com.condomix.financeiro.dominio.Boleto;
 import br.com.condomix.financeiro.dominio.Cobranca;
 import br.com.condomix.financeiro.dominio.FormaDePagamento;
 import br.com.condomix.financeiro.dominio.SituacaoDoBoleto;
 import br.com.condomix.financeiro.dominio.StatusCobranca;
-import br.com.condomix.financeiro.gateway.GatewayDePagamento.FormaDoPagamento;
-import br.com.condomix.financeiro.gateway.GatewayDePagamento.PagamentoConfirmado;
+import br.com.condomix.pagamentos.GatewayDePagamento.FormaDoPagamento;
+import br.com.condomix.pagamentos.GatewayDePagamento.PagamentoConfirmado;
 import br.com.condomix.financeiro.persistencia.BoletoRepository;
 import br.com.condomix.financeiro.persistencia.CobrancaRepository;
 import org.slf4j.Logger;

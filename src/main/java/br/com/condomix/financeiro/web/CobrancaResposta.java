@@ -7,7 +7,7 @@ import br.com.condomix.financeiro.dominio.ItemDeCobranca;
 import br.com.condomix.financeiro.dominio.OrigemCobranca;
 import br.com.condomix.financeiro.dominio.SituacaoDoBoleto;
 import br.com.condomix.financeiro.dominio.StatusCobranca;
-import br.com.condomix.financeiro.TipoDeGateway;
+import br.com.condomix.pagamentos.TipoDeGateway;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

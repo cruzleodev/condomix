@@ -19,10 +19,16 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
-/** Assinatura de um plano por um condomínio. */
+/**
+ * Assinatura de um plano por um condomínio. Em {@code TESTE}, o condomínio não paga; ao fim do teste
+ * ({@code fimDoTeste}), ela vira {@code ATIVA} sozinha e começa a ser faturada.
+ */
 @Entity
 @Table(name = "assinatura")
 public class Assinatura {
+
+	/** Duração do teste grátis de um cliente novo. */
+	public static final int DIAS_DE_TESTE = 30;
 
 	@Id
 	@GeneratedValue
@@ -46,6 +52,9 @@ public class Assinatura {
 
 	private LocalDate fim;
 
+	/** Só no teste: quando ele acaba. Vazio = teste sem prazo. */
+	private LocalDate fimDoTeste;
+
 	@CreationTimestamp
 	private Instant criadoEm;
 
@@ -61,22 +70,52 @@ public class Assinatura {
 		this.periodicidade = Objects.requireNonNull(periodicidade);
 		this.status = Objects.requireNonNull(status);
 		this.inicio = Objects.requireNonNull(inicio);
+		if (status == StatusAssinatura.TESTE) {
+			this.fimDoTeste = inicio.plusDays(DIAS_DE_TESTE);
+		}
 	}
 
 	public void cancelar(LocalDate fim) {
 		this.status = StatusAssinatura.CANCELADA;
 		this.fim = fim;
+		this.fimDoTeste = null;
 	}
 
-	/** Muda a situação (teste, ativa, suspensa). Para cancelar, use {@link #cancelar}. */
-	public void alterarStatus(StatusAssinatura novo) {
+	/**
+	 * Muda a situação (teste, ativa, suspensa). Para cancelar, use {@link #cancelar}. Voltar ao teste dá
+	 * mais {@value #DIAS_DE_TESTE} dias a partir de {@code hoje}.
+	 */
+	public void alterarStatus(StatusAssinatura novo, LocalDate hoje) {
 		if (novo == StatusAssinatura.CANCELADA) {
 			throw new IllegalArgumentException("Para cancelar, use cancelar(fim)");
 		}
 		if (this.status == StatusAssinatura.CANCELADA) {
 			throw new IllegalStateException("Assinatura cancelada não muda de situação");
 		}
+		if (novo == StatusAssinatura.TESTE && this.status != StatusAssinatura.TESTE) {
+			this.fimDoTeste = hoje.plusDays(DIAS_DE_TESTE);
+		}
+		if (novo != StatusAssinatura.TESTE) {
+			this.fimDoTeste = null;
+		}
 		this.status = novo;
+	}
+
+	/** Muda o fim do teste grátis; vazio = sem prazo. Só vale para assinatura em teste. */
+	public void definirFimDoTeste(LocalDate fim) {
+		if (status != StatusAssinatura.TESTE) {
+			throw new IllegalStateException("Só a assinatura em teste tem prazo de teste");
+		}
+		this.fimDoTeste = fim;
+	}
+
+	/** O teste acabou ({@code fimDoTeste} chegou): vira ativa e passa a ser faturada. */
+	public boolean encerrarTesteSeVenceu(LocalDate hoje) {
+		if (status != StatusAssinatura.TESTE || fimDoTeste == null || fimDoTeste.isAfter(hoje)) {
+			return false;
+		}
+		alterarStatus(StatusAssinatura.ATIVA, hoje);
+		return true;
 	}
 
 	public boolean isVigente() {
@@ -90,6 +129,7 @@ public class Assinatura {
 	public StatusAssinatura getStatus() { return status; }
 	public LocalDate getInicio() { return inicio; }
 	public LocalDate getFim() { return fim; }
+	public LocalDate getFimDoTeste() { return fimDoTeste; }
 	public Instant getCriadoEm() { return criadoEm; }
 	public Instant getAtualizadoEm() { return atualizadoEm; }
 

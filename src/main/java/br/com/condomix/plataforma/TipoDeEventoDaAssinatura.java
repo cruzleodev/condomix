@@ -14,6 +14,18 @@ public enum TipoDeEventoDaAssinatura {
 	/** O acesso do condomínio ao app foi suspenso. */
 	SUSPENSAO,
 
-	REATIVACAO
+	REATIVACAO,
+
+	/** O administrador mudou o fim do teste grátis. */
+	PRAZO_DO_TESTE,
+
+	/** O teste grátis acabou: a assinatura virou ativa sozinha e passou a ser faturada. */
+	FIM_DO_TESTE,
+
+	/** A fatura passou da tolerância sem pagamento: o acesso foi suspenso sozinho. */
+	SUSPENSAO_POR_FALTA_DE_PAGAMENTO,
+
+	/** A fatura atrasada foi paga: o acesso voltou sozinho. */
+	REATIVACAO_APOS_PAGAMENTO
 
 }

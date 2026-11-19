@@ -1,4 +1,4 @@
-import { ACOMPANHAMENTO } from '../sessao/papeis'
+import { ACOMPANHAMENTO, GESTAO } from '../sessao/papeis'
 
 /**
  * Os itens de navegação do app. Cada um diz quem o vê; a mesma lista monta o menu lateral (computador)
@@ -13,6 +13,8 @@ export interface ItemDeNavegacao {
   /** Aparece na barra de baixo do celular (no máximo 5). */
   noCelular?: boolean
   secao?: 'principal' | 'gestao'
+  /** Continua no menu com o condomínio suspenso por falta de pagamento (só dá para pagar a assinatura). */
+  comPagamentoPendente?: boolean
 }
 
 export const ITENS: ItemDeNavegacao[] = [
@@ -27,15 +29,18 @@ export const ITENS: ItemDeNavegacao[] = [
   { para: '/gestao/taxa', rotulo: 'Taxa do mês', icone: '%', papeis: ACOMPANHAMENTO, secao: 'gestao' },
   { para: '/gestao/cobrancas', rotulo: 'Cobranças', icone: '$', papeis: ACOMPANHAMENTO, secao: 'gestao' },
   { para: '/gestao/caixa', rotulo: 'Caixa', icone: '⊟', papeis: ACOMPANHAMENTO, secao: 'gestao' },
-  { para: '/conta', rotulo: 'Conta', icone: '●', noCelular: true },
+  { para: '/gestao/assinatura', rotulo: 'Assinatura', icone: '✦', papeis: GESTAO, secao: 'gestao', comPagamentoPendente: true },
+  { para: '/conta', rotulo: 'Conta', icone: '●', noCelular: true, comPagamentoPendente: true },
 ]
 
-export function itensVisiveis(perfis: string[]): ItemDeNavegacao[] {
-  return ITENS.filter((i) => !i.papeis || i.papeis.some((p) => perfis.includes(p)))
+/** Com {@code pagamentoPendente} (condomínio suspenso por falta de pagamento), só a assinatura e a conta. */
+export function itensVisiveis(perfis: string[], pagamentoPendente = false): ItemDeNavegacao[] {
+  return ITENS.filter((i) => (!i.papeis || i.papeis.some((p) => perfis.includes(p))) && (!pagamentoPendente || i.comPagamentoPendente))
 }
 
 /** Barra de baixo do celular: sem o item "Gestão", o Balancete ocupa o lugar. */
-export function itensDoCelular(perfis: string[]): ItemDeNavegacao[] {
+export function itensDoCelular(perfis: string[], pagamentoPendente = false): ItemDeNavegacao[] {
+  if (pagamentoPendente) return itensVisiveis(perfis, true)
   const visiveis = itensVisiveis(perfis)
   const temGestao = visiveis.some((i) => i.para === '/gestao')
   return visiveis.filter((i) => i.noCelular || (!temGestao && i.para === '/balancete'))

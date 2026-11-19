@@ -154,7 +154,7 @@ class CadastroBaseTests {
 	void consultaDeCondominiosIgnoraInativos() {
 		Condominio ativo = condominios.save(new Condominio("Ativo", TipoCondominio.COMERCIAL));
 		Condominio inativo = new Condominio("Inativo", TipoCondominio.COMERCIAL);
-		inativo.desativar();
+		inativo.suspender(br.com.condomix.plataforma.MotivoDaSuspensao.MANUAL);
 		condominios.save(inativo);
 
 		assertThat(consultaDeCondominios.ativosEntre(java.util.List.of(ativo.getId(), inativo.getId(), UUID.randomUUID())))

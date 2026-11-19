@@ -4,6 +4,7 @@ import { useSessao } from '../sessao/contexto'
 const ITENS = [
   // Clientes também fica marcado na página de cada cliente (/plataforma/clientes/...).
   { para: '/plataforma', rotulo: 'Clientes', icone: '▦', tambem: '/plataforma/clientes/' },
+  { para: '/plataforma/faturas', rotulo: 'Faturas', icone: '₿' },
   { para: '/plataforma/planos', rotulo: 'Planos e preços', icone: '$' },
   { para: '/plataforma/logins', rotulo: 'Logins', icone: '⚿' },
   { para: '/plataforma/suporte', rotulo: 'Suporte', icone: '⛑' },

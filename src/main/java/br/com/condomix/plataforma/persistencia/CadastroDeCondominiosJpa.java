@@ -58,10 +58,10 @@ class CadastroDeCondominiosJpa implements CadastroDeCondominios {
 			novoCondominio.definirCnpj(cnpj);
 		}
 		Condominio condominio = condominios.save(novoCondominio);
-		TenantAtual.executarComo(condominio.getId(), () -> assinaturas.save(
+		Assinatura assinatura = TenantAtual.executarComo(condominio.getId(), () -> assinaturas.save(
 				new Assinatura(condominio, plano, novo.periodicidade(), StatusAssinatura.TESTE, LocalDate.now(relogio))));
 		historico.save(EventoDeAssinatura.daAssinatura(condominio.getId(), Instant.now(relogio),
-				TipoDeEventoDaAssinatura.CLIENTE_NOVO, plano, novo.periodicidade(), StatusAssinatura.TESTE, registradoPor));
+				TipoDeEventoDaAssinatura.CLIENTE_NOVO, assinatura, registradoPor));
 		return condominio.getId();
 	}
 
