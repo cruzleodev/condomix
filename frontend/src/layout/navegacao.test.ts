@@ -4,15 +4,15 @@ import { itensDoCelular, itensVisiveis } from './navegacao'
 const rotas = (itens: { para: string }[]) => itens.map((i) => i.para)
 
 describe('navegação por papel', () => {
-  it('morador não vê a gestão; no celular, o balancete ocupa o lugar dela', () => {
+  it('morador não vê a gestão; no celular, tem reservas e documentos', () => {
     expect(rotas(itensVisiveis(['MORADOR']))).not.toContain('/gestao/unidades')
-    expect(rotas(itensDoCelular(['MORADOR']))).toEqual(['/', '/debitos', '/documentos', '/balancete', '/conta'])
+    expect(rotas(itensDoCelular(['MORADOR']))).toEqual(['/', '/debitos', '/reservas', '/documentos', '/conta'])
   })
 
   it('síndico e conselheiro veem a gestão; no celular, a aba Gestão', () => {
     for (const papel of ['SINDICO', 'CONSELHEIRO']) {
       expect(rotas(itensVisiveis([papel]))).toEqual(expect.arrayContaining(['/gestao/unidades', '/gestao/moradores', '/gestao/mandatos']))
-      expect(rotas(itensDoCelular([papel]))).toEqual(['/', '/debitos', '/documentos', '/gestao', '/conta'])
+      expect(rotas(itensDoCelular([papel]))).toEqual(['/', '/debitos', '/reservas', '/gestao', '/conta'])
     }
   })
 

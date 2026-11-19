@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { competencia, data, mesAtual, moeda, tamanhoDeArquivo, periodoDaFatura } from './formato'
+import { competencia, data, mesAtual, moeda, tamanhoDeArquivo, periodoDaFatura, hora, horario, diaDaSemana, somarDias } from './formato'
 
 describe('formato', () => {
   it('formata reais no padrão brasileiro', () => {
@@ -65,5 +65,13 @@ describe('formato do financeiro', () => {
     expect(periodoDaFatura('2026-11-19', '2026-12-19')).toBe('19/11/2026 a 18/12/2026')
     expect(periodoDaFatura('2026-12-01', '2027-01-01')).toBe('01/12/2026 a 31/12/2026')
     expect(periodoDaFatura(null, '2027-01-01')).toBe('—')
+  })
+
+  it('formata horas, horários e dias da semana dos espaços', () => {
+    expect(hora('18:00:00')).toBe('18h')
+    expect(hora('08:30:00')).toBe('8h30')
+    expect(horario('Noite', '18:00:00', '23:00:00')).toBe('Noite (18h às 23h)')
+    expect(diaDaSemana('2026-12-20')).toBe('dom, 20/12/2026')
+    expect(somarDias('2026-12-30', 3)).toBe('2027-01-02')
   })
 })

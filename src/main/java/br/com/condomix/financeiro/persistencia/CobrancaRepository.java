@@ -53,4 +53,7 @@ public interface CobrancaRepository extends JpaRepository<Cobranca, UUID>, JpaSp
 			""")
 	boolean existeNaCompetencia(@Param("unidadeId") UUID unidadeId, @Param("competencia") LocalDate competencia);
 
+	/** Em aberto e vencida antes de {@code data} (inadimplência da unidade). */
+	boolean existsByUnidadeIdAndStatusAndVencimentoBefore(UUID unidadeId, StatusCobranca status, LocalDate data);
+
 }
