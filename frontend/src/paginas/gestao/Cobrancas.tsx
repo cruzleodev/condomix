@@ -3,6 +3,8 @@ import { useState, type FormEvent } from 'react'
 import { api, dados, requisicaoAutenticada } from '../../api/cliente'
 import type { Cobranca } from '../../api/tipos'
 import type { components } from '../../api/schema'
+import { BarraDoGateway, EtiquetaDoBoleto, SegundaVia } from '../../componentes/Boleto'
+import { atualizarEnquantoProcessa } from '../../util/boleto'
 import { Selecao } from '../../componentes/formulario'
 import { Tabela } from '../../componentes/Tabela'
 import { Aviso, Botao, Campo, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina } from '../../componentes/ui'
@@ -11,7 +13,7 @@ import { GESTAO } from '../../sessao/papeis'
 import { data, hojeIso, lerReais, moeda, opcoes, ROTULOS } from '../../util/formato'
 
 type Inadimplente = components['schemas']['Inadimplente']
-type Formulario = 'nenhum' | 'avulsa' | 'importar' | { pagar: Cobranca }
+type Formulario = 'nenhum' | 'avulsa' | 'importar' | { pagar: Cobranca } | { segundaVia: Cobranca }
 
 const COR_DO_STATUS = { ABERTA: 'amarelo', PAGA: 'verde', CANCELADA: 'cinza' } as const
 
@@ -48,6 +50,7 @@ function ListaDeCobrancas() {
     queryFn: async () => dados(await api.GET('/api/cobrancas', {
       params: { query: { competencia: mes || undefined, status: (status || undefined) as 'ABERTA' | undefined, pagina, tamanho: 50 } },
     })),
+    refetchInterval: (q) => atualizarEnquantoProcessa(q.state.data?.itens),
   })
   const atualizar = () => cliente.invalidateQueries({ queryKey: ['cobrancas'] })
   const estornar = useMutation({
@@ -59,10 +62,22 @@ function ListaDeCobrancas() {
       dados(await api.POST('/api/cobrancas/{id}/cancelamento', { params: { path: { id } }, body: { motivo } })),
     onSuccess: atualizar,
   })
+  const tentarDeNovo = useMutation({
+    mutationFn: async (id: string) => dados(await api.POST('/api/cobrancas/{id}/boleto/nova-tentativa', { params: { path: { id } } })),
+    onSuccess: atualizar,
+  })
+  const simular = useMutation({
+    mutationFn: async (id: string) => dados(await api.POST('/api/cobrancas/{id}/pagamento-simulado', { params: { path: { id } }, body: {} })),
+    onSuccess: () => {
+      atualizar()
+      cliente.invalidateQueries({ queryKey: ['caixa'] })
+    },
+  })
   const p = cobrancas.data
 
   return (
     <div className="space-y-4">
+      <BarraDoGateway gerencia={gerencia} />
       {gerencia && formulario === 'nenhum' && (
         <div className="flex flex-wrap gap-2">
           <Botao onClick={() => setFormulario('avulsa')}>Cobrança avulsa</Botao>
@@ -71,14 +86,20 @@ function ListaDeCobrancas() {
       )}
       {formulario === 'avulsa' && <Avulsa aoTerminar={() => setFormulario('nenhum')} />}
       {formulario === 'importar' && <Importacao aoTerminar={() => setFormulario('nenhum')} />}
-      {typeof formulario === 'object' && <Pagamento cobranca={formulario.pagar} aoTerminar={() => setFormulario('nenhum')} />}
+      {typeof formulario === 'object' && 'pagar' in formulario && <Pagamento cobranca={formulario.pagar} aoTerminar={() => setFormulario('nenhum')} />}
+      {typeof formulario === 'object' && 'segundaVia' in formulario && (
+        <Cartao titulo={`2ª via · ${formulario.segundaVia.unidade} · ${formulario.segundaVia.descricao}`}>
+          <SegundaVia cobrancaId={formulario.segundaVia.id ?? ''} dono="gestao" />
+          <Botao variante="secundario" className="mt-4 w-full md:w-auto" onClick={() => setFormulario('nenhum')}>Fechar</Botao>
+        </Cartao>
+      )}
 
       <div className="grid grid-cols-2 gap-3 md:max-w-lg">
         <Campo rotulo="Mês" type="month" value={mes} onChange={(e) => { setMes(e.target.value); setPagina(0) }} ajuda="Vazio: todos." />
         <Selecao rotulo="Situação" value={status} vazio="Todas" opcoes={opcoes(ROTULOS.statusDaCobranca)}
           onChange={(e) => { setStatus(e.target.value); setPagina(0) }} />
       </div>
-      <MensagemDeErro erro={estornar.error ?? cancelar.error} />
+      <MensagemDeErro erro={estornar.error ?? cancelar.error ?? tentarDeNovo.error ?? simular.error} />
 
       {cobrancas.isPending ? <Carregando /> : cobrancas.isError ? <MensagemDeErro erro={cobrancas.error} /> : (
         <>
@@ -108,10 +129,28 @@ function ListaDeCobrancas() {
                   </Etiqueta>
                 ),
               },
+              {
+                titulo: 'Boleto',
+                valor: (c) => c.boleto ? (
+                  <span>
+                    <EtiquetaDoBoleto boleto={c.boleto} />
+                    {c.boleto.situacao === 'FALHOU' && <span className="mt-1 block max-w-xs text-xs text-red-700">{c.boleto.erro}</span>}
+                  </span>
+                ) : '—',
+              },
               ...(gerencia ? [{
                 titulo: 'Ações', direita: true,
                 valor: (c: Cobranca) => (
-                  <span className="flex justify-end gap-3">
+                  <span className="flex flex-wrap justify-end gap-3">
+                    {c.status === 'ABERTA' && c.boleto?.situacao === 'EMITIDO' && (
+                      <button className="text-marca-700 underline" onClick={() => setFormulario({ segundaVia: c })}>2ª via</button>
+                    )}
+                    {c.status === 'ABERTA' && c.boleto?.situacao === 'EMITIDO' && c.boleto.gateway === 'SIMULADO' && (
+                      <button className="text-emerald-700 underline" disabled={simular.isPending} onClick={() => simular.mutate(c.id ?? '')}>Simular pagamento</button>
+                    )}
+                    {c.boleto?.situacao === 'FALHOU' && (
+                      <button className="text-marca-700 underline" disabled={tentarDeNovo.isPending} onClick={() => tentarDeNovo.mutate(c.id ?? '')}>Tentar de novo</button>
+                    )}
                     {c.status === 'ABERTA' && <button className="text-marca-700 underline" onClick={() => setFormulario({ pagar: c })}>Receber</button>}
                     {c.status === 'ABERTA' && (
                       <button className="text-red-700 underline" onClick={() => {

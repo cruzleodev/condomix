@@ -1,6 +1,7 @@
 package br.com.condomix.financeiro.persistencia;
 
 import br.com.condomix.financeiro.dominio.Cobranca;
+import br.com.condomix.financeiro.dominio.OrigemCobranca;
 import br.com.condomix.financeiro.dominio.StatusCobranca;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
@@ -29,6 +30,9 @@ public interface CobrancaRepository extends JpaRepository<Cobranca, UUID>, JpaSp
 	}
 
 	List<Cobranca> findByGeracaoId(UUID geracaoId);
+
+	/** Em aberto e emitidas pelo condomínio (as importadas já têm o boleto da administradora). */
+	List<Cobranca> findByStatusAndOrigemNot(StatusCobranca status, OrigemCobranca origem);
 
 	@Query("select c from Cobranca c where c.status = br.com.condomix.financeiro.dominio.StatusCobranca.ABERTA and c.vencimento < :data")
 	List<Cobranca> vencidasEm(@Param("data") LocalDate data);

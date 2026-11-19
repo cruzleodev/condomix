@@ -20,6 +20,7 @@ export function Moradores() {
   const [termo, setTermo] = useState('')
   const [cadastrando, setCadastrando] = useState(false)
   const [convidando, setConvidando] = useState<Pessoa | null>(null)
+  const [editando, setEditando] = useState<Pessoa | null>(null)
   const [convite, setConvite] = useState<Convite | null>(null)
 
   const pessoas = useQuery({
@@ -32,8 +33,9 @@ export function Moradores() {
       <TituloDaPagina subtitulo="Proprietários, inquilinos e moradores, e o acesso de cada um ao app.">Moradores</TituloDaPagina>
 
       {convite && <LinkDeConvite link={convite.link ?? ''} email={convite.email} />}
-      {gerencia && !cadastrando && !convidando && <Botao onClick={() => { setConvite(null); setCadastrando(true) }}>Cadastrar morador</Botao>}
+      {gerencia && !cadastrando && !convidando && !editando && <Botao onClick={() => { setConvite(null); setCadastrando(true) }}>Cadastrar morador</Botao>}
       {cadastrando && <CadastroDeMorador aoTerminar={(c) => { setCadastrando(false); setConvite(c) }} />}
+      {editando && <EdicaoDePessoa pessoa={editando} aoTerminar={() => setEditando(null)} />}
       {convidando && <Convidar pessoa={convidando} aoTerminar={(c) => { setConvidando(null); setConvite(c) }} />}
 
       <form className="flex gap-2 md:max-w-xl" onSubmit={(e) => { e.preventDefault(); setTermo(busca.trim()) }}>
@@ -48,7 +50,12 @@ export function Moradores() {
           chave={(p) => p.id ?? ''}
           vazio={termo ? `Ninguém encontrado para "${termo}".` : 'Nenhuma pessoa cadastrada.'}
           colunas={[
-            { titulo: 'Nome', valor: (p) => <span className="font-medium">{p.nome}</span> },
+            {
+              titulo: 'Nome',
+              valor: (p) => gerencia
+                ? <button className="font-medium text-marca-700 underline" onClick={() => { setConvite(null); setEditando(p) }}>{p.nome}</button>
+                : <span className="font-medium">{p.nome}</span>,
+            },
             { titulo: 'CPF/CNPJ', valor: (p) => documento(p.documento) || '—' },
             { titulo: 'Contato', valor: (p) => [p.email, telefone(p.telefone)].filter(Boolean).join(' · ') || '—' },
             {
@@ -141,6 +148,38 @@ function Convidar({ pessoa, aoTerminar }: { pessoa: Pessoa; aoTerminar: (convite
         <div className="flex gap-2 md:col-span-2">
           <Botao type="submit" carregando={convidar.isPending}>Gerar convite</Botao>
           <Botao type="button" variante="secundario" onClick={() => aoTerminar(null)}>Cancelar</Botao>
+        </div>
+      </form>
+    </Cartao>
+  )
+}
+
+/** Corrigir nome, CPF/CNPJ (o banco exige no boleto), e-mail e celular. */
+function EdicaoDePessoa({ pessoa, aoTerminar }: { pessoa: Pessoa; aoTerminar: () => void }) {
+  const cache = useQueryClient()
+  const [f, setF] = useState({ nome: pessoa.nome ?? '', documento: pessoa.documento ?? '', email: pessoa.email ?? '', telefone: pessoa.telefone ?? '' })
+  const muda = (campo: keyof typeof f) => (e: { target: { value: string } }) => setF({ ...f, [campo]: e.target.value })
+  const salvar = useMutation({
+    mutationFn: async () => dados(await api.PUT('/api/pessoas/{id}', {
+      params: { path: { id: pessoa.id ?? '' } },
+      body: { nome: f.nome, documento: f.documento || undefined, email: f.email || undefined, telefone: f.telefone || undefined },
+    })),
+    onSuccess: () => {
+      cache.invalidateQueries({ queryKey: ['pessoas'] })
+      aoTerminar()
+    },
+  })
+  return (
+    <Cartao titulo={`Editar ${pessoa.nome}`}>
+      <form onSubmit={(e: FormEvent) => { e.preventDefault(); salvar.mutate() }} className="grid gap-3 md:grid-cols-2">
+        <Campo rotulo="Nome" required maxLength={150} value={f.nome} onChange={muda('nome')} />
+        <Campo rotulo="CPF ou CNPJ" value={f.documento} onChange={muda('documento')} ajuda="Obrigatório para o boleto de quem paga a unidade." />
+        <Campo rotulo="E-mail" type="email" value={f.email} onChange={muda('email')} />
+        <Campo rotulo="Celular" type="tel" value={f.telefone} onChange={muda('telefone')} />
+        <div className="md:col-span-2"><MensagemDeErro erro={salvar.error} /></div>
+        <div className="flex gap-2 md:col-span-2">
+          <Botao type="submit" carregando={salvar.isPending}>Salvar</Botao>
+          <Botao type="button" variante="secundario" onClick={aoTerminar}>Cancelar</Botao>
         </div>
       </form>
     </Cartao>

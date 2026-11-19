@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
  *   <li>{@code /api/auth/**} e {@code /api/eu}: basta estar logado.</li>
  *   <li>{@code /api/plataforma/**}: só o administrador da plataforma.</li>
  *   <li>Aceitar convite: aberto (quem tem o código do convite ainda não tem login).</li>
+ *   <li>Avisos dos gateways de pagamento ({@code /api/avisos/**}): abertos; cada aviso traz o token do condomínio.</li>
  *   <li>Todo o resto: precisa estar logado <b>e</b> com um condomínio selecionado no token.
  *       O token de suporte só pode fazer leituras (GET).</li>
  * </ul>
@@ -66,6 +67,8 @@ class ConfiguracaoSeguranca {
 				.authorizeHttpRequests(regras -> regras
 						.requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/convites/consulta", "/api/convites/aceite")
 								.permitAll()
+						// Avisos (webhooks) dos gateways: autenticados pelo token de cada condomínio, conferido no controller.
+						.requestMatchers(HttpMethod.POST, "/api/avisos/**").permitAll()
 						.requestMatchers("/actuator/health/**", "/actuator/info", "/error",
 								"/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 						.requestMatchers("/api/auth/**", "/api/eu").authenticated()

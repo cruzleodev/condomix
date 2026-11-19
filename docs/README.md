@@ -23,8 +23,8 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 12 | [Frontend parte 3: financeiro do síndico (taxa, geração, cobranças, inadimplência, caixa)](etapas/12-frontend-financeiro.md) | `feature/frontend-financeiro` | Concluída |
 | 13 | [Frontend parte 4: painel do administrador da plataforma (clientes, planos, assinaturas e modo suporte)](etapas/13-frontend-plataforma.md) | `feature/frontend-plataforma` | Concluída |
 | 14 | [Administrador: convite e troca de síndico, bloqueio de login, fim do suporte e histórico da assinatura](etapas/14-admin-suporte-acessos.md) | `feature/admin-suporte-acessos` | Concluída |
-| 15 | Boletos e Pix pelo gateway, 2ª via e baixa automática (backend e telas) | — | Próxima |
-| 16 | Cobrança da assinatura do Condomix pelo gateway (backend e telas) | — | Pendente |
+| 15 | [Boletos e Pix pelo gateway (Asaas), 2ª via e baixa automática](etapas/15-boletos-pix.md) | `feature/boletos-pix` | Concluída |
+| 16 | Cobrança da assinatura do Condomix pelo gateway (backend e telas) | — | Próxima |
 | 17 | Reservas: espaços, agenda, regras e aluguel (backend e telas) | — | Pendente |
 | 18 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
 | 19 | App nas lojas (Capacitor) | — | Pendente |
@@ -54,7 +54,7 @@ Futuro, sem data: assembleias online (convocação, pauta, votação e ata).
 | Banco | PostgreSQL 18 com Flyway; todos os condomínios no mesmo banco, separados por `tenant_id` |
 | Mensageria | RabbitMQ |
 | WhatsApp | API oficial da Meta (Cloud API) |
-| Pagamentos | Gateway com subcontas (ex.: Asaas): o dinheiro do morador cai na conta do condomínio |
+| Pagamentos | Asaas: cada condomínio tem a própria conta, e o administrador cola a chave de API dela no painel (guardada cifrada). O dinheiro do morador cai direto na conta do condomínio. Boleto com Pix emitido na geração da taxa; baixa automática pelo aviso (webhook), conferida na API do Asaas |
 | Planos | Essencial (Documentos + Financeiro), Completo (+ Reservas) e WhatsApp como adicional |
 | Git | `desenvolvimento` → `homologacao` → `producao`, sempre por pull request; uma branch `feature/*` e um commit por etapa |
 

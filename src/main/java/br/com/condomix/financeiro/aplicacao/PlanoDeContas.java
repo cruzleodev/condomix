@@ -131,6 +131,13 @@ public class PlanoDeContas {
 		});
 	}
 
+	/** Onde caem os pagamentos por boleto e Pix do gateway. Criada no primeiro pagamento. */
+	public ContaFinanceira contaDoGateway(LocalDate inicio) {
+		return contas.findFirstByTipoAndAtivaTrue(TipoDeConta.GATEWAY).orElseGet(() -> contas.save(
+				new ContaFinanceira(TenantAtual.obrigatorio(), "Recebimentos online (boleto e Pix)", TipoDeConta.GATEWAY,
+						BigDecimal.ZERO, inicio.withDayOfMonth(1))));
+	}
+
 	public ContaFinanceira buscarConta(UUID id) {
 		return contas.findById(id).orElseThrow(() -> new NaoEncontradoException("Conta não encontrada"));
 	}

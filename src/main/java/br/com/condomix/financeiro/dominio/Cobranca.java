@@ -149,6 +149,22 @@ public class Cobranca {
 		return new Encargos(dias, valor, multa, juros, valor.add(multa).add(juros));
 	}
 
+	/**
+	 * Valor, vencimento e encargos para emitir o boleto hoje. Ainda no prazo: o valor e o vencimento da cobrança,
+	 * com multa e juros configurados no boleto. Já vencida (o gateway não aceita vencimento no passado): o valor
+	 * atualizado até hoje, vencendo hoje, só com juros dali em diante (a multa já está no valor).
+	 */
+	public CondicoesDoBoleto condicoesDoBoletoEm(LocalDate hoje) {
+		if (!hoje.isAfter(vencimento)) {
+			return new CondicoesDoBoleto(valor, vencimento, multaPercentual, jurosMensalPercentual);
+		}
+		return new CondicoesDoBoleto(encargosEm(hoje).total(), hoje, BigDecimal.ZERO, jurosMensalPercentual);
+	}
+
+	public record CondicoesDoBoleto(BigDecimal valor, LocalDate vencimento, BigDecimal multaPercentual,
+			BigDecimal jurosMensalPercentual) {
+	}
+
 	/** Baixa manual. Sem {@code valorPago}, usa o valor com encargos na data do pagamento. */
 	public void registrarPagamento(LocalDate data, BigDecimal valorPago, FormaDePagamento forma, String observacao,
 			UUID registradoPor) {

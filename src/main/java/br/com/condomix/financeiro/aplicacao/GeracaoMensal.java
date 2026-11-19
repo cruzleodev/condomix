@@ -8,6 +8,8 @@ import br.com.condomix.compartilhado.NaoEncontradoException;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
 import br.com.condomix.compartilhado.TenantAtual;
 import br.com.condomix.financeiro.dominio.Cobranca;
+import br.com.condomix.financeiro.dominio.CobrancaCancelada;
+import br.com.condomix.financeiro.dominio.CobrancasEmitidas;
 import br.com.condomix.financeiro.dominio.ConfiguracaoDaCobranca;
 import br.com.condomix.financeiro.dominio.Dinheiro;
 import br.com.condomix.financeiro.dominio.GeracaoDeCobranca;
@@ -20,6 +22,7 @@ import br.com.condomix.financeiro.persistencia.CobrancaRepository;
 import br.com.condomix.financeiro.persistencia.GeracaoDeCobrancaRepository;
 import br.com.condomix.financeiro.rateio.CalculoDoRateio;
 import br.com.condomix.financeiro.rateio.DistribuicaoDeCentavos;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,17 +69,20 @@ public class GeracaoMensal {
 
 	private final Map<TipoDeRateio, CalculoDoRateio> rateios;
 
+	private final ApplicationEventPublisher eventos;
+
 	private final Clock relogio;
 
 	public GeracaoMensal(CadastroParaCobranca cadastro, ConfiguracaoDeCobrancas configuracoes,
 			GeracaoDeCobrancaRepository geracoes, CobrancaRepository cobrancas, List<CalculoDoRateio> rateios,
-			Clock relogio) {
+			ApplicationEventPublisher eventos, Clock relogio) {
 		this.cadastro = cadastro;
 		this.configuracoes = configuracoes;
 		this.geracoes = geracoes;
 		this.cobrancas = cobrancas;
 		this.rateios = rateios.stream().collect(Collectors.toMap(CalculoDoRateio::tipo, Function.identity(),
 				(a, b) -> a, () -> new EnumMap<>(TipoDeRateio.class)));
+		this.eventos = eventos;
 		this.relogio = relogio;
 	}
 
@@ -114,13 +120,15 @@ public class GeracaoMensal {
 				regras.getTipoRateio(), pedido.valorOrdinariaTotal(), geradaPor));
 		Map<UUID, UnidadeCobravel> unidades = cadastro.unidadesAtivas(pedido.competencia().atDay(1)).stream()
 				.collect(Collectors.toMap(UnidadeCobravel::id, Function.identity()));
+		List<UUID> emitidas = new ArrayList<>();
 		for (Linha linha : calculo.cobrancas()) {
 			var responsavel = unidades.get(linha.unidadeId()).responsavel();
-			cobrancas.save(new Cobranca(new Cobranca.Emissao(tenant, linha.unidadeId(),
+			emitidas.add(cobrancas.save(new Cobranca(new Cobranca.Emissao(tenant, linha.unidadeId(),
 					responsavel == null ? null : responsavel.pessoaId(), OrigemCobranca.GERACAO_MENSAL, geracao.getId(),
 					pedido.competencia(), "Taxa condominial " + FormatoBrasileiro.mes(pedido.competencia()), calculo.vencimento(), linha.itens(),
-					regras, geradaPor)));
+					regras, geradaPor))).getId());
 		}
+		eventos.publishEvent(new CobrancasEmitidas(emitidas));
 		return new ResultadoDaGeracao(geracao.getId(), calculo.competencia(), calculo.vencimento(), calculo.rateio(),
 				calculo.cobrancas(), calculo.isentas(), calculo.totalGeral(), calculo.avisos());
 	}
@@ -135,8 +143,10 @@ public class GeracaoMensal {
 			throw RegraDeNegocioException.conflito("Há cobranças pagas nesta geração: estorne os pagamentos antes de cancelar");
 		}
 		Instant agora = Instant.now(relogio);
-		daGeracao.stream().filter(c -> c.getStatus() == StatusCobranca.ABERTA)
-				.forEach(c -> c.cancelar("Geração cancelada" + (motivo == null ? "" : ": " + motivo), agora));
+		daGeracao.stream().filter(c -> c.getStatus() == StatusCobranca.ABERTA).forEach(c -> {
+			c.cancelar("Geração cancelada" + (motivo == null ? "" : ": " + motivo), agora);
+			eventos.publishEvent(new CobrancaCancelada(c.getId()));
+		});
 		geracao.cancelar(agora);
 	}
 

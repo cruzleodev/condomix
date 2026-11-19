@@ -8,6 +8,10 @@ condomix:
   seguranca:
     jwt:
       segredo: segredo-de-desenvolvimento-condomix-nao-usar-em-producao
+  cofre:
+    chave: nBNQtlM37It7vJXlafF96D8wnkqU1paJYH+8h527xGs=
+  gateway:
+    simulado: true   # oferece o gateway simulado (boleto e Pix de mentira) para testar sem o Asaas
   dev:
     # Cria condomínios e usuários de exemplo na primeira execução (ver DadosDeDesenvolvimento).
     dados-exemplo: true

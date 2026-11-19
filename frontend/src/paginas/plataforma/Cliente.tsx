@@ -9,6 +9,7 @@ import { Botao, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina } f
 import { data, dataHora, documento, opcoes, ROTULOS } from '../../util/formato'
 import { Linha, SecaoDoSindico } from './SindicoDoCliente'
 import { COR_DO_STATUS, descricaoDaAssinatura, usePlanosBase } from './comum'
+import { GatewayDoCliente } from './GatewayDoCliente'
 
 type Periodicidade = NonNullable<NonNullable<CondominioNaPlataforma['assinatura']>['periodicidade']>
 type Status = NonNullable<NonNullable<CondominioNaPlataforma['assinatura']>['status']>
@@ -39,7 +40,10 @@ export function Cliente() {
         <SecaoDaAssinatura cliente={c} />
         <SecaoDoAcesso cliente={c} />
       </div>
-      <SecaoDoSindico condominioId={id} />
+      <div className="grid gap-4 md:grid-cols-2">
+        <SecaoDoSindico condominioId={id} />
+        <GatewayDoCliente condominioId={id} />
+      </div>
       <Historico condominioId={id} />
     </div>
   )

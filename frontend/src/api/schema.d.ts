@@ -63,6 +63,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plataforma/condominios/{id}/gateway": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Boleto e Pix do cliente: se estão ligados e por qual gateway */
+        get: operations["situacao"];
+        /**
+         * Ligar o boleto e o Pix com a chave de API da conta do condomínio no gateway
+         * @description A chave é conferida no gateway e guardada cifrada. A resposta traz o endereço e o token do aviso (webhook) para cadastrar na conta: o token só aparece agora.
+         */
+        put: operations["configurar"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plataforma/condominios/{id}/assinatura": {
         parameters: {
             query?: never;
@@ -424,6 +445,23 @@ export interface paths {
         put?: never;
         /** Reativar um condomínio suspenso */
         post: operations["reativar_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/condominios/{id}/gateway/desativacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Desligar: as cobranças novas deixam de sair com boleto (os já emitidos continuam valendo) */
+        post: operations["desativar_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -900,13 +938,31 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Boleto e Pix de uma cobrança em aberto (2ª via), para a gestão */
+        get: operations["daCobranca"];
         put?: never;
         /**
          * Registrar pagamento (baixa manual)
          * @description Sem valorPago, usa o valor com multa e juros na data. data vazia = hoje.
          */
         post: operations["pagar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cobrancas/{id}/pagamento-simulado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simular o pagamento do boleto (gateway simulado, só em desenvolvimento) */
+        post: operations["simular_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -947,6 +1003,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/cobrancas/{id}/boleto/nova-tentativa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Tentar de novo um boleto que falhou (depois de corrigir o motivo) */
+        post: operations["tentarDeNovo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/cobrancas/importacao": {
         parameters: {
             query?: never;
@@ -961,6 +1034,46 @@ export interface paths {
          * @description Cabeçalho: unidade;competencia;vencimento;valor;situacao;data_pagamento;valor_pago;descricao. Tudo ou nada: com erro em qualquer linha, nada é importado e a resposta lista os erros.
          */
         post: operations["importar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cobrancas/boletos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Emitir os boletos que faltam
+         * @description Para as cobranças em aberto sem boleto (ex.: de antes de ligar o gateway) e as que falharam. As importadas da administradora ficam de fora. Os boletos ficam prontos em alguns segundos.
+         */
+        post: operations["emitirOsQueFaltam"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/avisos/asaas/{condominioId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Aviso de pagamento do Asaas (configurado na conta do condomínio)
+         * @description Responde 200 para todo aviso autêntico, mesmo os ignorados, para o Asaas não repetir.
+         */
+        post: operations["aviso"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1106,6 +1219,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/financeiro/gateway": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Se o boleto e o Pix estão ligados para o condomínio */
+        get: operations["gateway"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/financeiro/balancete": {
         parameters: {
             query?: never;
@@ -1175,6 +1305,23 @@ export interface paths {
          * @description Em aberto, com multa e juros até hoje, e as dos últimos 12 meses.
          */
         get: operations["minhas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/eu/cobrancas/{id}/pagamento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Minha 2ª via: boleto e Pix de uma cobrança das minhas unidades */
+        get: operations["minha"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1332,6 +1479,17 @@ export interface components {
         SindicoRegistrado: {
             sindico?: components["schemas"]["SindicoAtual"];
             convite?: components["schemas"]["ConviteGerado"];
+        };
+        PedidoGateway: {
+            /** @enum {string} */
+            gateway: "ASAAS" | "SIMULADO";
+            /** @enum {string} */
+            ambiente: "SANDBOX" | "PRODUCAO";
+            chave: string;
+        };
+        AvisoParaConfigurar: {
+            url?: string;
+            token?: string;
         };
         PedidoAssinatura: {
             plano: string;
@@ -1785,6 +1943,13 @@ export interface components {
             /** Format: date */
             vencimento: string;
         };
+        BoletoDaCobranca: {
+            /** @enum {string} */
+            situacao?: "PENDENTE" | "EMITIDO" | "FALHOU" | "PAGO" | "A_CANCELAR" | "CANCELADO";
+            /** @enum {string} */
+            gateway?: "ASAAS" | "SIMULADO";
+            erro?: string;
+        };
         CobrancaResposta: {
             /** Format: uuid */
             id?: string;
@@ -1813,6 +1978,7 @@ export interface components {
             /** @enum {string} */
             formaPagamento?: "PIX" | "BOLETO" | "TRANSFERENCIA" | "DINHEIRO" | "CARTAO" | "OUTRO";
             motivoCancelamento?: string;
+            boleto?: components["schemas"]["BoletoDaCobranca"];
         };
         PedidoPagamento: {
             /** Format: date */
@@ -1821,6 +1987,15 @@ export interface components {
             /** @enum {string} */
             forma: "PIX" | "BOLETO" | "TRANSFERENCIA" | "DINHEIRO" | "CARTAO" | "OUTRO";
             observacao?: string;
+        };
+        PedidoPagamentoSimulado: {
+            /** @enum {string} */
+            forma?: "BOLETO" | "PIX" | "OUTRA";
+            valor?: number;
+        };
+        PagamentoSimulado: {
+            /** @enum {string} */
+            resultado?: "BAIXADA" | "JA_BAIXADA" | "NAO_PAGO" | "IGNORADO" | "PAGO_EM_DUPLICIDADE";
         };
         PedidoCancelamentoDeCobranca: {
             motivo: string;
@@ -1832,6 +2007,17 @@ export interface components {
             pagas?: number;
             /** Format: int32 */
             abertas?: number;
+        };
+        BoletosPedidos: {
+            /** Format: int32 */
+            pedidos?: number;
+        };
+        AvisoDoAsaas: {
+            event?: string;
+            payment?: components["schemas"]["PagamentoDoAviso"];
+        };
+        PagamentoDoAviso: {
+            id?: string;
         };
         PedidoLogin: {
             /** Format: email */
@@ -1898,6 +2084,20 @@ export interface components {
             status?: "TESTE" | "ATIVA" | "SUSPENSA" | "CANCELADA";
             feitoPor?: string;
         };
+        GatewayDoClienteAtual: {
+            situacao?: components["schemas"]["SituacaoDoGateway"];
+            disponiveis?: ("ASAAS" | "SIMULADO")[];
+        };
+        SituacaoDoGateway: {
+            configurado?: boolean;
+            ativo?: boolean;
+            /** @enum {string} */
+            gateway?: "ASAAS" | "SIMULADO";
+            /** @enum {string} */
+            ambiente?: "SANDBOX" | "PRODUCAO";
+            /** Format: date-time */
+            configuradoEm?: string;
+        };
         GeracaoResumo: {
             /** Format: uuid */
             id?: string;
@@ -1909,6 +2109,13 @@ export interface components {
             geradaEm?: string;
             /** Format: date-time */
             canceladaEm?: string;
+        };
+        GatewayNoCondominio: {
+            ligado?: boolean;
+            /** @enum {string} */
+            gateway?: "ASAAS" | "SIMULADO";
+            /** @enum {string} */
+            ambiente?: "SANDBOX" | "PRODUCAO";
         };
         DoMes: {
             competencia?: string;
@@ -1939,6 +2146,19 @@ export interface components {
             /** Format: uuid */
             condominioId?: string;
             perfis?: string[];
+        };
+        FormasDePagamento: {
+            /** Format: uuid */
+            cobrancaId?: string;
+            valor?: number;
+            /** Format: date */
+            vencimento?: string;
+            url?: string;
+            linhaDigitavel?: string;
+            pixCopiaECola?: string;
+            pixQrCode?: string;
+            /** @enum {string} */
+            gateway?: "ASAAS" | "SIMULADO";
         };
         PaginaDocumentoResposta: {
             itens?: components["schemas"]["DocumentoResposta"][];
@@ -2113,6 +2333,54 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SindicoRegistrado"];
+                };
+            };
+        };
+    };
+    situacao: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GatewayDoClienteAtual"];
+                };
+            };
+        };
+    };
+    configurar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoGateway"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AvisoParaConfigurar"];
                 };
             };
         };
@@ -2715,6 +2983,26 @@ export interface operations {
         };
     };
     reativar_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    desativar_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -3483,6 +3771,28 @@ export interface operations {
             };
         };
     };
+    daCobranca: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FormasDePagamento"];
+                };
+            };
+        };
+    };
     pagar: {
         parameters: {
             query?: never;
@@ -3505,6 +3815,32 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CobrancaResposta"];
+                };
+            };
+        };
+    };
+    simular_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PedidoPagamentoSimulado"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PagamentoSimulado"];
                 };
             };
         };
@@ -3557,6 +3893,26 @@ export interface operations {
             };
         };
     };
+    tentarDeNovo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     importar: {
         parameters: {
             query?: never;
@@ -3581,6 +3937,52 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["ResultadoDaImportacao"];
                 };
+            };
+        };
+    };
+    emitirOsQueFaltam: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BoletosPedidos"];
+                };
+            };
+        };
+    };
+    aviso: {
+        parameters: {
+            query?: never;
+            header?: {
+                "asaas-access-token"?: string;
+            };
+            path: {
+                condominioId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvisoDoAsaas"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3760,6 +4162,26 @@ export interface operations {
             };
         };
     };
+    gateway: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GatewayNoCondominio"];
+                };
+            };
+        };
+    };
     balancete: {
         parameters: {
             query: {
@@ -3838,6 +4260,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CobrancaResposta"][];
+                };
+            };
+        };
+    };
+    minha: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FormasDePagamento"];
                 };
             };
         };

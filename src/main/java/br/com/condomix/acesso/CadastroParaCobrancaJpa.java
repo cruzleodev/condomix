@@ -1,6 +1,7 @@
 package br.com.condomix.acesso;
 
 import br.com.condomix.acesso.persistencia.MandatoRepository;
+import br.com.condomix.acesso.persistencia.PessoaRepository;
 import br.com.condomix.acesso.persistencia.UnidadeRepository;
 import br.com.condomix.acesso.persistencia.VinculoUnidadeRepository;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,10 +33,20 @@ class CadastroParaCobrancaJpa implements CadastroParaCobranca {
 
 	private final MandatoRepository mandatos;
 
-	CadastroParaCobrancaJpa(UnidadeRepository unidades, VinculoUnidadeRepository vinculos, MandatoRepository mandatos) {
+	private final PessoaRepository pessoas;
+
+	CadastroParaCobrancaJpa(UnidadeRepository unidades, VinculoUnidadeRepository vinculos, MandatoRepository mandatos,
+			PessoaRepository pessoas) {
 		this.unidades = unidades;
 		this.vinculos = vinculos;
 		this.mandatos = mandatos;
+		this.pessoas = pessoas;
+	}
+
+	@Override
+	public Optional<DadosDoPagador> pagador(UUID pessoaId) {
+		return pessoas.findById(pessoaId)
+				.map(p -> new DadosDoPagador(p.getId(), p.getNome(), p.getDocumento(), p.getEmail()));
 	}
 
 	@Override

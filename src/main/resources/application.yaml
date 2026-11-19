@@ -61,3 +61,12 @@ condomix:
     endereco-do-app: ${CONDOMIX_ENDERECO_CONVITE:http://localhost:5173/convite}
   suporte:
     validade: 1h
+  cofre:
+    chave: ${CONDOMIX_COFRE_CHAVE:}   # 32 bytes em Base64; cifra as chaves de API dos gateways
+  gateway:
+    simulado: false   # gateway de mentira, só para desenvolvimento e testes
+    # Endereço público da API, para montar a URL de aviso (webhook) que o gateway chama.
+    endereco-publico: ${CONDOMIX_ENDERECO_PUBLICO:http://localhost:8080}
+    processador:
+      ativo: true
+      intervalo: 10s   # de quanto em quanto tempo os boletos pendentes são emitidos ou cancelados no gateway

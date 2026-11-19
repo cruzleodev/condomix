@@ -3,5 +3,11 @@ condomix:
   seguranca:
     jwt:
       segredo: segredo-dos-testes-automatizados-do-condomix
+  cofre:
+    chave: GlsNGp9TkO+ILOpisWthqO+aIhwaUCmfDazlIddZbK8=
+  gateway:
+    simulado: true
+    processador:
+      ativo: false   # nos testes, o processamento dos boletos é chamado direto, sem esperar o agendamento
   armazenamento:
     diretorio: target/arquivos-de-teste

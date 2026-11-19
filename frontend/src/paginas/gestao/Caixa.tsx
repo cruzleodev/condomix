@@ -38,7 +38,7 @@ export function Caixa() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{c.nome}</p>
-                    <p className="text-xs text-slate-500">{ROTULOS.tipoDeConta[c.tipo as keyof typeof ROTULOS.tipoDeConta] ?? c.tipo}{c.banco && ` · ${c.banco}`}</p>
+                    <p className="text-xs text-slate-500">{ROTULOS.tipoDeContaExibido[c.tipo as keyof typeof ROTULOS.tipoDeContaExibido] ?? c.tipo}{c.banco && ` · ${c.banco}`}</p>
                   </div>
                   {c.recebimentoPadrao && <Etiqueta cor="marca">recebimentos</Etiqueta>}
                   {!c.ativa && <Etiqueta>desativada</Etiqueta>}

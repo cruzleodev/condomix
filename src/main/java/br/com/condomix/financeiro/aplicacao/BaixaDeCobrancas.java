@@ -3,6 +3,7 @@ package br.com.condomix.financeiro.aplicacao;
 import br.com.condomix.compartilhado.NaoEncontradoException;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
 import br.com.condomix.financeiro.dominio.Cobranca;
+import br.com.condomix.financeiro.dominio.CobrancaCancelada;
 import br.com.condomix.financeiro.dominio.FormaDePagamento;
 import br.com.condomix.financeiro.dominio.PagamentoDeCobrancaEstornado;
 import br.com.condomix.financeiro.dominio.PagamentoDeCobrancaRegistrado;
@@ -19,7 +20,7 @@ import java.util.UUID;
 
 /**
  * Caso de uso: o síndico registra que recebeu (baixa manual), desfaz uma baixa feita por engano ou cancela
- * uma cobrança. A baixa automática pelo banco vem na etapa do gateway.
+ * uma cobrança. Também registra a baixa automática, quando o gateway confirma o pagamento.
  *
  * <p>Publica {@link PagamentoDeCobrancaRegistrado} e {@link PagamentoDeCobrancaEstornado}: o caixa reage
  * na mesma transação (se a entrada no caixa falhar, a baixa também não acontece).
@@ -49,7 +50,19 @@ public class BaixaDeCobrancas {
 			throw RegraDeNegocioException.invalido("A data do pagamento não pode ser no futuro");
 		}
 		Regras.aplicar(() -> cobranca.registrarPagamento(pagoEm, valorPago, forma, observacao, registradoPor));
-		eventos.publishEvent(new PagamentoDeCobrancaRegistrado(cobranca.getId()));
+		eventos.publishEvent(PagamentoDeCobrancaRegistrado.manual(cobranca.getId()));
+		return cobranca;
+	}
+
+	/**
+	 * Baixa automática: o gateway confirmou o pagamento do boleto ou do Pix. O valor pago já inclui multa e juros,
+	 * se o morador pagou atrasado; a tarifa do gateway vira despesa no caixa.
+	 */
+	public Cobranca registrarPagamentoPeloGateway(UUID id, LocalDate data, BigDecimal valorPago, BigDecimal tarifa,
+			FormaDePagamento forma, String observacao) {
+		Cobranca cobranca = buscar(id);
+		Regras.aplicar(() -> cobranca.registrarPagamento(data, valorPago, forma, observacao, null));
+		eventos.publishEvent(new PagamentoDeCobrancaRegistrado(cobranca.getId(), true, tarifa));
 		return cobranca;
 	}
 
@@ -63,6 +76,7 @@ public class BaixaDeCobrancas {
 	public Cobranca cancelar(UUID id, String motivo) {
 		Cobranca cobranca = buscar(id);
 		Regras.aplicar(() -> cobranca.cancelar(motivo, Instant.now(relogio)));
+		eventos.publishEvent(new CobrancaCancelada(cobranca.getId()));
 		return cobranca;
 	}
 
