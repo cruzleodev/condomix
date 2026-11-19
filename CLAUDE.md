@@ -24,6 +24,7 @@ cd frontend && npm run api:tipos  # gera os tipos TypeScript a partir do OpenAPI
 ```
 
 - Swagger: http://localhost:8080/swagger-ui/index.html
+- E-mails de desenvolvimento (Mailpit, sobe com o compose): http://localhost:8025
 - Logins de dev: `sindico@condomix.dev` e `morador@condomix.dev`, senha `condomix123`.
 
 ---
@@ -108,8 +109,10 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
 
 - Só as classes públicas do **pacote raiz** de um módulo podem ser usadas por outro.
   O que for interno vai em subpacotes. O teste `ModularityTests` falha se essa regra for quebrada.
-- Prefira **eventos** (`ApplicationEventPublisher` + `@ApplicationModuleListener`) quando um módulo
-  só precisa avisar outro que algo aconteceu (ex.: "pagamento confirmado" → comunicação envia WhatsApp).
+- Prefira **eventos** (`ApplicationEventPublisher` + ouvinte) quando um módulo só precisa avisar outro que algo
+  aconteceu (ex.: "pagamento confirmado" → comunicação notifica). Os eventos ficam guardados no banco (Spring Modulith)
+  e são reprocessados se falharem. Ouvinte que grava dados de condomínio usa `@Async @TransactionalEventListener` e
+  abre a transação dentro de `TenantAtual.executarComo` (o `@ApplicationModuleListener` abriria antes do tenant).
   Dentro do mesmo módulo, quando a reação precisa ser na mesma transação (tudo ou nada), use `@EventListener`
   (ex.: pagamento de cobrança → lançamentos no caixa).
 - Sem dependência circular entre módulos. `compartilhado` não depende de ninguém.

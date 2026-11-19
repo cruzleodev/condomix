@@ -1,10 +1,12 @@
 package br.com.condomix.faturamento.aplicacao;
 
 import br.com.condomix.compartilhado.TenantAtual;
+import br.com.condomix.faturamento.AcessoReativadoAposPagamento;
 import br.com.condomix.faturamento.SituacaoDaFatura;
 import br.com.condomix.faturamento.dominio.CalendarioDeFaturas;
 import br.com.condomix.faturamento.persistencia.FaturaRepository;
 import br.com.condomix.plataforma.AssinaturasParaFaturamento;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -24,8 +26,11 @@ class ReativacaoDoAcesso {
 
 	private final Clock relogio;
 
+	private final ApplicationEventPublisher eventos;
+
 	ReativacaoDoAcesso(FaturaRepository faturas, AssinaturasParaFaturamento assinaturas, TransactionTemplate transacao,
-			Clock relogio) {
+			Clock relogio, ApplicationEventPublisher eventos) {
+		this.eventos = eventos;
 		this.faturas = faturas;
 		this.assinaturas = assinaturas;
 		this.transacao = transacao;
@@ -36,8 +41,8 @@ class ReativacaoDoAcesso {
 		LocalDate limite = CalendarioDeFaturas.limiteDaTolerancia(LocalDate.now(relogio));
 		Boolean aindaDeve = TenantAtual.executarComo(condominioId, () -> transacao.execute(
 				s -> faturas.existsBySituacaoAndVencimentoBefore(SituacaoDaFatura.EMITIDA, limite)));
-		if (!Boolean.TRUE.equals(aindaDeve)) {
-			assinaturas.reativarAposPagamento(condominioId);
+		if (!Boolean.TRUE.equals(aindaDeve) && assinaturas.reativarAposPagamento(condominioId)) {
+			transacao.executeWithoutResult(s -> eventos.publishEvent(new AcessoReativadoAposPagamento(condominioId)));
 		}
 	}
 

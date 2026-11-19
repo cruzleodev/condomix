@@ -44,4 +44,11 @@ public interface MandatoRepository extends JpaRepository<Mandato, UUID> {
 			""")
 	List<Mandato> comAcessoNaData(@Param("usuarioId") UUID usuarioId, @Param("data") LocalDate data);
 
+	/** Mandatos com acesso na data (vigentes ou prorrogados), com a pessoa carregada (notificações). */
+	@Query("""
+			select m from Mandato m join fetch m.pessoa
+			where m.inicio <= :data and (m.encerradoEm is null or m.encerradoEm >= :data)
+			""")
+	List<Mandato> comAcessoNaDataDeTodos(@Param("data") LocalDate data);
+
 }

@@ -1,6 +1,7 @@
 package br.com.condomix.faturamento.aplicacao;
 
 import br.com.condomix.compartilhado.TenantAtual;
+import br.com.condomix.faturamento.AcessoSuspensoPorFaltaDePagamento;
 import br.com.condomix.faturamento.FaturasDosClientes.ResumoDaRotina;
 import br.com.condomix.faturamento.dominio.CalendarioDeFaturas;
 import br.com.condomix.faturamento.dominio.Fatura;
@@ -9,6 +10,7 @@ import br.com.condomix.plataforma.AssinaturasParaFaturamento;
 import br.com.condomix.plataforma.AssinaturasParaFaturamento.AssinaturaCobravel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -45,9 +47,12 @@ public class RotinaDeFaturamento {
 
 	private final PropriedadesDoFaturamento propriedades;
 
+	private final ApplicationEventPublisher eventos;
+
 	public RotinaDeFaturamento(AssinaturasParaFaturamento assinaturas, FaturaRepository faturas,
 			ContaDeRecebimentoService conta, TransactionTemplate transacao, Clock relogio,
-			PropriedadesDoFaturamento propriedades) {
+			PropriedadesDoFaturamento propriedades, ApplicationEventPublisher eventos) {
+		this.eventos = eventos;
 		this.assinaturas = assinaturas;
 		this.faturas = faturas;
 		this.conta = conta;
@@ -106,8 +111,14 @@ public class RotinaDeFaturamento {
 	private int suspenderAtrasados(LocalDate hoje) {
 		List<UUID> atrasados = TenantAtual.comoSistema(() -> transacao.execute(
 				s -> faturas.condominiosComFaturaVencidaAntesDe(CalendarioDeFaturas.limiteDaTolerancia(hoje))));
-		atrasados.forEach(assinaturas::suspenderPorFaltaDePagamento);
-		return atrasados.size();
+		int suspensos = 0;
+		for (UUID condominio : atrasados) {
+			if (assinaturas.suspenderPorFaltaDePagamento(condominio)) {
+				transacao.executeWithoutResult(s -> eventos.publishEvent(new AcessoSuspensoPorFaltaDePagamento(condominio)));
+				suspensos++;
+			}
+		}
+		return suspensos;
 	}
 
 }

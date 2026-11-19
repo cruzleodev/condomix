@@ -20,5 +20,13 @@ services:
       timeout: 5s
       retries: 10
 
+  # Servidor de e-mail de mentira: recebe os e-mails do app e mostra em http://localhost:8025 (nada sai de verdade).
+  mailpit:
+    image: axllent/mailpit:v1.27
+    container_name: condomix-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
 volumes:
   postgres-data:

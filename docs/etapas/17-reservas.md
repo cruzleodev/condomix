@@ -33,7 +33,7 @@ espaços com os horários, o aluguel e as regras, e acompanha a agenda. O alugue
 2. Horário de hoje que já começou não pode ser reservado.
 3. Todas as **regras** (`RegraDeReserva`) são aplicadas, e cada recusa vem com o motivo em português:
    - **Antecedência:** "precisa ser reservado com pelo menos 2 dias de antecedência: a partir de 21/11/2026";
-   - **Limite por mês:** "a unidade já tem 1 reserva deste espaço em novembro/2026, o limite do condomínio";
+   - **Limite por mês:** "a unidade já tem 1 reserva deste espaço em 11/2026, o limite do condomínio";
    - **Inadimplência:** "a unidade tem cobrança vencida em aberto. Regularize em Meus débitos para poder reservar".
 4. O espaço fica **travado** durante a reserva (`SELECT ... FOR UPDATE`). Assim, duas pessoas pedindo o mesmo
    horário ao mesmo tempo passam uma de cada vez, e a segunda recebe "Este horário já está reservado". O banco também
@@ -90,7 +90,6 @@ cd frontend && npm test      # frontend: 32 testes
 
 ## Pendências
 - **Separar por plano** (reservas só no Completo), quando você quiser.
-- **Avisos** (reserva confirmada, lembrete na véspera, cancelamento) por e-mail e push: etapa de notificações.
 - **Horário que vira a noite** (ex.: 20h às 2h) e **bloqueio de datas** pela gestão (manutenção, evento do condomínio).
 - **Aprovação do síndico** por espaço, se algum condomínio pedir. Hoje toda reserva vale na hora.
 - **Lista de convidados** e **termo de uso** do espaço.

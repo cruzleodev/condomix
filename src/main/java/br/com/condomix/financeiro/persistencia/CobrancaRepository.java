@@ -56,4 +56,20 @@ public interface CobrancaRepository extends JpaRepository<Cobranca, UUID>, JpaSp
 	/** Em aberto e vencida antes de {@code data} (inadimplência da unidade). */
 	boolean existsByUnidadeIdAndStatusAndVencimentoBefore(UUID unidadeId, StatusCobranca status, LocalDate data);
 
+	/** Em aberto, emitidas pelo condomínio, vencendo na data (lembrete do dia). */
+	@Query("""
+			select c from Cobranca c
+			where c.status = br.com.condomix.financeiro.dominio.StatusCobranca.ABERTA
+			  and c.origem <> br.com.condomix.financeiro.dominio.OrigemCobranca.IMPORTACAO
+			  and c.vencimento = :data
+			""")
+	List<Cobranca> abertasVencendoEm(@Param("data") LocalDate data);
+
+	/** Em modo sistema: os condomínios com cobrança em aberto vencendo na data. */
+	@Query("""
+			select distinct c.tenantId from Cobranca c
+			where c.status = br.com.condomix.financeiro.dominio.StatusCobranca.ABERTA and c.vencimento = :data
+			""")
+	List<UUID> condominiosComCobrancaVencendoEm(@Param("data") LocalDate data);
+
 }

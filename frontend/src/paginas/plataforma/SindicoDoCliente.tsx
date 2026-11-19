@@ -63,7 +63,7 @@ function NovoConvite({ condominioId, sindico, aoTerminar }: { condominioId: stri
       {gerado ? (
         <>
           <p className="mb-3 text-sm text-slate-600">O link anterior deixou de valer. Envie este ao síndico:</p>
-          {gerado.link && <LinkDeConvite link={gerado.link} email={gerado.email} />}
+          {gerado.link && <LinkDeConvite link={gerado.link} email={gerado.email} enviadoPorEmail={gerado.enviadoPorEmail} />}
           <Botao variante="secundario" className="mt-3 w-full md:w-auto" onClick={aoTerminar}>Fechar</Botao>
         </>
       ) : (
@@ -103,7 +103,7 @@ function TrocaDeSindico({ condominioId, aoTerminar }: { condominioId: string; ao
       <Cartao titulo={`${registrado.sindico?.nome} registrado como síndico`}>
         <p className="mb-3 text-sm text-slate-600">O mandato anterior termina na véspera da posse.</p>
         {registrado.convite?.link
-          ? <LinkDeConvite link={registrado.convite.link} email={registrado.convite.email} />
+          ? <LinkDeConvite link={registrado.convite.link} email={registrado.convite.email} enviadoPorEmail={registrado.convite.enviadoPorEmail} />
           : <p className="text-sm text-slate-600">Essa pessoa já tem login no Condomix: entra com a senha dela, já como síndico.</p>}
         <Botao variante="secundario" className="mt-3 w-full md:w-auto" onClick={aoTerminar}>Fechar</Botao>
       </Cartao>

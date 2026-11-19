@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router'
+import { PreferenciasDeNotificacao } from '../componentes/PreferenciasDeNotificacao'
 import { Botao, Cartao, Etiqueta, TituloDaPagina } from '../componentes/ui'
 import { useSessao } from '../sessao/contexto'
 import { perfil } from '../util/formato'
 
 export function Conta() {
-  const { email, condominio, condominios, perfis, sair, tem } = useSessao()
+  const { email, condominio, condominios, perfis, sair, tem, suporte } = useSessao()
   const navegar = useNavigate()
   return (
     <div className="space-y-4 md:max-w-xl">
@@ -19,6 +20,7 @@ export function Conta() {
           <Botao variante="secundario" className="mt-3 w-full" onClick={() => navegar('/condominio')}>Trocar de condomínio</Botao>
         )}
       </Cartao>
+      {!suporte && !condominio?.pagamentoPendente && <PreferenciasDeNotificacao />}
       {tem('ADMIN_PLATAFORMA') && (
         <Botao variante="secundario" className="w-full" onClick={() => navegar('/plataforma')}>Painel da plataforma</Botao>
       )}

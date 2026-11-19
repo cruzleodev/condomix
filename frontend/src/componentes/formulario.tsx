@@ -30,8 +30,8 @@ export function AreaDeTexto({ rotulo, ajuda, ...resto }: TextareaHTMLAttributes<
   )
 }
 
-/** Mostra o link do convite com um botão para copiar (o envio por e-mail chega na etapa de notificações). */
-export function LinkDeConvite({ link, email }: { link: string; email?: string }) {
+/** Mostra o link do convite com um botão para copiar. Com o e-mail ligado, o convite também foi por e-mail. */
+export function LinkDeConvite({ link, email, enviadoPorEmail }: { link: string; email?: string; enviadoPorEmail?: boolean }) {
   const [copiado, setCopiado] = useState(false)
   async function copiar() {
     try {
@@ -44,8 +44,12 @@ export function LinkDeConvite({ link, email }: { link: string; email?: string })
   }
   return (
     <div className="rounded-xl bg-emerald-50 p-3 text-sm ring-1 ring-emerald-200">
-      <p className="font-medium text-emerald-900">Convite criado{email ? ` para ${email}` : ''}.</p>
-      <p className="mb-2 text-emerald-800">Envie este link à pessoa (vale 7 dias):</p>
+      <p className="font-medium text-emerald-900">
+        {enviadoPorEmail ? `Convite enviado por e-mail${email ? ` para ${email}` : ''}.` : `Convite criado${email ? ` para ${email}` : ''}.`}
+      </p>
+      <p className="mb-2 text-emerald-800">
+        {enviadoPorEmail ? 'Se não chegar (veja também o spam), envie este link à pessoa (vale 7 dias):' : 'Envie este link à pessoa (vale 7 dias):'}
+      </p>
       <p className="mb-2 break-all rounded-lg bg-white p-2 font-mono text-xs text-slate-700">{link}</p>
       <Botao type="button" variante="secundario" onClick={copiar} className="w-full md:w-auto">
         {copiado ? 'Copiado ✓' : 'Copiar link'}

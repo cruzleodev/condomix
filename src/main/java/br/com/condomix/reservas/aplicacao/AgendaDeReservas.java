@@ -7,6 +7,8 @@ import br.com.condomix.compartilhado.NaoEncontradoException;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
 import br.com.condomix.financeiro.CobrancasParaReservas;
 import br.com.condomix.financeiro.CobrancasParaReservas.ResultadoDoCancelamento;
+import br.com.condomix.reservas.ReservaDesfeita;
+import br.com.condomix.reservas.ReservaFeita;
 import br.com.condomix.reservas.dominio.Espaco;
 import br.com.condomix.reservas.dominio.PeriodoDoEspaco;
 import br.com.condomix.reservas.dominio.Reserva;
@@ -15,6 +17,7 @@ import br.com.condomix.reservas.persistencia.EspacoRepository;
 import br.com.condomix.reservas.persistencia.ReservaRepository;
 import br.com.condomix.reservas.regras.PedidoDeReserva;
 import br.com.condomix.reservas.regras.RegraDeReserva;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,8 +48,11 @@ public class AgendaDeReservas {
 
 	private final Clock relogio;
 
+	private final ApplicationEventPublisher eventos;
+
 	public AgendaDeReservas(EspacoRepository espacos, ReservaRepository reservas, List<RegraDeReserva> regras,
-			CadastroParaReservas cadastro, CobrancasParaReservas cobrancas, Clock relogio) {
+			CadastroParaReservas cadastro, CobrancasParaReservas cobrancas, Clock relogio, ApplicationEventPublisher eventos) {
+		this.eventos = eventos;
 		this.espacos = espacos;
 		this.reservas = reservas;
 		this.regras = regras;
@@ -107,6 +113,8 @@ public class AgendaDeReservas {
 			String descricao = "Aluguel: " + espaco.getNome() + ", " + FormatoBrasileiro.data(nova.data()) + " (" + periodo.nome() + ")";
 			reserva.cobradaPor(cobrancas.cobrarAluguel(unidade.id(), descricao, espaco.getValorAluguel(), nova.data(), quem.usuarioId()));
 		}
+		eventos.publishEvent(new ReservaFeita(reserva.getTenantId(), reserva.getId(), unidade.id(), espaco.getNome(), reserva.getData(),
+				reserva.getPeriodo(), reserva.getInicio(), reserva.getFim(), reserva.getValor(), quem.gestao()));
 		return reserva;
 	}
 
@@ -134,6 +142,8 @@ public class AgendaDeReservas {
 			aluguel = semCusto ? cancelarAluguel(reserva, motivo) : AluguelNoCancelamento.MANTIDO;
 		}
 		reserva.cancelar(Instant.now(relogio), quem.usuarioId(), motivo, aluguel == AluguelNoCancelamento.MANTIDO);
+		eventos.publishEvent(new ReservaDesfeita(reserva.getTenantId(), reserva.getId(), reserva.getUnidadeId(), espaco.getNome(),
+				reserva.getData(), reserva.getPeriodo(), reserva.getMotivoCancelamento(), quem.gestao(), reserva.isAluguelMantido()));
 		return new ReservaCancelada(reserva, aluguel);
 	}
 

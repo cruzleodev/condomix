@@ -32,7 +32,7 @@ export function Moradores() {
     <div className="space-y-4">
       <TituloDaPagina subtitulo="Proprietários, inquilinos e moradores, e o acesso de cada um ao app.">Moradores</TituloDaPagina>
 
-      {convite && <LinkDeConvite link={convite.link ?? ''} email={convite.email} />}
+      {convite && <LinkDeConvite link={convite.link ?? ''} email={convite.email} enviadoPorEmail={convite.enviadoPorEmail} />}
       {gerencia && !cadastrando && !convidando && !editando && <Botao onClick={() => { setConvite(null); setCadastrando(true) }}>Cadastrar morador</Botao>}
       {cadastrando && <CadastroDeMorador aoTerminar={(c) => { setCadastrando(false); setConvite(c) }} />}
       {editando && <EdicaoDePessoa pessoa={editando} aoTerminar={() => setEditando(null)} />}
