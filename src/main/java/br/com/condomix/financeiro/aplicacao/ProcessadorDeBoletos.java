@@ -1,5 +1,8 @@
 package br.com.condomix.financeiro.aplicacao;
 
+import br.com.condomix.financeiro.CobrancaDisponivel;
+import org.springframework.context.ApplicationEventPublisher;
+
 import br.com.condomix.acesso.CadastroParaCobranca;
 import br.com.condomix.compartilhado.TenantAtual;
 import br.com.condomix.financeiro.dominio.Boleto;
@@ -55,9 +58,12 @@ public class ProcessadorDeBoletos {
 
 	private final boolean ativo;
 
+	private final ApplicationEventPublisher eventos;
+
 	public ProcessadorDeBoletos(BoletoRepository boletos, CobrancaRepository cobrancas, CadastroParaCobranca cadastro,
 			ContaDoGateway contas, TransactionTemplate transacao, Clock relogio,
-			@Value("${condomix.gateway.processador.ativo:true}") boolean ativo) {
+			@Value("${condomix.gateway.processador.ativo:true}") boolean ativo, ApplicationEventPublisher eventos) {
+		this.eventos = eventos;
 		this.boletos = boletos;
 		this.cobrancas = cobrancas;
 		this.cadastro = cadastro;
@@ -121,8 +127,13 @@ public class ProcessadorDeBoletos {
 			gravar(boletoId, b -> {
 				b.emitido(emitido, preparo.pedido().valor(), preparo.pedido().vencimento());
 				// A cobrança pode ter sido cancelada ou paga enquanto o boleto era emitido.
-				if (cobrancas.findById(b.getCobrancaId()).map(c -> c.getStatus() != StatusCobranca.ABERTA).orElse(true)) {
+				var cobranca = cobrancas.findById(b.getCobrancaId()).orElse(null);
+				if (cobranca == null || cobranca.getStatus() != StatusCobranca.ABERTA) {
 					b.pedirCancelamento();
+				}
+				else {
+					eventos.publishEvent(new CobrancaDisponivel(cobranca.getTenantId(), cobranca.getId(), cobranca.getUnidadeId(),
+							cobranca.getDescricao(), preparo.pedido().valor(), preparo.pedido().vencimento(), true));
 				}
 			});
 		}

@@ -88,7 +88,7 @@ function CadastroDeCliente({ aoTerminar }: { aoTerminar: () => void }) {
           Se o link se perder, gere outro na página do cliente.
         </p>
         {criado.conviteDoSindico?.link
-          ? <LinkDeConvite link={criado.conviteDoSindico.link} email={criado.conviteDoSindico.email} />
+          ? <LinkDeConvite link={criado.conviteDoSindico.link} email={criado.conviteDoSindico.email} enviadoPorEmail={criado.conviteDoSindico.enviadoPorEmail} />
           : <p className="text-sm text-slate-600">O síndico já tinha login no Condomix: entra com a senha dele.</p>}
         <Botao variante="secundario" className="mt-3 w-full md:w-auto" onClick={aoTerminar}>Fechar</Botao>
       </Cartao>

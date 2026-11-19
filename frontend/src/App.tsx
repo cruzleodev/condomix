@@ -20,6 +20,7 @@ import { EscolherCondominio } from './paginas/EscolherCondominio'
 import { AgendaDoEspaco } from './paginas/AgendaDoEspaco'
 import { Inicio } from './paginas/Inicio'
 import { MeusDebitos } from './paginas/MeusDebitos'
+import { Notificacoes } from './paginas/Notificacoes'
 import { Reservas } from './paginas/Reservas'
 import { Cliente } from './paginas/plataforma/Cliente'
 import { Clientes } from './paginas/plataforma/Clientes'
@@ -66,6 +67,7 @@ const rotas = [
         { path: '/documentos', element: <Documentos /> },
         { path: '/balancete', element: <Balancete /> },
         { path: '/conta', element: <Conta /> },
+        { path: '/notificacoes', element: <Notificacoes /> },
         {
           element: <RotaComPapel papeis={ACOMPANHAMENTO} />,
           children: [

@@ -2,6 +2,7 @@ package br.com.condomix.faturamento.aplicacao;
 
 import br.com.condomix.compartilhado.FormatoBrasileiro;
 import br.com.condomix.compartilhado.TenantAtual;
+import br.com.condomix.faturamento.FaturaDisponivel;
 import br.com.condomix.faturamento.SituacaoDaFatura;
 import br.com.condomix.faturamento.dominio.Fatura;
 import br.com.condomix.faturamento.persistencia.FaturaRepository;
@@ -12,6 +13,7 @@ import br.com.condomix.pagamentos.GatewayDePagamento.PedidoDeBoleto;
 import br.com.condomix.plataforma.AssinaturasParaFaturamento;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Limit;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -46,9 +48,12 @@ public class EmissaoDeFaturas {
 
 	private final PropriedadesDoFaturamento propriedades;
 
+	private final ApplicationEventPublisher eventos;
+
 	public EmissaoDeFaturas(FaturaRepository faturas, AssinaturasParaFaturamento assinaturas,
 			ContaDeRecebimentoService conta, TransactionTemplate transacao, Clock relogio,
-			PropriedadesDoFaturamento propriedades) {
+			PropriedadesDoFaturamento propriedades, ApplicationEventPublisher eventos) {
+		this.eventos = eventos;
 		this.faturas = faturas;
 		this.assinaturas = assinaturas;
 		this.conta = conta;
@@ -107,7 +112,11 @@ public class EmissaoDeFaturas {
 		}
 		try {
 			BoletoEmitido emitido = acesso.gateway().emitir(acesso.credencial(), preparo.pedido());
-			gravar(faturaId, f -> f.emitida(acesso.gateway().tipo(), emitido, preparo.pedido().vencimento()));
+			gravar(faturaId, f -> {
+				f.emitida(acesso.gateway().tipo(), emitido, preparo.pedido().vencimento());
+				eventos.publishEvent(new FaturaDisponivel(f.getTenantId(), f.getId(), f.getValor(), f.getVencimento(),
+						f.getPeriodoInicio(), f.getPeriodoFim()));
+			});
 		}
 		catch (FalhaNoGateway e) {
 			gravar(faturaId, f -> f.falhou(e.getMessage()));

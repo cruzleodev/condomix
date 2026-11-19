@@ -5,7 +5,9 @@ import java.util.UUID;
 
 /**
  * Um convite recém-criado. O {@code link} leva ao app, onde a pessoa define a senha.
- * Enquanto não há envio de e-mail (etapa de notificações), quem convidou repassa o link.
+ *
+ * @param enviadoPorEmail o convite também foi para o e-mail da pessoa (com o e-mail configurado); de todo jeito,
+ *                        quem convidou pode repassar o link
  */
-public record ConviteGerado(UUID conviteId, String email, String link, Instant expiraEm) {
+public record ConviteGerado(UUID conviteId, String email, String link, Instant expiraEm, boolean enviadoPorEmail) {
 }

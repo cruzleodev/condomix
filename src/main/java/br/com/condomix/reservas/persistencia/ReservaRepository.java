@@ -23,4 +23,11 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
 
 	List<Reserva> findByDataBetweenOrderByDataAscInicioAsc(LocalDate de, LocalDate ate);
 
+	/** Em modo sistema: os condomínios com reserva confirmada na data (lembrete da véspera). */
+	@org.springframework.data.jpa.repository.Query("""
+			select distinct r.tenantId from Reserva r
+			where r.situacao = br.com.condomix.reservas.dominio.SituacaoDaReserva.CONFIRMADA and r.data = :data
+			""")
+	List<UUID> condominiosComReservaEm(LocalDate data);
+
 }

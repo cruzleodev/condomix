@@ -35,6 +35,15 @@ spring:
     compose:
       lifecycle-management: start-only   # sobe o Postgres e deixa rodando ao parar a app
 
+  modulith:
+    events:
+      # Os eventos entre módulos ficam guardados no Postgres (tabela event_publication) até serem tratados.
+      completion-mode: delete                       # tratado, sai da tabela
+      republish-outstanding-events-on-restart: true # ao subir, refaz os que ficaram pela metade
+
+  # E-mail por SMTP de qualquer provedor (Amazon SES, Brevo, Resend...). Sem host, o e-mail fica desligado.
+  # Em produção: SPRING_MAIL_HOST, SPRING_MAIL_PORT, SPRING_MAIL_USERNAME e SPRING_MAIL_PASSWORD.
+
 server:
   port: 8080
 
@@ -70,3 +79,10 @@ condomix:
     processador:
       ativo: true
       intervalo: 10s   # de quanto em quanto tempo os boletos pendentes são emitidos ou cancelados no gateway
+  notificacoes:
+    endereco-do-app: ${CONDOMIX_ENDERECO_DO_APP:http://localhost:5173}   # links dos e-mails e do push
+    remetente: ${CONDOMIX_EMAIL_REMETENTE:Condomix <avisos@condomix.com.br>}
+    contato-push: ${CONDOMIX_CONTATO_PUSH:mailto:suporte@condomix.com.br}  # exigido pelos serviços de push
+    intervalo-da-entrega: 15s   # de quanto em quanto tempo os e-mails e pushes pendentes saem
+  lembretes:
+    horario: "0 0 8 * * *"   # todo dia às 8h: cobrança vencendo, reserva amanhã, fatura atrasada, fim do teste

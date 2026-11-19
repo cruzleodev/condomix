@@ -13,4 +13,8 @@ public interface PerfilAcessoRepository extends JpaRepository<PerfilAcesso, UUID
 
 	boolean existsByUsuarioIdAndPerfil(UUID usuarioId, Perfil perfil);
 
+	/** Perfis ativos do condomínio atual, com o login carregado (notificações). */
+	@org.springframework.data.jpa.repository.Query("select p from PerfilAcesso p join fetch p.usuario where p.ativo = true")
+	List<PerfilAcesso> ativosComUsuario();
+
 }

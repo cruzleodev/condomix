@@ -27,4 +27,7 @@ public interface PessoaRepository extends JpaRepository<Pessoa, UUID> {
 	@Query("select p from Pessoa p order by p.nome")
 	List<Pessoa> todasEmOrdem();
 
+	/** A pessoa do condomínio atual ligada ao login (para o nome nas notificações). */
+	Optional<Pessoa> findFirstByUsuarioId(UUID usuarioId);
+
 }

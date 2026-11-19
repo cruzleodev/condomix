@@ -180,6 +180,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/notificacoes/preferencias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * O que eu recebo por e-mail e push (no app, sempre)
+         * @description Vale em todos os meus condomínios.
+         */
+        get: operations["preferencias"];
+        /** Mudar o que eu recebo por e-mail e push */
+        put: operations["alterarPreferencias"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/financeiro/grupos/{id}": {
         parameters: {
             query?: never;
@@ -734,6 +755,77 @@ export interface paths {
          * @description fim é o último dia. O histórico fica guardado.
          */
         post: operations["encerrarVinculo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notificacoes/{id}/leitura": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marcar uma notificação como lida */
+        post: operations["marcarLida"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notificacoes/push/inscricao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ligar o push neste aparelho
+         * @description Os dados vêm do PushSubscription do navegador.
+         */
+        post: operations["inscrever"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notificacoes/push/cancelamento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Desligar o push neste aparelho */
+        post: operations["cancelarPush"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notificacoes/leitura": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marcar todas como lidas */
+        post: operations["marcarTodas"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1539,6 +1631,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/notificacoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Minhas notificações neste condomínio (as 50 mais recentes) */
+        get: operations["recentes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notificacoes/push/chave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A chave pública (VAPID) para o navegador ligar o push */
+        get: operations["chaveDoPush"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notificacoes/nao-lidas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Quantas não lidas (o número no sino) */
+        get: operations["naoLidas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/mandatos/{id}": {
         parameters: {
             query?: never;
@@ -1883,6 +2026,7 @@ export interface components {
             link?: string;
             /** Format: date-time */
             expiraEm?: string;
+            enviadoPorEmail?: boolean;
         };
         SindicoAtual: {
             nome?: string;
@@ -1984,6 +2128,25 @@ export interface components {
             inicio?: string;
             /** Format: date */
             fim?: string;
+        };
+        PedidoPreferencia: {
+            /** @enum {string} */
+            grupo: "COBRANCAS" | "RESERVAS" | "ASSINATURA" | "DOCUMENTOS";
+            email?: boolean;
+            push?: boolean;
+        };
+        PreferenciaDoGrupo: {
+            /** @enum {string} */
+            grupo?: "COBRANCAS" | "RESERVAS" | "ASSINATURA" | "DOCUMENTOS";
+            rotulo?: string;
+            exemplos?: string;
+            email?: boolean;
+            push?: boolean;
+        };
+        PreferenciasDeNotificacao: {
+            grupos?: components["schemas"]["PreferenciaDoGrupo"][];
+            emailLigado?: boolean;
+            aparelhoComPush?: boolean;
         };
         PedidoGrupo: {
             nome: string;
@@ -2269,6 +2432,14 @@ export interface components {
         PedidoEncerramentoDeVinculo: {
             /** Format: date */
             fim: string;
+        };
+        PedidoInscricaoNoPush: {
+            endpoint: string;
+            p256dh: string;
+            auth: string;
+        };
+        PedidoCancelamentoDoPush: {
+            endpoint: string;
         };
         PedidoMorador: {
             pessoa: components["schemas"]["PedidoPessoa"];
@@ -2719,6 +2890,25 @@ export interface components {
             ambiente?: "SANDBOX" | "PRODUCAO";
             /** Format: date-time */
             configuradoEm?: string;
+        };
+        NotificacaoResposta: {
+            /** Format: uuid */
+            id?: string;
+            /** @enum {string} */
+            grupo?: "COBRANCAS" | "RESERVAS" | "ASSINATURA" | "DOCUMENTOS";
+            titulo?: string;
+            texto?: string;
+            link?: string;
+            /** Format: date-time */
+            criadoEm?: string;
+            lida?: boolean;
+        };
+        ChaveDoPush: {
+            chavePublica?: string;
+        };
+        NotificacoesNaoLidas: {
+            /** Format: int64 */
+            quantidade?: number;
         };
         GeracaoResumo: {
             /** Format: uuid */
@@ -3220,6 +3410,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PessoaResposta"];
+                };
+            };
+        };
+    };
+    preferencias: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PreferenciasDeNotificacao"];
+                };
+            };
+        };
+    };
+    alterarPreferencias: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoPreferencia"][];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PreferenciasDeNotificacao"];
                 };
             };
         };
@@ -4104,6 +4338,88 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["PessoaResposta"];
                 };
+            };
+        };
+    };
+    marcarLida: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    inscrever: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoInscricaoNoPush"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    cancelarPush: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoCancelamentoDoPush"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    marcarTodas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -5298,6 +5614,66 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AlteracaoDaAssinatura"][];
+                };
+            };
+        };
+    };
+    recentes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NotificacaoResposta"][];
+                };
+            };
+        };
+    };
+    chaveDoPush: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ChaveDoPush"];
+                };
+            };
+        };
+    };
+    naoLidas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NotificacoesNaoLidas"];
                 };
             };
         };

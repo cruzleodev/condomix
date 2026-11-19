@@ -11,5 +11,9 @@ condomix:
       ativo: false   # nos testes, o processamento dos boletos é chamado direto, sem esperar o agendamento
   faturamento:
     automatico: false   # idem: a rotina e a emissão das faturas são chamadas direto
+  notificacoes:
+    automatico: false   # idem: a entrega dos e-mails e pushes é chamada direto
+  lembretes:
+    horario: "-"        # os lembretes do dia são chamados direto pelos testes
   armazenamento:
     diretorio: target/arquivos-de-teste

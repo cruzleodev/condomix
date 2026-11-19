@@ -84,6 +84,17 @@
 			<groupId>org.springframework.modulith</groupId>
 			<artifactId>spring-modulith-starter-core</artifactId>
 		</dependency>
+		<!-- Guarda os eventos entre módulos no banco e reenvia os que falharam (nenhum aviso se perde) -->
+		<dependency>
+			<groupId>org.springframework.modulith</groupId>
+			<artifactId>spring-modulith-starter-jpa</artifactId>
+		</dependency>
+
+		<!-- Avisos por e-mail (SMTP de qualquer provedor) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
 
 		<!-- Operação -->
 		<dependency>

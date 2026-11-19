@@ -1,6 +1,11 @@
 # Perfil de desenvolvimento (ativo por padrão na sua máquina).
 # NUNCA usar estes valores em produção.
 
+spring:
+  mail:
+    host: localhost   # o Mailpit do compose.yaml: os e-mails aparecem em http://localhost:8025, nada sai de verdade
+    port: 1025
+
 condomix:
   admin:
     email: admin@condomix.dev
