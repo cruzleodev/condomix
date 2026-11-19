@@ -23,7 +23,11 @@ public record Sessao(
 		Set<Perfil> perfis,
 		List<CondominioDisponivel> condominios) {
 
-	public record CondominioDisponivel(UUID id, String nome, Set<Perfil> perfis) {
+	/**
+	 * @param pagamentoPendente o condomínio está suspenso por falta de pagamento da assinatura: a gestão entra, mas
+	 *                          só para pagar a fatura (o token só vale para {@code /api/assinatura})
+	 */
+	public record CondominioDisponivel(UUID id, String nome, Set<Perfil> perfis, boolean pagamentoPendente) {
 	}
 
 }

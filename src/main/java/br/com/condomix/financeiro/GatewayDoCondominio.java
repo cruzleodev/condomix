@@ -1,5 +1,8 @@
 package br.com.condomix.financeiro;
 
+import br.com.condomix.pagamentos.AmbienteDoGateway;
+import br.com.condomix.pagamentos.TipoDeGateway;
+
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;

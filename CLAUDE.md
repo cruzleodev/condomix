@@ -100,9 +100,11 @@ O código de negócio depende de **abstrações do próprio módulo**. A infraes
 
 ## Módulos (Spring Modulith)
 
-`compartilhado`, `plataforma`, `acesso`, `administracao`, `documentos`, `financeiro`, `reservas`, `comunicacao`.
+`compartilhado`, `plataforma`, `acesso`, `administracao`, `documentos`, `financeiro`, `pagamentos`, `faturamento`, `reservas`, `comunicacao`.
 
 - `administracao` fica acima de `plataforma` e `acesso` (painel do dono do Condomix, `/api/plataforma/**`).
+- `pagamentos` é a ligação com os gateways (`GatewayDePagamento`, Asaas, simulado). O `financeiro` (moradores pagam ao
+  condomínio) e o `faturamento` (condomínio paga a assinatura ao Condomix) usam a mesma interface, cada um com a própria conta.
 
 - Só as classes públicas do **pacote raiz** de um módulo podem ser usadas por outro.
   O que for interno vai em subpacotes. O teste `ModularityTests` falha se essa regra for quebrada.

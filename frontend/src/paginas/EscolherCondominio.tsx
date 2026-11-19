@@ -42,6 +42,9 @@ export function EscolherCondominio() {
                 {c.id === condominioId && ' · atual'}
                 {escolhendo === c.id && ' · entrando…'}
               </span>
+              {c.pagamentoPendente && (
+                <span className="mt-1 block text-sm font-medium text-red-700">Acesso suspenso: entre para pagar a fatura do Condomix</span>
+              )}
             </button>
           </li>
         ))}

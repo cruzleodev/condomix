@@ -62,6 +62,14 @@ class CondominiosDaPlataformaController {
 
 	}
 
+	/** Vazio = teste sem prazo. */
+	record PedidoFimDoTeste(LocalDate fimDoTeste) {
+	}
+
+	record PedidoDadosDoCliente(@Size(max = 20) String cnpj, @Email @Size(max = 150) String email,
+			@Size(max = 20) String telefone) {
+	}
+
 	record PedidoAssinatura(@NotBlank String plano, @NotNull Periodicidade periodicidade, @NotNull StatusAssinatura status) {
 	}
 
@@ -111,6 +119,20 @@ class CondominiosDaPlataformaController {
 			@AuthenticationPrincipal Jwt jwt) {
 		return painel.alterarAssinatura(id, pedido.plano(), pedido.periodicidade(), pedido.status(),
 				UUID.fromString(jwt.getSubject()));
+	}
+
+	@Operation(summary = "Mudar o fim do teste grátis",
+			description = "Só com a assinatura em teste. Vazio: teste sem prazo. Ao fim, a assinatura vira ativa e começa a ser faturada.")
+	@PutMapping("/{id}/fim-do-teste")
+	CondominioNaPlataforma definirFimDoTeste(@PathVariable UUID id, @RequestBody PedidoFimDoTeste pedido,
+			@AuthenticationPrincipal Jwt jwt) {
+		return painel.definirFimDoTeste(id, pedido.fimDoTeste(), UUID.fromString(jwt.getSubject()));
+	}
+
+	@Operation(summary = "Dados para a fatura: CNPJ, e-mail e telefone do condomínio")
+	@PutMapping("/{id}/dados")
+	CondominioNaPlataforma alterarDados(@PathVariable UUID id, @Valid @RequestBody PedidoDadosDoCliente pedido) {
+		return painel.alterarDados(id, new PainelDeCondominios.DadosDoCliente(pedido.cnpj(), pedido.email(), pedido.telefone()));
 	}
 
 	@Operation(summary = "Histórico da assinatura: cada mudança de plano, de situação e de acesso, com quem fez")

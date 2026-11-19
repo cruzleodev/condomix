@@ -3,11 +3,12 @@ package br.com.condomix.financeiro.simulado;
 import br.com.condomix.acesso.Permissoes;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
 import br.com.condomix.compartilhado.TenantAtual;
-import br.com.condomix.financeiro.TipoDeGateway;
+import br.com.condomix.pagamentos.TipoDeGateway;
 import br.com.condomix.financeiro.aplicacao.ConsultaDeBoletos;
 import br.com.condomix.financeiro.aplicacao.RecebimentoPeloGateway;
-import br.com.condomix.financeiro.gateway.FalhaNoGateway;
-import br.com.condomix.financeiro.gateway.GatewayDePagamento.FormaDoPagamento;
+import br.com.condomix.pagamentos.FalhaNoGateway;
+import br.com.condomix.pagamentos.SimuladorDePagamentos;
+import br.com.condomix.pagamentos.GatewayDePagamento.FormaDoPagamento;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -31,7 +32,7 @@ import java.util.UUID;
 @ConditionalOnProperty(name = "condomix.gateway.simulado", havingValue = "true")
 class SimulacaoDePagamentoController {
 
-	private final GatewaySimulado gateway;
+	private final SimuladorDePagamentos gateway;
 
 	private final ConsultaDeBoletos boletos;
 
@@ -39,7 +40,7 @@ class SimulacaoDePagamentoController {
 
 	private final Clock relogio;
 
-	SimulacaoDePagamentoController(GatewaySimulado gateway, ConsultaDeBoletos boletos, RecebimentoPeloGateway recebimento,
+	SimulacaoDePagamentoController(SimuladorDePagamentos gateway, ConsultaDeBoletos boletos, RecebimentoPeloGateway recebimento,
 			Clock relogio) {
 		this.gateway = gateway;
 		this.boletos = boletos;

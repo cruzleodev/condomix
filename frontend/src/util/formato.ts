@@ -113,7 +113,14 @@ export const ROTULOS = {
   situacaoDoBoleto: { PENDENTE: 'Gerando boleto', EMITIDO: 'Boleto emitido', FALHOU: 'Boleto com problema', PAGO: 'Pago pelo boleto/Pix', A_CANCELAR: 'Cancelando boleto', CANCELADO: 'Boleto cancelado' },
   gateway: { ASAAS: 'Asaas', SIMULADO: 'Simulado (testes)' },
   ambienteDoGateway: { SANDBOX: 'Sandbox (testes)', PRODUCAO: 'Produção' },
-  tipoDeEventoDaAssinatura: { CLIENTE_NOVO: 'Entrou como cliente', TROCA_DE_PLANO: 'Trocou o plano', MUDANCA_DE_SITUACAO: 'Mudou a situação', SUSPENSAO: 'Acesso suspenso', REATIVACAO: 'Acesso reativado' },
+  tipoDeEventoDaAssinatura: {
+    CLIENTE_NOVO: 'Entrou como cliente', TROCA_DE_PLANO: 'Trocou o plano', MUDANCA_DE_SITUACAO: 'Mudou a situação',
+    SUSPENSAO: 'Acesso suspenso', REATIVACAO: 'Acesso reativado', PRAZO_DO_TESTE: 'Mudou o prazo do teste',
+    FIM_DO_TESTE: 'Fim do teste: passou a pagar', SUSPENSAO_POR_FALTA_DE_PAGAMENTO: 'Suspenso por falta de pagamento',
+    REATIVACAO_APOS_PAGAMENTO: 'Reativado: fatura paga',
+  },
+  situacaoDaFatura: { A_EMITIR: 'Gerando boleto', EMITIDA: 'Em aberto', FALHOU: 'Com problema', PAGA: 'Paga', A_CANCELAR: 'Cancelando', CANCELADA: 'Cancelada' },
+  motivoDaSuspensao: { MANUAL: 'Suspenso pelo administrador', FALTA_DE_PAGAMENTO: 'Suspenso por falta de pagamento' },
   modulo: { DOCUMENTOS: 'Documentos', FINANCEIRO: 'Financeiro', RESERVAS: 'Reservas', WHATSAPP: 'WhatsApp' },
   tipoDeLancamento: { RECEITA: 'Receita', DESPESA: 'Despesa', TRANSFERENCIA_ENTRADA: 'Transferência (entrada)', TRANSFERENCIA_SAIDA: 'Transferência (saída)' },
 } as const
@@ -158,6 +165,14 @@ export function periodoDoMes(anoMes: string): [string, string] {
 export function proximoMes(anoMes: string): string {
   const [ano, mes] = anoMes.split('-').map(Number)
   return mes === 12 ? `${ano + 1}-01` : `${ano}-${String(mes + 1).padStart(2, '0')}`
+}
+
+/** Período de uma fatura (o fim não entra): ("2026-11-19", "2026-12-19") → "19/11/2026 a 18/12/2026". */
+export function periodoDaFatura(inicio: string | null | undefined, fimExclusivo: string | null | undefined): string {
+  if (!inicio || !fimExclusivo) return '—'
+  const [ano, mes, dia] = fimExclusivo.split('-').map(Number)
+  const ultimoDia = new Date(Date.UTC(ano, mes - 1, dia - 1)).toISOString().slice(0, 10)
+  return `${data(inicio)} a ${data(ultimoDia)}`
 }
 
 /** Lê um valor digitado em reais ("1.234,56", "1234.56", "1234,5") → 1234.56. Vazio ou inválido → undefined. */

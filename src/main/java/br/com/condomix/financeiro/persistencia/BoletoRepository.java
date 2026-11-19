@@ -2,7 +2,7 @@ package br.com.condomix.financeiro.persistencia;
 
 import br.com.condomix.financeiro.dominio.Boleto;
 import br.com.condomix.financeiro.dominio.SituacaoDoBoleto;
-import br.com.condomix.financeiro.TipoDeGateway;
+import br.com.condomix.pagamentos.TipoDeGateway;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

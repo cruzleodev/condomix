@@ -1,8 +1,8 @@
 package br.com.condomix.administracao;
 
-import br.com.condomix.financeiro.AmbienteDoGateway;
+import br.com.condomix.pagamentos.AmbienteDoGateway;
 import br.com.condomix.financeiro.GatewayDoCondominio;
-import br.com.condomix.financeiro.TipoDeGateway;
+import br.com.condomix.pagamentos.TipoDeGateway;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

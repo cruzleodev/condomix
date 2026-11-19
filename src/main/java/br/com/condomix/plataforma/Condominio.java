@@ -44,6 +44,10 @@ public class Condominio {
 
 	private boolean ativo = true;
 
+	/** Vazio enquanto o condomínio está ativo. */
+	@Enumerated(EnumType.STRING)
+	private MotivoDaSuspensao motivoSuspensao;
+
 	@CreationTimestamp
 	private Instant criadoEm;
 
@@ -71,13 +75,23 @@ public class Condominio {
 		this.cnpj = cnpj;
 	}
 
-	/** Suspende o condomínio: ninguém dele consegue mais entrar no sistema. */
-	public void desativar() {
+	/**
+	 * Suspende o condomínio: ninguém dele consegue mais entrar no sistema (na falta de pagamento, a gestão ainda
+	 * entra, só para pagar a fatura). Suspender à mão um condomínio já suspenso por falta de pagamento troca o
+	 * motivo: aí ele só volta quando o administrador reativar.
+	 */
+	public void suspender(MotivoDaSuspensao motivo) {
 		this.ativo = false;
+		this.motivoSuspensao = Objects.requireNonNull(motivo);
 	}
 
 	public void reativar() {
 		this.ativo = true;
+		this.motivoSuspensao = null;
+	}
+
+	public boolean isSuspensoPorFaltaDePagamento() {
+		return motivoSuspensao == MotivoDaSuspensao.FALTA_DE_PAGAMENTO;
 	}
 
 	public UUID getId() { return id; }
@@ -88,6 +102,7 @@ public class Condominio {
 	public String getTelefone() { return telefone; }
 	public Endereco getEndereco() { return endereco; }
 	public boolean isAtivo() { return ativo; }
+	public MotivoDaSuspensao getMotivoSuspensao() { return motivoSuspensao; }
 	public Instant getCriadoEm() { return criadoEm; }
 	public Instant getAtualizadoEm() { return atualizadoEm; }
 

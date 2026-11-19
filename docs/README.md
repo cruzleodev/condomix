@@ -24,8 +24,8 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 13 | [Frontend parte 4: painel do administrador da plataforma (clientes, planos, assinaturas e modo suporte)](etapas/13-frontend-plataforma.md) | `feature/frontend-plataforma` | Concluída |
 | 14 | [Administrador: convite e troca de síndico, bloqueio de login, fim do suporte e histórico da assinatura](etapas/14-admin-suporte-acessos.md) | `feature/admin-suporte-acessos` | Concluída |
 | 15 | [Boletos e Pix pelo gateway (Asaas), 2ª via e baixa automática](etapas/15-boletos-pix.md) | `feature/boletos-pix` | Concluída |
-| 16 | Cobrança da assinatura do Condomix pelo gateway (backend e telas) | — | Próxima |
-| 17 | Reservas: espaços, agenda, regras e aluguel (backend e telas) | — | Pendente |
+| 16 | [Cobrança da assinatura do Condomix: teste grátis, faturas com boleto e Pix, suspensão por atraso](etapas/16-assinatura-pelo-gateway.md) | `feature/assinatura-gateway` | Concluída |
+| 17 | Reservas: espaços, agenda, regras e aluguel (backend e telas) | — | Próxima |
 | 18 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
 | 19 | App nas lojas (Capacitor) | — | Pendente |
 | 20 | Bot de WhatsApp | — | Pendente |
@@ -55,6 +55,7 @@ Futuro, sem data: assembleias online (convocação, pauta, votação e ata).
 | Mensageria | RabbitMQ |
 | WhatsApp | API oficial da Meta (Cloud API) |
 | Pagamentos | Asaas: cada condomínio tem a própria conta, e o administrador cola a chave de API dela no painel (guardada cifrada). O dinheiro do morador cai direto na conta do condomínio. Boleto com Pix emitido na geração da taxa; baixa automática pelo aviso (webhook), conferida na API do Asaas |
+| Assinatura do Condomix | Cobrada por boleto e Pix na conta Asaas do próprio Condomix (chave no painel, cifrada). Cliente novo tem 30 dias de teste grátis; cada fatura sai 10 dias antes do período e vence no início dele; com 15 dias de atraso o acesso é suspenso (a gestão ainda entra, só para pagar) e volta sozinho ao pagar. Troca de plano vale na próxima fatura |
 | Planos | Essencial (Documentos + Financeiro), Completo (+ Reservas) e WhatsApp como adicional |
 | Git | `desenvolvimento` → `homologacao` → `producao`, sempre por pull request; uma branch `feature/*` e um commit por etapa |
 
@@ -68,6 +69,8 @@ Futuro, sem data: assembleias online (convocação, pauta, votação e ata).
 | `acesso` | Unidades, pessoas, usuários e perfis de acesso |
 | `documentos` | Convenção, regimento, leis e atas |
 | `financeiro` | Cobranças, boletos/Pix, histórico e balancete |
+| `pagamentos` | A ligação com os gateways (Asaas e o simulado), usada pelo financeiro e pelo faturamento |
+| `faturamento` | A assinatura que cada condomínio paga ao Condomix: faturas, baixa e suspensão por atraso |
 | `reservas` | Espaços comuns, agenda e aluguel |
 | `comunicacao` | WhatsApp, e-mail, push e bot |
 

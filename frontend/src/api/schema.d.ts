@@ -22,6 +22,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plataforma/recebimento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A conta do Condomix que recebe as assinaturas: se está ligada e por qual gateway */
+        get: operations["situacao"];
+        /**
+         * Ligar a cobrança das assinaturas com a chave de API da conta do Condomix no gateway
+         * @description A chave é conferida no gateway e guardada cifrada. A resposta traz o endereço e o token do aviso (webhook) para cadastrar na conta: o token só aparece agora.
+         */
+        put: operations["configurar"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plataforma/planos/{codigo}/precos": {
         parameters: {
             query?: never;
@@ -71,12 +92,49 @@ export interface paths {
             cookie?: never;
         };
         /** Boleto e Pix do cliente: se estão ligados e por qual gateway */
-        get: operations["situacao"];
+        get: operations["situacao_1"];
         /**
          * Ligar o boleto e o Pix com a chave de API da conta do condomínio no gateway
          * @description A chave é conferida no gateway e guardada cifrada. A resposta traz o endereço e o token do aviso (webhook) para cadastrar na conta: o token só aparece agora.
          */
-        put: operations["configurar"];
+        put: operations["configurar_1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/condominios/{id}/fim-do-teste": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Mudar o fim do teste grátis
+         * @description Só com a assinatura em teste. Vazio: teste sem prazo. Ao fim, a assinatura vira ativa e começa a ser faturada.
+         */
+        put: operations["definirFimDoTeste"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/condominios/{id}/dados": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Dados para a fatura: CNPJ, e-mail e telefone do condomínio */
+        put: operations["alterarDados"];
         post?: never;
         delete?: never;
         options?: never;
@@ -339,6 +397,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plataforma/recebimento/desativacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Desligar: não sai mais fatura nova (as já emitidas continuam valendo) */
+        post: operations["desativar_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plataforma/logins/{id}/desbloqueio": {
         parameters: {
             query?: never;
@@ -370,6 +445,80 @@ export interface paths {
          * @description O usuário não entra mais, e os tokens que ele já tinha deixam de valer na hora.
          */
         post: operations["bloquear"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/faturas/{id}/pagamento-simulado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simular o pagamento da fatura (gateway simulado, só em desenvolvimento) */
+        post: operations["simular"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/faturas/{id}/nova-tentativa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Emitir de novo uma fatura que falhou (depois de corrigir o motivo, ex.: o CNPJ) */
+        post: operations["tentarDeNovo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/faturas/{id}/cancelamento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancelar (perdoar) a fatura
+         * @description O boleto é cancelado no gateway. O período não é cobrado de novo. Se era a fatura que mantinha o acesso suspenso, o acesso volta.
+         */
+        post: operations["cancelar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/faturas/rotina": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rodar agora a rotina de cobrança (fim dos testes, faturas novas e suspensões)
+         * @description Ela já roda sozinha de hora em hora; isto só adianta.
+         */
+        post: operations["rodarRotina"];
         delete?: never;
         options?: never;
         head?: never;
@@ -461,7 +610,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Desligar: as cobranças novas deixam de sair com boleto (os já emitidos continuam valendo) */
-        post: operations["desativar_1"];
+        post: operations["desativar_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -647,7 +796,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Cancelar um lançamento manual ou uma transferência */
-        post: operations["cancelar"];
+        post: operations["cancelar_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -706,7 +855,7 @@ export interface paths {
          * Cancelar uma geração (e as cobranças dela)
          * @description Não é possível se alguma cobrança já foi paga.
          */
-        post: operations["cancelar_1"];
+        post: operations["cancelar_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -726,7 +875,7 @@ export interface paths {
          * Simular a taxa do mês (não grava nada)
          * @description competencia: "2026-12". valorOrdinariaTotal: total da taxa ordinária do mês (não usado no rateio por grupo). taxasExtras: [{"descricao": "Pintura da fachada", "valorTotal": 30000, "rateio": "FRACAO_IDEAL"}].
          */
-        post: operations["simular"];
+        post: operations["simular_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -962,7 +1111,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Simular o pagamento do boleto (gateway simulado, só em desenvolvimento) */
-        post: operations["simular_1"];
+        post: operations["simular_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -996,7 +1145,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Cancelar uma cobrança em aberto */
-        post: operations["cancelar_2"];
+        post: operations["cancelar_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1013,7 +1162,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Tentar de novo um boleto que falhou (depois de corrigir o motivo) */
-        post: operations["tentarDeNovo"];
+        post: operations["tentarDeNovo_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1074,6 +1223,26 @@ export interface paths {
          * @description Responde 200 para todo aviso autêntico, mesmo os ignorados, para o Asaas não repetir.
          */
         post: operations["aviso"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/avisos/asaas/assinaturas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Aviso de pagamento do Asaas (configurado na conta do Condomix)
+         * @description Responde 200 para todo aviso autêntico, mesmo os ignorados, para o Asaas não repetir.
+         */
+        post: operations["aviso_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1160,6 +1329,40 @@ export interface paths {
          * @description Mostra a situação e em que condomínios o login entra, com os papéis. Nada dos dados internos.
          */
         get: operations["buscar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/faturas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Faturas de todos os clientes (ou de um, com condominioId), as mais recentes primeiro */
+        get: operations["listar_7"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/faturas/{id}/pagamento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 2ª via da fatura (Pix e boleto), para mandar ao síndico */
+        get: operations["segundaVia"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1398,6 +1601,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/assinatura": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** O plano do condomínio e as faturas da assinatura do Condomix */
+        get: operations["assinatura"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assinatura/faturas/{id}/pagamento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 2ª via da fatura: Pix e boleto */
+        get: operations["pagamento"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1429,6 +1666,17 @@ export interface components {
             fracaoIdeal?: number;
             ativo?: boolean;
             ocupantes?: components["schemas"]["OcupanteDaUnidade"][];
+        };
+        PedidoContaDeRecebimento: {
+            /** @enum {string} */
+            gateway: "ASAAS" | "SIMULADO";
+            /** @enum {string} */
+            ambiente: "SANDBOX" | "PRODUCAO";
+            chave: string;
+        };
+        AvisoDaContaDeRecebimento: {
+            url?: string;
+            token?: string;
         };
         PedidoPrecos: {
             mensal?: number;
@@ -1491,12 +1739,9 @@ export interface components {
             url?: string;
             token?: string;
         };
-        PedidoAssinatura: {
-            plano: string;
-            /** @enum {string} */
-            periodicidade: "MENSAL" | "SEMESTRAL" | "ANUAL";
-            /** @enum {string} */
-            status: "TESTE" | "ATIVA" | "SUSPENSA" | "CANCELADA";
+        PedidoFimDoTeste: {
+            /** Format: date */
+            fimDoTeste?: string;
         };
         AssinaturaAtual: {
             plano?: string;
@@ -1507,6 +1752,8 @@ export interface components {
             status?: "TESTE" | "ATIVA" | "SUSPENSA" | "CANCELADA";
             /** Format: date */
             inicio?: string;
+            /** Format: date */
+            fimDoTeste?: string;
         };
         CondominioNaPlataforma: {
             /** Format: uuid */
@@ -1515,10 +1762,27 @@ export interface components {
             /** @enum {string} */
             tipo?: "RESIDENCIAL_VERTICAL" | "RESIDENCIAL_HORIZONTAL" | "COMERCIAL" | "MISTO";
             cnpj?: string;
+            email?: string;
+            telefone?: string;
             ativo?: boolean;
+            /** @enum {string} */
+            motivoSuspensao?: "MANUAL" | "FALTA_DE_PAGAMENTO";
             /** Format: date-time */
             criadoEm?: string;
             assinatura?: components["schemas"]["AssinaturaAtual"];
+        };
+        PedidoDadosDoCliente: {
+            cnpj?: string;
+            /** Format: email */
+            email?: string;
+            telefone?: string;
+        };
+        PedidoAssinatura: {
+            plano: string;
+            /** @enum {string} */
+            periodicidade: "MENSAL" | "SEMESTRAL" | "ANUAL";
+            /** @enum {string} */
+            status: "TESTE" | "ATIVA" | "SUSPENSA" | "CANCELADA";
         };
         PedidoPessoa: {
             nome: string;
@@ -1678,6 +1942,18 @@ export interface components {
         };
         PedidoBloqueio: {
             motivo: string;
+        };
+        FaturaPagaNaSimulacao: {
+            /** @enum {string} */
+            resultado?: "PAGA" | "JA_PAGA" | "NAO_PAGA" | "IGNORADO" | "PAGA_EM_DUPLICIDADE";
+        };
+        ResumoDaRotina: {
+            /** Format: int32 */
+            testesEncerrados?: number;
+            /** Format: int32 */
+            faturasGeradas?: number;
+            /** Format: int32 */
+            condominiosSuspensos?: number;
         };
         PedidoClienteNovo: {
             nome: string;
@@ -2019,6 +2295,13 @@ export interface components {
         PagamentoDoAviso: {
             id?: string;
         };
+        AvisoDeFaturaDoAsaas: {
+            event?: string;
+            payment?: components["schemas"]["PagamentoDaFaturaNoAviso"];
+        };
+        PagamentoDaFaturaNoAviso: {
+            id?: string;
+        };
         PedidoLogin: {
             /** Format: email */
             email: string;
@@ -2029,6 +2312,7 @@ export interface components {
             id?: string;
             nome?: string;
             perfis?: ("SINDICO" | "SUBSINDICO" | "CONSELHEIRO" | "ADMINISTRADORA" | "MORADOR" | "PORTARIA" | "ADMIN_PLATAFORMA" | "SUPORTE")[];
+            pagamentoPendente?: boolean;
         };
         Sessao: {
             token?: string;
@@ -2071,17 +2355,75 @@ export interface components {
             /** Format: date-time */
             encerradoEm?: string;
         };
+        ContaDeRecebimentoAtual: {
+            conta?: components["schemas"]["SituacaoDaContaDeRecebimento"];
+            disponiveis?: ("ASAAS" | "SIMULADO")[];
+        };
+        SituacaoDaContaDeRecebimento: {
+            configurada?: boolean;
+            ativa?: boolean;
+            /** @enum {string} */
+            gateway?: "ASAAS" | "SIMULADO";
+            /** @enum {string} */
+            ambiente?: "SANDBOX" | "PRODUCAO";
+            /** Format: date-time */
+            configuradaEm?: string;
+        };
+        FaturaDeCliente: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            condominioId?: string;
+            condominio?: string;
+            plano?: string;
+            /** @enum {string} */
+            periodicidade?: "MENSAL" | "SEMESTRAL" | "ANUAL";
+            /** Format: date */
+            periodoInicio?: string;
+            /** Format: date */
+            periodoFim?: string;
+            valor?: number;
+            /** Format: date */
+            vencimento?: string;
+            /** @enum {string} */
+            situacao?: "A_EMITIR" | "EMITIDA" | "FALHOU" | "PAGA" | "A_CANCELAR" | "CANCELADA";
+            atrasada?: boolean;
+            /** Format: date */
+            suspensaoEm?: string;
+            erro?: string;
+            /** @enum {string} */
+            gateway?: "ASAAS" | "SIMULADO";
+            /** Format: date */
+            pagoEm?: string;
+            valorPago?: number;
+            /** @enum {string} */
+            forma?: "BOLETO" | "PIX" | "OUTRA";
+            tarifa?: number;
+        };
+        PagamentoDaFatura: {
+            valor?: number;
+            /** Format: date */
+            vencimento?: string;
+            /** @enum {string} */
+            gateway?: "ASAAS" | "SIMULADO";
+            url?: string;
+            linhaDigitavel?: string;
+            pixCopiaECola?: string;
+            pixQrCode?: string;
+        };
         AlteracaoDaAssinatura: {
             /** Format: date-time */
             momento?: string;
             /** @enum {string} */
-            tipo?: "CLIENTE_NOVO" | "TROCA_DE_PLANO" | "MUDANCA_DE_SITUACAO" | "SUSPENSAO" | "REATIVACAO";
+            tipo?: "CLIENTE_NOVO" | "TROCA_DE_PLANO" | "MUDANCA_DE_SITUACAO" | "SUSPENSAO" | "REATIVACAO" | "PRAZO_DO_TESTE" | "FIM_DO_TESTE" | "SUSPENSAO_POR_FALTA_DE_PAGAMENTO" | "REATIVACAO_APOS_PAGAMENTO";
             plano?: string;
             nomeDoPlano?: string;
             /** @enum {string} */
             periodicidade?: "MENSAL" | "SEMESTRAL" | "ANUAL";
             /** @enum {string} */
             status?: "TESTE" | "ATIVA" | "SUSPENSA" | "CANCELADA";
+            /** Format: date */
+            fimDoTeste?: string;
             feitoPor?: string;
         };
         GatewayDoClienteAtual: {
@@ -2206,6 +2548,36 @@ export interface components {
             diasMaiorAtraso?: number;
             valores?: components["schemas"]["Encargos"];
         };
+        AssinaturaDoCondominio: {
+            plano?: string;
+            /** @enum {string} */
+            periodicidade?: "MENSAL" | "SEMESTRAL" | "ANUAL";
+            /** @enum {string} */
+            status?: "TESTE" | "ATIVA" | "SUSPENSA" | "CANCELADA";
+            /** Format: date */
+            fimDoTeste?: string;
+            preco?: number;
+            suspensaPorFaltaDePagamento?: boolean;
+            faturas?: components["schemas"]["FaturaDaAssinatura"][];
+        };
+        FaturaDaAssinatura: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: date */
+            periodoInicio?: string;
+            /** Format: date */
+            periodoFim?: string;
+            valor?: number;
+            /** Format: date */
+            vencimento?: string;
+            /** @enum {string} */
+            situacao?: "A_EMITIR" | "EMITIDA" | "FALHOU" | "PAGA" | "A_CANCELAR" | "CANCELADA";
+            atrasada?: boolean;
+            /** Format: date */
+            suspensaoEm?: string;
+            /** Format: date */
+            pagoEm?: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -2259,6 +2631,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["UnidadeResposta"];
+                };
+            };
+        };
+    };
+    situacao: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ContaDeRecebimentoAtual"];
+                };
+            };
+        };
+    };
+    configurar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoContaDeRecebimento"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AvisoDaContaDeRecebimento"];
                 };
             };
         };
@@ -2337,7 +2753,7 @@ export interface operations {
             };
         };
     };
-    situacao: {
+    situacao_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2359,7 +2775,7 @@ export interface operations {
             };
         };
     };
-    configurar: {
+    configurar_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2381,6 +2797,58 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AvisoParaConfigurar"];
+                };
+            };
+        };
+    };
+    definirFimDoTeste: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoFimDoTeste"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CondominioNaPlataforma"];
+                };
+            };
+        };
+    };
+    alterarDados: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoDadosDoCliente"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CondominioNaPlataforma"];
                 };
             };
         };
@@ -2844,6 +3312,24 @@ export interface operations {
             };
         };
     };
+    desativar_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     desbloquear: {
         parameters: {
             query?: never;
@@ -2888,6 +3374,88 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["LoginNaPlataforma"];
+                };
+            };
+        };
+    };
+    simular: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FaturaPagaNaSimulacao"];
+                };
+            };
+        };
+    };
+    tentarDeNovo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    cancelar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    rodarRotina: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ResumoDaRotina"];
                 };
             };
         };
@@ -3002,7 +3570,7 @@ export interface operations {
             };
         };
     };
-    desativar_1: {
+    desativar_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -3289,7 +3857,7 @@ export interface operations {
             };
         };
     };
-    cancelar: {
+    cancelar_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -3401,7 +3969,7 @@ export interface operations {
             };
         };
     };
-    cancelar_1: {
+    cancelar_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -3425,7 +3993,7 @@ export interface operations {
             };
         };
     };
-    simular: {
+    simular_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -3819,7 +4387,7 @@ export interface operations {
             };
         };
     };
-    simular_1: {
+    simular_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -3867,7 +4435,7 @@ export interface operations {
             };
         };
     };
-    cancelar_2: {
+    cancelar_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -3893,7 +4461,7 @@ export interface operations {
             };
         };
     };
-    tentarDeNovo: {
+    tentarDeNovo_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -3974,6 +4542,30 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["AvisoDoAsaas"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    aviso_1: {
+        parameters: {
+            query?: never;
+            header?: {
+                "asaas-access-token"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvisoDeFaturaDoAsaas"];
             };
         };
         responses: {
@@ -4092,6 +4684,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["LoginNaPlataforma"][];
+                };
+            };
+        };
+    };
+    listar_7: {
+        parameters: {
+            query?: {
+                condominioId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FaturaDeCliente"][];
+                };
+            };
+        };
+    };
+    segundaVia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PagamentoDaFatura"];
                 };
             };
         };
@@ -4366,6 +5002,48 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Inadimplente"][];
+                };
+            };
+        };
+    };
+    assinatura: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AssinaturaDoCondominio"];
+                };
+            };
+        };
+    };
+    pagamento: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PagamentoDaFatura"];
                 };
             };
         };

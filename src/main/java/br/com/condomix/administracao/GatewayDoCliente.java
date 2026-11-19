@@ -1,9 +1,9 @@
 package br.com.condomix.administracao;
 
 import br.com.condomix.compartilhado.NaoEncontradoException;
-import br.com.condomix.financeiro.AmbienteDoGateway;
+import br.com.condomix.pagamentos.AmbienteDoGateway;
 import br.com.condomix.financeiro.GatewayDoCondominio;
-import br.com.condomix.financeiro.TipoDeGateway;
+import br.com.condomix.pagamentos.TipoDeGateway;
 import br.com.condomix.plataforma.ConsultaDeCondominios;
 import org.springframework.stereotype.Service;
 

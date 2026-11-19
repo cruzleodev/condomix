@@ -27,21 +27,35 @@ public interface PainelDeCondominios {
 	CondominioNaPlataforma alterarAssinatura(UUID condominioId, String codigoPlano, Periodicidade periodicidade,
 			StatusAssinatura status, UUID feitoPor);
 
+	/**
+	 * Muda o fim do teste grátis (só com a assinatura em teste). Vazio = teste sem prazo. Se a data já chegou,
+	 * a rotina de faturamento ativa a assinatura na próxima rodada.
+	 */
+	CondominioNaPlataforma definirFimDoTeste(UUID condominioId, LocalDate fimDoTeste, UUID feitoPor);
+
+	/** CNPJ, e-mail e telefone do condomínio: vão na fatura da assinatura. */
+	CondominioNaPlataforma alterarDados(UUID condominioId, DadosDoCliente dados);
+
 	/** Cada mudança na assinatura e no acesso do condomínio, mais recentes primeiro. */
 	List<EventoDaAssinatura> historico(UUID condominioId);
 
-	record CondominioNaPlataforma(UUID id, String nome, TipoCondominio tipo, String cnpj, boolean ativo,
-			Instant criadoEm, AssinaturaAtual assinatura) {
+	/** {@code motivoSuspensao} vazio enquanto o condomínio está ativo. */
+	record CondominioNaPlataforma(UUID id, String nome, TipoCondominio tipo, String cnpj, String email, String telefone,
+			boolean ativo, MotivoDaSuspensao motivoSuspensao, Instant criadoEm, AssinaturaAtual assinatura) {
+	}
+
+	/** Campos vazios ficam vazios (apagam o que havia). */
+	record DadosDoCliente(String cnpj, String email, String telefone) {
 	}
 
 	/** Plano, periodicidade e situação ficam vazios na suspensão e na reativação. {@code feitoPor} vazio: o sistema. */
 	record EventoDaAssinatura(Instant momento, TipoDeEventoDaAssinatura tipo, String plano, String nomeDoPlano,
-			Periodicidade periodicidade, StatusAssinatura status, UUID feitoPor) {
+			Periodicidade periodicidade, StatusAssinatura status, LocalDate fimDoTeste, UUID feitoPor) {
 	}
 
-	/** {@code null} no condomínio quando não há assinatura de plano base vigente. */
+	/** {@code null} no condomínio quando não há assinatura de plano base vigente. {@code fimDoTeste}: só no teste. */
 	record AssinaturaAtual(String plano, String nomeDoPlano, Periodicidade periodicidade, StatusAssinatura status,
-			LocalDate inicio) {
+			LocalDate inicio, LocalDate fimDoTeste) {
 	}
 
 }

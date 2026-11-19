@@ -1,10 +1,13 @@
 package br.com.condomix.plataforma.persistencia;
 
+import br.com.condomix.compartilhado.DocumentoBrasileiro;
 import br.com.condomix.compartilhado.NaoEncontradoException;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
+import br.com.condomix.compartilhado.TelefoneBrasileiro;
 import br.com.condomix.compartilhado.TenantAtual;
 import br.com.condomix.plataforma.Assinatura;
 import br.com.condomix.plataforma.Condominio;
+import br.com.condomix.plataforma.MotivoDaSuspensao;
 import br.com.condomix.plataforma.PainelDeCondominios;
 import br.com.condomix.plataforma.Periodicidade;
 import br.com.condomix.plataforma.Plano;
@@ -76,9 +79,11 @@ class PainelDeCondominiosJpa implements PainelDeCondominios {
 	public void suspender(UUID condominioId, UUID feitoPor) {
 		transacao.executeWithoutResult(s -> {
 			Condominio condominio = buscar(condominioId);
-			if (condominio.isAtivo()) {
-				condominio.desativar();
-				historico.save(EventoDeAssinatura.doAcesso(condominioId, Instant.now(relogio), true, feitoPor));
+			// Suspender à mão quem já está suspenso por falta de pagamento troca o motivo: só o administrador reativa.
+			if (condominio.isAtivo() || condominio.isSuspensoPorFaltaDePagamento()) {
+				condominio.suspender(MotivoDaSuspensao.MANUAL);
+				historico.save(EventoDeAssinatura.doAcesso(condominioId, Instant.now(relogio),
+						TipoDeEventoDaAssinatura.SUSPENSAO, feitoPor));
 			}
 		});
 	}
@@ -89,7 +94,8 @@ class PainelDeCondominiosJpa implements PainelDeCondominios {
 			Condominio condominio = buscar(condominioId);
 			if (!condominio.isAtivo()) {
 				condominio.reativar();
-				historico.save(EventoDeAssinatura.doAcesso(condominioId, Instant.now(relogio), false, feitoPor));
+				historico.save(EventoDeAssinatura.doAcesso(condominioId, Instant.now(relogio),
+						TipoDeEventoDaAssinatura.REATIVACAO, feitoPor));
 			}
 		});
 	}
@@ -101,7 +107,7 @@ class PainelDeCondominiosJpa implements PainelDeCondominios {
 				.map(e -> new EventoDaAssinatura(e.getMomento(), e.getTipo(),
 						e.getPlano() == null ? null : e.getPlano().getCodigo(),
 						e.getPlano() == null ? null : e.getPlano().getNome(),
-						e.getPeriodicidade(), e.getStatus(), e.getFeitoPor()))
+						e.getPeriodicidade(), e.getStatus(), e.getFimDoTeste(), e.getFeitoPor()))
 				.toList());
 	}
 
@@ -123,25 +129,76 @@ class PainelDeCondominiosJpa implements PainelDeCondominios {
 						&& atual.get().getPeriodicidade() == periodicidade;
 				if (mesmaAssinatura) {
 					if (atual.get().getStatus() != status) {
-						atual.get().alterarStatus(status);
-						registrar(condominioId, TipoDeEventoDaAssinatura.MUDANCA_DE_SITUACAO, plano, periodicidade, status, feitoPor);
+						atual.get().alterarStatus(status, hoje);
+						registrar(condominioId, TipoDeEventoDaAssinatura.MUDANCA_DE_SITUACAO, atual.get(), feitoPor);
 					}
 					return;
 				}
+				// Trocar de plano no meio do teste não dá um teste novo: continua o prazo que havia.
+				LocalDate testeQueHavia = atual.filter(a -> a.getStatus() == StatusAssinatura.TESTE)
+						.map(Assinatura::getFimDoTeste).orElse(null);
 				atual.ifPresent(a -> a.cancelar(hoje));
 				assinaturas.flush(); // grava o cancelamento antes da nova (regra de um plano vigente por vez)
-				assinaturas.save(new Assinatura(condominio, plano, periodicidade, status, hoje));
-				registrar(condominioId, TipoDeEventoDaAssinatura.TROCA_DE_PLANO, plano, periodicidade, status, feitoPor);
+				Assinatura nova = new Assinatura(condominio, plano, periodicidade, status, hoje);
+				if (status == StatusAssinatura.TESTE && testeQueHavia != null) {
+					nova.definirFimDoTeste(testeQueHavia);
+				}
+				assinaturas.save(nova);
+				registrar(condominioId, TipoDeEventoDaAssinatura.TROCA_DE_PLANO, nova, feitoPor);
 			});
 			return null;
 		});
 		return obter(condominioId);
 	}
 
-	private void registrar(UUID condominioId, TipoDeEventoDaAssinatura tipo, Plano plano, Periodicidade periodicidade,
-			StatusAssinatura status, UUID feitoPor) {
-		historico.save(EventoDeAssinatura.daAssinatura(condominioId, Instant.now(relogio), tipo, plano, periodicidade,
-				status, feitoPor));
+	@Override
+	public CondominioNaPlataforma definirFimDoTeste(UUID condominioId, LocalDate fimDoTeste, UUID feitoPor) {
+		buscar(condominioId);
+		LocalDate hoje = LocalDate.now(relogio);
+		if (fimDoTeste != null && fimDoTeste.isBefore(hoje)) {
+			throw RegraDeNegocioException.invalido("O fim do teste não pode ser no passado. Para encerrar o teste agora, ative a assinatura.");
+		}
+		TenantAtual.executarComo(condominioId, () -> {
+			transacao.executeWithoutResult(s -> {
+				Assinatura atual = assinaturas.vigentesDePlanoBase().stream().findFirst()
+						.filter(a -> a.getStatus() == StatusAssinatura.TESTE)
+						.orElseThrow(() -> RegraDeNegocioException.conflito("A assinatura deste cliente não está em teste"));
+				atual.definirFimDoTeste(fimDoTeste);
+				registrar(condominioId, TipoDeEventoDaAssinatura.PRAZO_DO_TESTE, atual, feitoPor);
+			});
+			return null;
+		});
+		return obter(condominioId);
+	}
+
+	@Override
+	public CondominioNaPlataforma alterarDados(UUID condominioId, DadosDoCliente dados) {
+		String cnpj;
+		String telefone;
+		try {
+			cnpj = DocumentoBrasileiro.normalizar(dados.cnpj());
+			telefone = TelefoneBrasileiro.normalizar(dados.telefone());
+		}
+		catch (IllegalArgumentException e) {
+			throw RegraDeNegocioException.invalido(e.getMessage());
+		}
+		if (cnpj != null && !DocumentoBrasileiro.ehCnpj(cnpj)) {
+			throw RegraDeNegocioException.invalido("O documento do condomínio deve ser um CNPJ");
+		}
+		String email = dados.email() == null || dados.email().isBlank() ? null : dados.email().strip();
+		transacao.executeWithoutResult(s -> {
+			Condominio condominio = buscar(condominioId);
+			if (cnpj != null && condominios.existsByCnpjAndIdNot(cnpj, condominioId)) {
+				throw RegraDeNegocioException.conflito("Já existe outro cliente com este CNPJ");
+			}
+			condominio.definirCnpj(cnpj);
+			condominio.alterarContato(email, telefone);
+		});
+		return obter(condominioId);
+	}
+
+	private void registrar(UUID condominioId, TipoDeEventoDaAssinatura tipo, Assinatura assinatura, UUID feitoPor) {
+		historico.save(EventoDeAssinatura.daAssinatura(condominioId, Instant.now(relogio), tipo, assinatura, feitoPor));
 	}
 
 	private Condominio buscar(UUID condominioId) {
@@ -150,9 +207,9 @@ class PainelDeCondominiosJpa implements PainelDeCondominios {
 
 	private static CondominioNaPlataforma paraPainel(Condominio c, Assinatura a) {
 		AssinaturaAtual assinatura = a == null ? null : new AssinaturaAtual(a.getPlano().getCodigo(),
-				a.getPlano().getNome(), a.getPeriodicidade(), a.getStatus(), a.getInicio());
-		return new CondominioNaPlataforma(c.getId(), c.getNome(), c.getTipo(), c.getCnpj(), c.isAtivo(),
-				c.getCriadoEm(), assinatura);
+				a.getPlano().getNome(), a.getPeriodicidade(), a.getStatus(), a.getInicio(), a.getFimDoTeste());
+		return new CondominioNaPlataforma(c.getId(), c.getNome(), c.getTipo(), c.getCnpj(), c.getEmail(), c.getTelefone(),
+				c.isAtivo(), c.getMotivoSuspensao(), c.getCriadoEm(), assinatura);
 	}
 
 }

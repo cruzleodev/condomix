@@ -4,6 +4,7 @@ import br.com.condomix.plataforma.Assinatura;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,5 +19,13 @@ public interface AssinaturaRepository extends JpaRepository<Assinatura, UUID> {
 			  and p.tipo = br.com.condomix.plataforma.TipoPlano.BASE
 			""")
 	List<Assinatura> vigentesDePlanoBase();
+
+	/** Testes grátis com prazo que já chegou. */
+	@Query("""
+			select a from Assinatura a
+			where a.status = br.com.condomix.plataforma.StatusAssinatura.TESTE
+			  and a.fimDoTeste <= :hoje
+			""")
+	List<Assinatura> testesVencidos(LocalDate hoje);
 
 }

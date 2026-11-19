@@ -42,7 +42,8 @@ import java.nio.charset.StandardCharsets;
  *   <li>Aceitar convite: aberto (quem tem o código do convite ainda não tem login).</li>
  *   <li>Avisos dos gateways de pagamento ({@code /api/avisos/**}): abertos; cada aviso traz o token do condomínio.</li>
  *   <li>Todo o resto: precisa estar logado <b>e</b> com um condomínio selecionado no token.
- *       O token de suporte só pode fazer leituras (GET).</li>
+ *       O token de suporte só pode fazer leituras (GET); o de pagamento pendente (condomínio suspenso por falta de
+ *       pagamento) só chega à assinatura.</li>
  * </ul>
  */
 @Configuration
@@ -58,6 +59,11 @@ class ConfiguracaoSeguranca {
 
 	/** Presente só no token de suporte: o id do registro de auditoria. */
 	static final String CLAIM_SUPORTE = "suporte";
+
+	/** Condomínio suspenso por falta de pagamento: o token só serve para ver e pagar a fatura da assinatura. */
+	static final String CLAIM_PAGAMENTO_PENDENTE = "pagamento_pendente";
+
+	private static final String ROTAS_DA_ASSINATURA = "/api/assinatura";
 
 	@Bean
 	SecurityFilterChain seguranca(HttpSecurity http) throws Exception {
@@ -82,11 +88,18 @@ class ConfiguracaoSeguranca {
 				.build();
 	}
 
-	/** Libera só tokens com condomínio definido. O token de suporte só pode ler (GET). */
+	/**
+	 * Libera só tokens com condomínio definido. O token de suporte só pode ler (GET). O de pagamento pendente só
+	 * chega à assinatura ({@code /api/assinatura/**}).
+	 */
 	private static AuthorizationManager<RequestAuthorizationContext> comCondominioSelecionado() {
 		return (autenticacao, contexto) -> {
 			if (!(autenticacao.get() instanceof JwtAuthenticationToken token) || !token.getToken().hasClaim(CLAIM_CONDOMINIO)) {
 				return new AuthorizationDecision(false);
+			}
+			if (token.getToken().hasClaim(CLAIM_PAGAMENTO_PENDENTE)) {
+				String caminho = contexto.getRequest().getRequestURI().substring(contexto.getRequest().getContextPath().length());
+				return new AuthorizationDecision(caminho.equals(ROTAS_DA_ASSINATURA) || caminho.startsWith(ROTAS_DA_ASSINATURA + "/"));
 			}
 			boolean suporte = token.getToken().hasClaim(CLAIM_SUPORTE);
 			return new AuthorizationDecision(!suporte || HttpMethod.GET.matches(contexto.getRequest().getMethod()));

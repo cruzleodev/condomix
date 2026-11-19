@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api, dados } from '../api/cliente'
-import type { BoletoDaCobranca } from '../api/tipos'
+import type { BoletoDaCobranca, FormasDePagamento, PagamentoDaFatura } from '../api/tipos'
 import { ROTULOS, data, moeda } from '../util/formato'
 import { Aviso, Botao, Carregando, Etiqueta, MensagemDeErro } from './ui'
 
@@ -38,20 +38,8 @@ export function TextoParaCopiar({ rotulo, texto }: { rotulo: string; texto: stri
   )
 }
 
-/**
- * A 2ª via: Pix (QR Code e copia e cola), linha digitável e o boleto em PDF.
- * {@code dono}: "eu" para o morador (só as próprias cobranças); "gestao" para o síndico mandar a alguém.
- */
-export function SegundaVia({ cobrancaId, dono }: { cobrancaId: string; dono: 'eu' | 'gestao' }) {
-  const via = useQuery({
-    queryKey: ['cobrancas', 'segunda-via', cobrancaId],
-    queryFn: async () => dados(dono === 'eu'
-      ? await api.GET('/api/eu/cobrancas/{id}/pagamento', { params: { path: { id: cobrancaId } } })
-      : await api.GET('/api/cobrancas/{id}/pagamento', { params: { path: { id: cobrancaId } } })),
-  })
-  if (via.isPending) return <Carregando texto="Buscando o boleto…" />
-  if (via.isError) return <MensagemDeErro erro={via.error} />
-  const v = via.data
+/** O que é preciso para pagar: Pix (QR Code e copia e cola), linha digitável e o boleto em PDF. */
+export function DadosParaPagar({ v }: { v: FormasDePagamento | PagamentoDaFatura }) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-slate-600">
@@ -81,6 +69,22 @@ export function SegundaVia({ cobrancaId, dono }: { cobrancaId: string; dono: 'eu
       {v.gateway === 'SIMULADO' && <p className="text-xs text-slate-500">Boleto de teste (gateway simulado): não pague.</p>}
     </div>
   )
+}
+
+/**
+ * A 2ª via de uma cobrança do condomínio.
+ * {@code dono}: "eu" para o morador (só as próprias cobranças); "gestao" para o síndico mandar a alguém.
+ */
+export function SegundaVia({ cobrancaId, dono }: { cobrancaId: string; dono: 'eu' | 'gestao' }) {
+  const via = useQuery({
+    queryKey: ['cobrancas', 'segunda-via', cobrancaId],
+    queryFn: async () => dados(dono === 'eu'
+      ? await api.GET('/api/eu/cobrancas/{id}/pagamento', { params: { path: { id: cobrancaId } } })
+      : await api.GET('/api/cobrancas/{id}/pagamento', { params: { path: { id: cobrancaId } } })),
+  })
+  if (via.isPending) return <Carregando texto="Buscando o boleto…" />
+  if (via.isError) return <MensagemDeErro erro={via.error} />
+  return <DadosParaPagar v={via.data} />
 }
 
 /**

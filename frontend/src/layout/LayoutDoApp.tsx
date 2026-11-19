@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { NavLink, Outlet, useNavigate } from 'react-router'
+import { AvisoDaAssinatura } from '../componentes/AvisoDaAssinatura'
 import { useSessao } from '../sessao/contexto'
 import { itensDoCelular, itensVisiveis, type ItemDeNavegacao } from './navegacao'
 
@@ -12,8 +13,9 @@ export function LayoutDoApp() {
   const { condominio, perfis, email, suporte, sairDoSuporte } = useSessao()
   const navegar = useNavigate()
   const cache = useQueryClient()
-  const principais = itensVisiveis(perfis).filter((i) => i.secao !== 'gestao' && i.para !== '/conta')
-  const gestao = itensVisiveis(perfis).filter((i) => i.secao === 'gestao')
+  const pagamentoPendente = !!condominio?.pagamentoPendente
+  const principais = itensVisiveis(perfis, pagamentoPendente).filter((i) => i.secao !== 'gestao' && i.para !== '/conta')
+  const gestao = itensVisiveis(perfis, pagamentoPendente).filter((i) => i.secao === 'gestao')
   return (
     <div className="min-h-dvh md:flex">
       <aside className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col md:bg-marca-800 md:text-white">
@@ -47,14 +49,15 @@ export function LayoutDoApp() {
           <p className="truncate font-semibold">{condominio?.nome ?? 'Condomínio'}</p>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-4 md:px-8 md:pb-10 md:pt-8">
+          {!suporte && !pagamentoPendente && <AvisoDaAssinatura />}
           <Outlet />
         </main>
       </div>
 
       <nav aria-label="Navegação principal"
         className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
-        <ul className="grid grid-cols-5">
-          {itensDoCelular(perfis).map((item) => (
+        <ul className={`grid ${pagamentoPendente ? 'grid-cols-2' : 'grid-cols-5'}`}>
+          {itensDoCelular(perfis, pagamentoPendente).map((item) => (
             <li key={item.para}>
               <NavLink to={item.para} end={item.para === '/'}
                 className={({ isActive }) => `flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs ${isActive ? 'font-semibold text-marca-700' : 'text-slate-500'}`}>

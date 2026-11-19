@@ -9,5 +9,7 @@ condomix:
     simulado: true
     processador:
       ativo: false   # nos testes, o processamento dos boletos é chamado direto, sem esperar o agendamento
+  faturamento:
+    automatico: false   # idem: a rotina e a emissão das faturas são chamadas direto
   armazenamento:
     diretorio: target/arquivos-de-teste

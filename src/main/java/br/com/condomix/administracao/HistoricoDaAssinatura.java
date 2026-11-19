@@ -9,6 +9,7 @@ import br.com.condomix.plataforma.TipoDeEventoDaAssinatura;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,7 +30,7 @@ class HistoricoDaAssinatura {
 
 	/** {@code feitoPor} vazio: feito pelo sistema (ou antes de o histórico existir). */
 	record AlteracaoDaAssinatura(Instant momento, TipoDeEventoDaAssinatura tipo, String plano, String nomeDoPlano,
-			Periodicidade periodicidade, StatusAssinatura status, String feitoPor) {
+			Periodicidade periodicidade, StatusAssinatura status, LocalDate fimDoTeste, String feitoPor) {
 	}
 
 	List<AlteracaoDaAssinatura> doCondominio(UUID condominioId) {
@@ -38,7 +39,7 @@ class HistoricoDaAssinatura {
 				eventos.stream().map(EventoDaAssinatura::feitoPor).filter(Objects::nonNull).distinct().toList());
 		return eventos.stream()
 				.map(e -> new AlteracaoDaAssinatura(e.momento(), e.tipo(), e.plano(), e.nomeDoPlano(), e.periodicidade(),
-						e.status(), e.feitoPor() == null ? null : emails.get(e.feitoPor())))
+						e.status(), e.fimDoTeste(), e.feitoPor() == null ? null : emails.get(e.feitoPor())))
 				.toList();
 	}
 

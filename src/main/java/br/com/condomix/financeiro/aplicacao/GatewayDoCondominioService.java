@@ -1,10 +1,10 @@
 package br.com.condomix.financeiro.aplicacao;
 
 import br.com.condomix.compartilhado.TenantAtual;
-import br.com.condomix.financeiro.AmbienteDoGateway;
+import br.com.condomix.pagamentos.AmbienteDoGateway;
 import br.com.condomix.financeiro.GatewayDoCondominio;
-import br.com.condomix.financeiro.TipoDeGateway;
-import br.com.condomix.financeiro.gateway.Gateways;
+import br.com.condomix.pagamentos.TipoDeGateway;
+import br.com.condomix.pagamentos.Gateways;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;

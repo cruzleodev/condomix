@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * Login e seleção de condomínio.
@@ -27,6 +28,9 @@ import java.util.UUID;
  */
 @Service
 public class AutenticacaoService {
+
+	/** Quem entra num condomínio suspenso por falta de pagamento, para pagar a fatura (o mesmo que {@code Permissoes.GESTAO}). */
+	private static final Set<Perfil> GESTAO = EnumSet.of(Perfil.SINDICO, Perfil.ADMINISTRADORA);
 
 	private final UsuarioRepository usuarios;
 
@@ -88,11 +92,18 @@ public class AutenticacaoService {
 		return montarSessao(usuario, disponiveis, condominioId);
 	}
 
-	/** Condomínios ativos em que o usuário tem algum papel hoje, com os papéis de cada um. */
+	/**
+	 * Condomínios ativos em que o usuário tem algum papel hoje, com os papéis de cada um. Também os suspensos por
+	 * falta de pagamento em que ele é da gestão: ele entra só para pagar a fatura da assinatura.
+	 */
 	private List<Sessao.CondominioDisponivel> condominiosDo(Usuario usuario) {
 		Map<UUID, Set<Perfil>> papeis = this.papeis.porCondominio(usuario.getId());
-		return condominios.ativosEntre(papeis.keySet()).stream()
-				.map((ResumoCondominio c) -> new Sessao.CondominioDisponivel(c.id(), c.nome(), papeis.get(c.id())))
+		var ativos = condominios.ativosEntre(papeis.keySet()).stream()
+				.map((ResumoCondominio c) -> new Sessao.CondominioDisponivel(c.id(), c.nome(), papeis.get(c.id()), false));
+		var paraPagar = condominios.suspensosPorFaltaDePagamentoEntre(papeis.keySet()).stream()
+				.filter(c -> papeis.get(c.id()).stream().anyMatch(GESTAO::contains))
+				.map((ResumoCondominio c) -> new Sessao.CondominioDisponivel(c.id(), c.nome(), papeis.get(c.id()), true));
+		return Stream.concat(ativos, paraPagar)
 				.sorted(Comparator.comparing(Sessao.CondominioDisponivel::nome))
 				.toList();
 	}
@@ -106,7 +117,10 @@ public class AutenticacaoService {
 		if (usuario.isAdminPlataforma()) {
 			perfisNoSelecionado.add(Perfil.ADMIN_PLATAFORMA);
 		}
-		var token = emissor.emitir(usuario, selecionado, perfisNoSelecionado);
+		boolean pagamentoPendente = disponiveis.stream().anyMatch(c -> c.id().equals(selecionado) && c.pagamentoPendente());
+		var token = pagamentoPendente
+				? emissor.emitir(usuario, selecionado, perfisNoSelecionado, ConfiguracaoSeguranca.CLAIM_PAGAMENTO_PENDENTE)
+				: emissor.emitir(usuario, selecionado, perfisNoSelecionado);
 		return new Sessao(token.valor(), "Bearer", token.expiraEm(), selecionado, perfisNoSelecionado, disponiveis);
 	}
 

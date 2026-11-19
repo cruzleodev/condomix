@@ -27,6 +27,14 @@ class ConsultaDeCondominiosJpa implements ConsultaDeCondominios {
 	}
 
 	@Override
+	public List<ResumoCondominio> suspensosPorFaltaDePagamentoEntre(Collection<UUID> ids) {
+		return condominios.findAllById(ids).stream()
+				.filter(Condominio::isSuspensoPorFaltaDePagamento)
+				.map(c -> new ResumoCondominio(c.getId(), c.getNome()))
+				.toList();
+	}
+
+	@Override
 	public boolean existe(UUID id) {
 		return condominios.existsById(id);
 	}
