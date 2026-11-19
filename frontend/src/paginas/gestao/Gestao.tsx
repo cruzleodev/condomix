@@ -8,6 +8,9 @@ const ATALHOS = [
   { para: '/gestao/unidades', titulo: 'Unidades', texto: 'Blocos, apartamentos, salas e frações ideais.' },
   { para: '/gestao/moradores', titulo: 'Moradores', texto: 'Pessoas, vínculos com as unidades e convites de acesso.' },
   { para: '/gestao/mandatos', titulo: 'Cargos e mandatos', texto: 'Síndico, subsíndico e conselho: eleição e encerramento.' },
+  { para: '/gestao/taxa', titulo: 'Taxa do mês', texto: 'Como a taxa é cobrada, simulação e geração das cobranças.' },
+  { para: '/gestao/cobrancas', titulo: 'Cobranças', texto: 'Quem pagou, baixa de pagamentos, avulsas e inadimplência.' },
+  { para: '/gestao/caixa', titulo: 'Caixa', texto: 'Contas, despesas, transferências e extrato.' },
   { para: '/balancete', titulo: 'Balancete', texto: 'Prestação de contas do mês.' },
 ]
 

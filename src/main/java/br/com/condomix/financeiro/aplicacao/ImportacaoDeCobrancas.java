@@ -1,5 +1,6 @@
 package br.com.condomix.financeiro.aplicacao;
 
+import br.com.condomix.compartilhado.FormatoBrasileiro;
 import br.com.condomix.acesso.CadastroParaCobranca;
 import br.com.condomix.acesso.CadastroParaCobranca.UnidadeCobravel;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
@@ -99,10 +100,10 @@ public class ImportacaoDeCobrancas {
 			try {
 				LinhaValida l = ler(linhas.get(i).split(separador, -1), colunas, unidades);
 				if (!vistas.add(l.unidade().id() + "|" + l.competencia())) {
-					throw new IllegalArgumentException("a unidade " + l.unidade().descricao() + " aparece duas vezes em " + l.competencia());
+					throw new IllegalArgumentException("a unidade " + l.unidade().descricao() + " aparece duas vezes em " + FormatoBrasileiro.mes(l.competencia()));
 				}
 				if (cobrancas.existeNaCompetencia(l.unidade().id(), l.competencia().atDay(1))) {
-					throw new IllegalArgumentException("a unidade " + l.unidade().descricao() + " já tem cobrança em " + l.competencia());
+					throw new IllegalArgumentException("a unidade " + l.unidade().descricao() + " já tem cobrança em " + FormatoBrasileiro.mes(l.competencia()));
 				}
 				validas.add(l);
 			}
@@ -164,7 +165,7 @@ public class ImportacaoDeCobrancas {
 		}
 		String descricao = opcional(campos, colunas, "descricao");
 		return new LinhaValida(unidade, competencia, vencimento, valor, paga, pagoEm, valorPago,
-				descricao != null ? descricao : "Taxa condominial " + competencia + " (importada)");
+				descricao != null ? descricao : "Taxa condominial " + FormatoBrasileiro.mes(competencia) + " (importada)");
 	}
 
 	private static Map<String, Integer> colunas(String cabecalho, String separador) {

@@ -1,7 +1,7 @@
 package br.com.condomix.acesso.mandato;
 
+import br.com.condomix.compartilhado.FormatoBrasileiro;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
@@ -16,21 +16,18 @@ public enum SituacaoMandato {
 		@Override
 		Optional<String> aviso(LocalDate data, LocalDate fimPrevisto) {
 			return Optional.of("O mandato termina em " + ChronoUnit.DAYS.between(data, fimPrevisto) + " dias ("
-					+ BRASIL.format(fimPrevisto) + "). Convoque a assembleia para eleger o sucessor.");
+					+ FormatoBrasileiro.data(fimPrevisto) + "). Convoque a assembleia para eleger o sucessor.");
 		}
 	},
 	/** O prazo acabou e ninguém tomou posse: continua valendo até o sucessor assumir (decisão de negócio). */
 	PRORROGADO(true) {
 		@Override
 		Optional<String> aviso(LocalDate data, LocalDate fimPrevisto) {
-			return Optional.of("Mandato vencido em " + BRASIL.format(fimPrevisto)
+			return Optional.of("Mandato vencido em " + FormatoBrasileiro.data(fimPrevisto)
 					+ ". Prorrogado até a posse do sucessor: convoque a assembleia para a eleição.");
 		}
 	},
 	ENCERRADO(false);
-
-	/** Datas nas mensagens para o usuário: 19/01/2027. */
-	private static final DateTimeFormatter BRASIL = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 	private final boolean daAcesso;
 

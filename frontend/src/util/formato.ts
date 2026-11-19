@@ -99,6 +99,13 @@ export const ROTULOS = {
   cargo: { SINDICO: 'Síndico', SUBSINDICO: 'Subsíndico', CONSELHEIRO: 'Conselheiro' },
   situacaoDoMandato: { FUTURO: 'Futuro', VIGENTE: 'Vigente', A_VENCER: 'A vencer', PRORROGADO: 'Prorrogado', ENCERRADO: 'Encerrado' },
   motivoDeEncerramento: { RENUNCIA: 'Renúncia', DESTITUICAO: 'Destituição', OUTRO: 'Outro' },
+  tipoDeRateio: { IGUALITARIO: 'Igual para todas as unidades', FRACAO_IDEAL: 'Pela fração ideal', VALOR_POR_GRUPO: 'Valor fixo por grupo' },
+  formaDePagamento: { PIX: 'Pix', BOLETO: 'Boleto', TRANSFERENCIA: 'Transferência', DINHEIRO: 'Dinheiro', CARTAO: 'Cartão', OUTRO: 'Outra' },
+  itemAvulso: { MULTA_DISCIPLINAR: 'Multa disciplinar', RESERVA_DE_ESPACO: 'Aluguel de espaço', CONSUMO: 'Consumo (água, gás)', TAXA_EXTRA: 'Taxa extra', OUTRO: 'Outro' },
+  statusDaCobranca: { ABERTA: 'Em aberto', PAGA: 'Paga', CANCELADA: 'Cancelada' },
+  origemDaCobranca: { GERACAO_MENSAL: 'Taxa do mês', AVULSA: 'Avulsa', IMPORTACAO: 'Importada' },
+  tipoDeConta: { CONTA_CORRENTE: 'Conta corrente', POUPANCA: 'Poupança', APLICACAO: 'Aplicação', CAIXA_FISICO: 'Caixa físico' },
+  tipoDeLancamento: { RECEITA: 'Receita', DESPESA: 'Despesa', TRANSFERENCIA_ENTRADA: 'Transferência (entrada)', TRANSFERENCIA_SAIDA: 'Transferência (saída)' },
 } as const
 
 /** "5591999998888" → "(91) 99999-8888". */
@@ -128,4 +135,25 @@ export function umAnoDepoisMenosUmDia(iso: string): string {
   const [ano, mes, dia] = iso.split('-').map(Number)
   const d = new Date(Date.UTC(ano + 1, mes - 1, dia - 1))
   return d.toISOString().slice(0, 10)
+}
+
+/** Primeiro e último dia do mês ("2026-11" → ["2026-11-01", "2026-11-30"]). */
+export function periodoDoMes(anoMes: string): [string, string] {
+  const [ano, mes] = anoMes.split('-').map(Number)
+  const ultimo = new Date(Date.UTC(ano, mes, 0)).getUTCDate()
+  return [`${anoMes}-01`, `${anoMes}-${String(ultimo).padStart(2, '0')}`]
+}
+
+/** O mês seguinte: "2026-12" → "2027-01". */
+export function proximoMes(anoMes: string): string {
+  const [ano, mes] = anoMes.split('-').map(Number)
+  return mes === 12 ? `${ano + 1}-01` : `${ano}-${String(mes + 1).padStart(2, '0')}`
+}
+
+/** Lê um valor digitado em reais ("1.234,56", "1234.56", "1234,5") → 1234.56. Vazio ou inválido → undefined. */
+export function lerReais(texto: string): number | undefined {
+  const limpo = texto.replace(/R\$|\s/g, '')
+  if (!limpo) return undefined
+  const numero = Number(limpo.includes(',') ? limpo.replace(/\./g, '').replace(',', '.') : limpo)
+  return Number.isFinite(numero) ? numero : undefined
 }

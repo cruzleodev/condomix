@@ -1,5 +1,6 @@
 package br.com.condomix.acesso;
 
+import br.com.condomix.compartilhado.FormatoBrasileiro;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -69,7 +70,7 @@ public class VinculoUnidade {
 			throw new IllegalStateException("Este vínculo já foi encerrado");
 		}
 		if (fim.isBefore(inicio)) {
-			throw new IllegalArgumentException("O fim do vínculo não pode ser antes do início (" + inicio + ")");
+			throw new IllegalArgumentException("O fim do vínculo não pode ser antes do início (" + FormatoBrasileiro.data(inicio) + ")");
 		}
 		this.fim = fim;
 	}

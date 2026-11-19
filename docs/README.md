@@ -20,8 +20,8 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 9 | [Financeiro: caixa, despesas e balancete](etapas/09-financeiro-caixa.md) | `feature/financeiro-caixa` | Concluída |
 | 10 | [Frontend parte 1: base do app (PWA), login, telas do morador e documentos](etapas/10-frontend-base.md) | `feature/frontend-base` | Concluída |
 | 11 | [Frontend parte 2: layout para computador (todos os usuários) e gestão do condomínio](etapas/11-frontend-gestao.md) | `feature/frontend-gestao` | Concluída |
-| 12 | Frontend parte 3: financeiro do síndico (taxa, geração, cobranças, inadimplência, caixa) | — | Próxima |
-| 13 | Frontend parte 4: painel do administrador da plataforma | — | Pendente |
+| 12 | [Frontend parte 3: financeiro do síndico (taxa, geração, cobranças, inadimplência, caixa)](etapas/12-frontend-financeiro.md) | `feature/frontend-financeiro` | Concluída |
+| 13 | Frontend parte 4: painel do administrador da plataforma | — | Próxima |
 | 14 | Boletos e Pix pelo gateway, 2ª via e baixa automática (backend e telas) | — | Pendente |
 | 15 | Cobrança da assinatura do Condomix pelo gateway (backend e telas) | — | Pendente |
 | 16 | Reservas: espaços, agenda, regras e aluguel (backend e telas) | — | Pendente |
