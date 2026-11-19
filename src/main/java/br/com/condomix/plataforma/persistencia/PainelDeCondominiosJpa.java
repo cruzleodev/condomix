@@ -9,11 +9,14 @@ import br.com.condomix.plataforma.PainelDeCondominios;
 import br.com.condomix.plataforma.Periodicidade;
 import br.com.condomix.plataforma.Plano;
 import br.com.condomix.plataforma.StatusAssinatura;
+import br.com.condomix.plataforma.TipoDeEventoDaAssinatura;
 import br.com.condomix.plataforma.TipoPlano;
+import br.com.condomix.plataforma.historico.EventoDeAssinatura;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -35,15 +38,18 @@ class PainelDeCondominiosJpa implements PainelDeCondominios {
 
 	private final PlanoRepository planos;
 
+	private final EventoDeAssinaturaRepository historico;
+
 	private final TransactionTemplate transacao;
 
 	private final Clock relogio;
 
 	PainelDeCondominiosJpa(CondominioRepository condominios, AssinaturaRepository assinaturas, PlanoRepository planos,
-			TransactionTemplate transacao, Clock relogio) {
+			EventoDeAssinaturaRepository historico, TransactionTemplate transacao, Clock relogio) {
 		this.condominios = condominios;
 		this.assinaturas = assinaturas;
 		this.planos = planos;
+		this.historico = historico;
 		this.transacao = transacao;
 		this.relogio = relogio;
 	}
@@ -67,18 +73,41 @@ class PainelDeCondominiosJpa implements PainelDeCondominios {
 	}
 
 	@Override
-	public void suspender(UUID condominioId) {
-		transacao.executeWithoutResult(s -> buscar(condominioId).desativar());
+	public void suspender(UUID condominioId, UUID feitoPor) {
+		transacao.executeWithoutResult(s -> {
+			Condominio condominio = buscar(condominioId);
+			if (condominio.isAtivo()) {
+				condominio.desativar();
+				historico.save(EventoDeAssinatura.doAcesso(condominioId, Instant.now(relogio), true, feitoPor));
+			}
+		});
 	}
 
 	@Override
-	public void reativar(UUID condominioId) {
-		transacao.executeWithoutResult(s -> buscar(condominioId).reativar());
+	public void reativar(UUID condominioId, UUID feitoPor) {
+		transacao.executeWithoutResult(s -> {
+			Condominio condominio = buscar(condominioId);
+			if (!condominio.isAtivo()) {
+				condominio.reativar();
+				historico.save(EventoDeAssinatura.doAcesso(condominioId, Instant.now(relogio), false, feitoPor));
+			}
+		});
+	}
+
+	@Override
+	public List<EventoDaAssinatura> historico(UUID condominioId) {
+		buscar(condominioId);
+		return transacao.execute(s -> historico.doCondominio(condominioId).stream()
+				.map(e -> new EventoDaAssinatura(e.getMomento(), e.getTipo(),
+						e.getPlano() == null ? null : e.getPlano().getCodigo(),
+						e.getPlano() == null ? null : e.getPlano().getNome(),
+						e.getPeriodicidade(), e.getStatus(), e.getFeitoPor()))
+				.toList());
 	}
 
 	@Override
 	public CondominioNaPlataforma alterarAssinatura(UUID condominioId, String codigoPlano, Periodicidade periodicidade,
-			StatusAssinatura status) {
+			StatusAssinatura status, UUID feitoPor) {
 		if (status == StatusAssinatura.CANCELADA) {
 			throw RegraDeNegocioException.invalido("Para encerrar o cliente, suspenda o condomínio");
 		}
@@ -93,16 +122,26 @@ class PainelDeCondominiosJpa implements PainelDeCondominios {
 				boolean mesmaAssinatura = atual.isPresent() && atual.get().getPlano().getCodigo().equals(codigoPlano)
 						&& atual.get().getPeriodicidade() == periodicidade;
 				if (mesmaAssinatura) {
-					atual.get().alterarStatus(status);
+					if (atual.get().getStatus() != status) {
+						atual.get().alterarStatus(status);
+						registrar(condominioId, TipoDeEventoDaAssinatura.MUDANCA_DE_SITUACAO, plano, periodicidade, status, feitoPor);
+					}
 					return;
 				}
 				atual.ifPresent(a -> a.cancelar(hoje));
 				assinaturas.flush(); // grava o cancelamento antes da nova (regra de um plano vigente por vez)
 				assinaturas.save(new Assinatura(condominio, plano, periodicidade, status, hoje));
+				registrar(condominioId, TipoDeEventoDaAssinatura.TROCA_DE_PLANO, plano, periodicidade, status, feitoPor);
 			});
 			return null;
 		});
 		return obter(condominioId);
+	}
+
+	private void registrar(UUID condominioId, TipoDeEventoDaAssinatura tipo, Plano plano, Periodicidade periodicidade,
+			StatusAssinatura status, UUID feitoPor) {
+		historico.save(EventoDeAssinatura.daAssinatura(condominioId, Instant.now(relogio), tipo, plano, periodicidade,
+				status, feitoPor));
 	}
 
 	private Condominio buscar(UUID condominioId) {

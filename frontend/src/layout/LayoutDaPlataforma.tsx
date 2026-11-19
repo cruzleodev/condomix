@@ -1,15 +1,20 @@
-import { NavLink, Outlet } from 'react-router'
+import { NavLink, Outlet, useLocation } from 'react-router'
 import { useSessao } from '../sessao/contexto'
 
 const ITENS = [
-  { para: '/plataforma', rotulo: 'Clientes', icone: '▦' },
+  // Clientes também fica marcado na página de cada cliente (/plataforma/clientes/...).
+  { para: '/plataforma', rotulo: 'Clientes', icone: '▦', tambem: '/plataforma/clientes/' },
   { para: '/plataforma/planos', rotulo: 'Planos e preços', icone: '$' },
+  { para: '/plataforma/logins', rotulo: 'Logins', icone: '⚿' },
   { para: '/plataforma/suporte', rotulo: 'Suporte', icone: '⛑' },
 ]
 
 /** Painel do administrador do Condomix: menu lateral no computador, abas em cima no celular. */
 export function LayoutDaPlataforma() {
   const { email, sair, condominios } = useSessao()
+  const { pathname } = useLocation()
+  const marcado = (item: (typeof ITENS)[number], isActive: boolean) =>
+    isActive || ('tambem' in item && !!item.tambem && pathname.startsWith(item.tambem))
   return (
     <div className="min-h-dvh md:flex">
       <aside className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col md:bg-slate-900 md:text-white">
@@ -20,7 +25,7 @@ export function LayoutDaPlataforma() {
         <nav aria-label="Menu da plataforma" className="flex-1 space-y-1 px-3">
           {ITENS.map((item) => (
             <NavLink key={item.para} to={item.para} end
-              className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${isActive ? 'bg-white/15 font-semibold' : 'text-slate-300 hover:bg-white/10'}`}>
+              className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${marcado(item, isActive) ? 'bg-white/15 font-semibold' : 'text-slate-300 hover:bg-white/10'}`}>
               <span aria-hidden className="w-5 text-center">{item.icone}</span>{item.rotulo}
             </NavLink>
           ))}
@@ -41,7 +46,7 @@ export function LayoutDaPlataforma() {
           <nav aria-label="Menu da plataforma" className="mt-2 flex gap-2 overflow-x-auto">
             {ITENS.map((item) => (
               <NavLink key={item.para} to={item.para} end
-                className={({ isActive }) => `shrink-0 rounded-full px-3 py-1 text-sm ${isActive ? 'bg-white text-slate-900' : 'bg-white/10'}`}>
+                className={({ isActive }) => `shrink-0 rounded-full px-3 py-1 text-sm ${marcado(item, isActive) ? 'bg-white text-slate-900' : 'bg-white/10'}`}>
                 {item.rotulo}
               </NavLink>
             ))}

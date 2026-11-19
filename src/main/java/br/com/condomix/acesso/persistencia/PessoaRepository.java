@@ -6,11 +6,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface PessoaRepository extends JpaRepository<Pessoa, UUID> {
 
 	List<Pessoa> findByTenantIdOrderByNome(UUID tenantId);
+
+	/** No condomínio atual (o documento é único por condomínio). */
+	Optional<Pessoa> findByDocumento(String documento);
 
 	/** Por parte do nome ou pelo documento exato, sem diferenciar maiúsculas. */
 	@Query("""

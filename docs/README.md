@@ -22,12 +22,13 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 11 | [Frontend parte 2: layout para computador (todos os usuários) e gestão do condomínio](etapas/11-frontend-gestao.md) | `feature/frontend-gestao` | Concluída |
 | 12 | [Frontend parte 3: financeiro do síndico (taxa, geração, cobranças, inadimplência, caixa)](etapas/12-frontend-financeiro.md) | `feature/frontend-financeiro` | Concluída |
 | 13 | [Frontend parte 4: painel do administrador da plataforma (clientes, planos, assinaturas e modo suporte)](etapas/13-frontend-plataforma.md) | `feature/frontend-plataforma` | Concluída |
-| 14 | Boletos e Pix pelo gateway, 2ª via e baixa automática (backend e telas) | — | Próxima |
-| 15 | Cobrança da assinatura do Condomix pelo gateway (backend e telas) | — | Pendente |
-| 16 | Reservas: espaços, agenda, regras e aluguel (backend e telas) | — | Pendente |
-| 17 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
-| 18 | App nas lojas (Capacitor) | — | Pendente |
-| 19 | Bot de WhatsApp | — | Pendente |
+| 14 | [Administrador: convite e troca de síndico, bloqueio de login, fim do suporte e histórico da assinatura](etapas/14-admin-suporte-acessos.md) | `feature/admin-suporte-acessos` | Concluída |
+| 15 | Boletos e Pix pelo gateway, 2ª via e baixa automática (backend e telas) | — | Próxima |
+| 16 | Cobrança da assinatura do Condomix pelo gateway (backend e telas) | — | Pendente |
+| 17 | Reservas: espaços, agenda, regras e aluguel (backend e telas) | — | Pendente |
+| 18 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
+| 19 | App nas lojas (Capacitor) | — | Pendente |
+| 20 | Bot de WhatsApp | — | Pendente |
 
 A partir da etapa 14, cada etapa é uma **fatia vertical**: entrega o backend **e** as telas juntos.
 
@@ -40,7 +41,7 @@ Futuro, sem data: assembleias online (convocação, pauta, votação e ata).
 | Síndico morador × profissional | Ser síndico é um cargo (perfil), não depende de morar. O síndico morador tem os perfis MORADOR e SINDICO; o profissional, só SINDICO, e pode atender vários condomínios com um único login |
 | Mandato e passagem | Cargos com mandato (posse, fim previsto, ata da eleição). Ao registrar a eleição, o mandato anterior se encerra na data de posse do sucessor; o histórico é mantido. Avisos 90, 60 e 30 dias antes do fim |
 | Mandato vencido sem eleição | **Prorrogar com aviso** até a posse do sucessor (padrão). Configurável por condomínio para "suspender", conforme a convenção |
-| Administrador da plataforma | Papel `ADMIN_PLATAFORMA`, fora dos condomínios: gerencia condomínios, planos, assinaturas e usuários pela aplicação, nunca direto no banco. Não vê dados internos dos condomínios, exceto em "modo suporte" temporário e auditado (LGPD) |
+| Administrador da plataforma | Papel `ADMIN_PLATAFORMA`, fora dos condomínios: gerencia condomínios, planos, assinaturas e usuários pela aplicação, nunca direto no banco. Não vê dados internos dos condomínios, exceto em "modo suporte" temporário e auditado (LGPD). Pode bloquear um login (em todos os condomínios) e cuidar do síndico do cliente (novo convite, troca) |
 | Desconto do síndico | Desconto ou isenção definidos no mandato, aplicados à unidade indicada só enquanto o mandato vigorar (proporcional aos dias). Síndico profissional recebe remuneração, que é despesa, não desconto. Implementado como uma `RegraDeDesconto` |
 | "Meus dados" | Telas como "minhas cobranças" e "minhas reservas" usam os vínculos da pessoa com unidades, não o perfil MORADOR |
 

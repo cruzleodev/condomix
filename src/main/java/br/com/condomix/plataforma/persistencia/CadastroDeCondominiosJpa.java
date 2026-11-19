@@ -7,10 +7,13 @@ import br.com.condomix.plataforma.CadastroDeCondominios;
 import br.com.condomix.plataforma.Condominio;
 import br.com.condomix.plataforma.Plano;
 import br.com.condomix.plataforma.StatusAssinatura;
+import br.com.condomix.plataforma.TipoDeEventoDaAssinatura;
 import br.com.condomix.plataforma.TipoPlano;
+import br.com.condomix.plataforma.historico.EventoDeAssinatura;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -23,13 +26,16 @@ class CadastroDeCondominiosJpa implements CadastroDeCondominios {
 
 	private final AssinaturaRepository assinaturas;
 
+	private final EventoDeAssinaturaRepository historico;
+
 	private final Clock relogio;
 
 	CadastroDeCondominiosJpa(CondominioRepository condominios, PlanoRepository planos,
-			AssinaturaRepository assinaturas, Clock relogio) {
+			AssinaturaRepository assinaturas, EventoDeAssinaturaRepository historico, Clock relogio) {
 		this.condominios = condominios;
 		this.planos = planos;
 		this.assinaturas = assinaturas;
+		this.historico = historico;
 		this.relogio = relogio;
 	}
 
@@ -39,7 +45,7 @@ class CadastroDeCondominiosJpa implements CadastroDeCondominios {
 	 * uma depois; quando houver cadastro pela API (etapa de cobrança), isso vira uma única operação.
 	 */
 	@Override
-	public UUID cadastrar(NovoCondominio novo) {
+	public UUID cadastrar(NovoCondominio novo, UUID registradoPor) {
 		Plano plano = planos.findByCodigo(novo.codigoPlano())
 				.filter(p -> p.isAtivo() && p.getTipo() == TipoPlano.BASE)
 				.orElseThrow(() -> new IllegalArgumentException("Plano base inexistente: " + novo.codigoPlano()));
@@ -54,6 +60,8 @@ class CadastroDeCondominiosJpa implements CadastroDeCondominios {
 		Condominio condominio = condominios.save(novoCondominio);
 		TenantAtual.executarComo(condominio.getId(), () -> assinaturas.save(
 				new Assinatura(condominio, plano, novo.periodicidade(), StatusAssinatura.TESTE, LocalDate.now(relogio))));
+		historico.save(EventoDeAssinatura.daAssinatura(condominio.getId(), Instant.now(relogio),
+				TipoDeEventoDaAssinatura.CLIENTE_NOVO, plano, novo.periodicidade(), StatusAssinatura.TESTE, registradoPor));
 		return condominio.getId();
 	}
 

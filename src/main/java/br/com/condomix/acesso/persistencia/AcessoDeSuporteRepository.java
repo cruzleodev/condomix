@@ -10,4 +10,6 @@ public interface AcessoDeSuporteRepository extends JpaRepository<AcessoDeSuporte
 
 	List<AcessoDeSuporte> findTop200ByOrderByInicioDesc();
 
+	boolean existsByIdAndEncerradoEmIsNull(UUID id);
+
 }

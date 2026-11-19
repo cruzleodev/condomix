@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -108,9 +110,13 @@ class ConfiguracaoSeguranca {
 		return new NimbusJwtEncoder(new ImmutableSecret<>(chaveJwt));
 	}
 
+	/** Além da assinatura e do prazo, confere se o login não foi bloqueado e se o suporte não foi encerrado. */
 	@Bean
-	JwtDecoder jwtDecoder(SecretKey chaveJwt) {
-		return NimbusJwtDecoder.withSecretKey(chaveJwt).macAlgorithm(MacAlgorithm.HS256).build();
+	JwtDecoder jwtDecoder(SecretKey chaveJwt, PropriedadesJwt propriedades, ValidadorDeSessao sessaoAtiva) {
+		NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(chaveJwt).macAlgorithm(MacAlgorithm.HS256).build();
+		decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
+				JwtValidators.createDefaultWithIssuer(propriedades.emissor()), sessaoAtiva));
+		return decoder;
 	}
 
 	/** Grava as senhas com BCrypt, no formato "{bcrypt}$2a$...". */

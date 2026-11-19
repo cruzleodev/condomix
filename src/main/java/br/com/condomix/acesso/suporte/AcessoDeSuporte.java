@@ -33,6 +33,9 @@ public class AcessoDeSuporte {
 
 	private Instant expiraEm;
 
+	/** Encerrado pelo administrador antes do prazo. */
+	private Instant encerradoEm;
+
 	protected AcessoDeSuporte() {
 	}
 
@@ -47,11 +50,19 @@ public class AcessoDeSuporte {
 		this.expiraEm = expiraEm;
 	}
 
+	/** Encerra antes do prazo. Sem efeito se já terminou (encerrado ou expirado). */
+	public void encerrar(Instant agora) {
+		if (encerradoEm == null && agora.isBefore(expiraEm)) {
+			this.encerradoEm = agora;
+		}
+	}
+
 	public UUID getId() { return id; }
 	public UUID getAdministradorId() { return administradorId; }
 	public UUID getCondominioId() { return condominioId; }
 	public String getMotivo() { return motivo; }
 	public Instant getInicio() { return inicio; }
 	public Instant getExpiraEm() { return expiraEm; }
+	public Instant getEncerradoEm() { return encerradoEm; }
 
 }

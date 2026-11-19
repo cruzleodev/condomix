@@ -15,19 +15,28 @@ public interface PainelDeCondominios {
 
 	CondominioNaPlataforma obter(UUID condominioId);
 
-	void suspender(UUID condominioId);
+	/** @param feitoPor quem suspendeu (vai para o histórico) */
+	void suspender(UUID condominioId, UUID feitoPor);
 
-	void reativar(UUID condominioId);
+	void reativar(UUID condominioId, UUID feitoPor);
 
 	/**
 	 * Muda o plano base, a periodicidade ou a situação. Trocar plano ou periodicidade encerra a
 	 * assinatura atual (fica no histórico) e abre uma nova; mudar só a situação altera a atual.
 	 */
 	CondominioNaPlataforma alterarAssinatura(UUID condominioId, String codigoPlano, Periodicidade periodicidade,
-			StatusAssinatura status);
+			StatusAssinatura status, UUID feitoPor);
+
+	/** Cada mudança na assinatura e no acesso do condomínio, mais recentes primeiro. */
+	List<EventoDaAssinatura> historico(UUID condominioId);
 
 	record CondominioNaPlataforma(UUID id, String nome, TipoCondominio tipo, String cnpj, boolean ativo,
 			Instant criadoEm, AssinaturaAtual assinatura) {
+	}
+
+	/** Plano, periodicidade e situação ficam vazios na suspensão e na reativação. {@code feitoPor} vazio: o sistema. */
+	record EventoDaAssinatura(Instant momento, TipoDeEventoDaAssinatura tipo, String plano, String nomeDoPlano,
+			Periodicidade periodicidade, StatusAssinatura status, UUID feitoPor) {
 	}
 
 	/** {@code null} no condomínio quando não há assinatura de plano base vigente. */
