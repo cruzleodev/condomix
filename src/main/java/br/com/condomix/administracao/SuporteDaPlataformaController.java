@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +41,14 @@ class SuporteDaPlataformaController {
 	@ResponseStatus(HttpStatus.CREATED)
 	SuporteAoCondominio.TokenDeSuporte abrir(@Valid @RequestBody PedidoSuporte pedido, @AuthenticationPrincipal Jwt jwt) {
 		return suporte.abrir(UUID.fromString(jwt.getSubject()), pedido.condominioId(), pedido.motivo());
+	}
+
+	@Operation(summary = "Encerrar um acesso de suporte antes do prazo",
+			description = "O token de suporte deixa de valer na hora. Sem efeito se o acesso já terminou.")
+	@PostMapping("/{id}/encerramento")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	void encerrar(@PathVariable UUID id) {
+		suporte.encerrar(id);
 	}
 
 	@Operation(summary = "Auditoria: os últimos acessos de suporte")

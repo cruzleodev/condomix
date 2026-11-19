@@ -39,6 +39,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plataforma/condominios/{id}/sindico": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * O síndico do cliente: nome, e-mail, mandato e se já criou o login
+         * @description 204 quando o condomínio ainda não tem síndico registrado.
+         */
+        get: operations["atual"];
+        /**
+         * Trocar o síndico: registra o novo mandato e o convite
+         * @description O mandato anterior termina na véspera da posse. Se a pessoa já tem login, não há convite.
+         */
+        put: operations["trocar"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plataforma/condominios/{id}/assinatura": {
         parameters: {
             query?: never;
@@ -274,6 +298,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plataforma/suporte/{id}/encerramento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Encerrar um acesso de suporte antes do prazo
+         * @description O token de suporte deixa de valer na hora. Sem efeito se o acesso já terminou.
+         */
+        post: operations["encerrar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/logins/{id}/desbloqueio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Desbloquear um login */
+        post: operations["desbloquear"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/logins/{id}/bloqueio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bloquear um login em todos os condomínios
+         * @description O usuário não entra mais, e os tokens que ele já tinha deixam de valer na hora.
+         */
+        post: operations["bloquear"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plataforma/condominios": {
         parameters: {
             query?: never;
@@ -306,6 +387,26 @@ export interface paths {
         put?: never;
         /** Suspender: ninguém do condomínio consegue mais entrar */
         post: operations["suspender"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/condominios/{id}/sindico/convite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Novo convite para o síndico que ainda não criou o login
+         * @description O convite anterior deixa de valer. Informe o e-mail só para corrigir o do cadastro.
+         */
+        post: operations["reconvidar"];
         delete?: never;
         options?: never;
         head?: never;
@@ -447,7 +548,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Encerrar antes do prazo: renúncia, destituição... (síndico ou administradora) */
-        post: operations["encerrar"];
+        post: operations["encerrar_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -934,6 +1035,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plataforma/logins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Buscar logins por parte do e-mail (até 20)
+         * @description Mostra a situação e em que condomínios o login entra, com os papéis. Nada dos dados internos.
+         */
+        get: operations["buscar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plataforma/condominios/{id}": {
         parameters: {
             query?: never;
@@ -943,6 +1064,23 @@ export interface paths {
         };
         /** Um condomínio */
         get: operations["obter_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plataforma/condominios/{id}/historico": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Histórico da assinatura: cada mudança de plano, de situação e de acesso, com quem fez */
+        get: operations["historico_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1162,6 +1300,39 @@ export interface components {
             precoSemestral?: number;
             precoAnual?: number;
         };
+        PedidoNovoSindico: {
+            nome: string;
+            /** Format: email */
+            email: string;
+            documento?: string;
+            /** Format: date */
+            inicioMandato: string;
+            /** Format: date */
+            fimMandato: string;
+        };
+        ConviteGerado: {
+            /** Format: uuid */
+            conviteId?: string;
+            email?: string;
+            link?: string;
+            /** Format: date-time */
+            expiraEm?: string;
+        };
+        SindicoAtual: {
+            nome?: string;
+            email?: string;
+            /** Format: date */
+            inicioMandato?: string;
+            /** Format: date */
+            fimMandato?: string;
+            temLogin?: boolean;
+            /** Format: date-time */
+            convitePendenteAte?: string;
+        };
+        SindicoRegistrado: {
+            sindico?: components["schemas"]["SindicoAtual"];
+            convite?: components["schemas"]["ConviteGerado"];
+        };
         PedidoAssinatura: {
             plano: string;
             /** @enum {string} */
@@ -1328,6 +1499,28 @@ export interface components {
             /** Format: date-time */
             expiraEm?: string;
         };
+        AcessoDoLogin: {
+            /** Format: uuid */
+            condominioId?: string;
+            nome?: string;
+            perfis?: ("SINDICO" | "SUBSINDICO" | "CONSELHEIRO" | "ADMINISTRADORA" | "MORADOR" | "PORTARIA" | "ADMIN_PLATAFORMA" | "SUPORTE")[];
+        };
+        LoginNaPlataforma: {
+            /** Format: uuid */
+            id?: string;
+            email?: string;
+            bloqueado?: boolean;
+            motivoDoBloqueio?: string;
+            /** Format: date-time */
+            bloqueadoEm?: string;
+            administradorDaPlataforma?: boolean;
+            /** Format: date-time */
+            ultimoAcesso?: string;
+            condominios?: components["schemas"]["AcessoDoLogin"][];
+        };
+        PedidoBloqueio: {
+            motivo: string;
+        };
         PedidoClienteNovo: {
             nome: string;
             /** @enum {string} */
@@ -1352,13 +1545,9 @@ export interface components {
             condominio?: components["schemas"]["CondominioNaPlataforma"];
             conviteDoSindico?: components["schemas"]["ConviteGerado"];
         };
-        ConviteGerado: {
-            /** Format: uuid */
-            conviteId?: string;
+        PedidoNovoConvite: {
+            /** Format: email */
             email?: string;
-            link?: string;
-            /** Format: date-time */
-            expiraEm?: string;
         };
         PedidoVinculo: {
             /** Format: uuid */
@@ -1693,6 +1882,21 @@ export interface components {
             inicio?: string;
             /** Format: date-time */
             expiraEm?: string;
+            /** Format: date-time */
+            encerradoEm?: string;
+        };
+        AlteracaoDaAssinatura: {
+            /** Format: date-time */
+            momento?: string;
+            /** @enum {string} */
+            tipo?: "CLIENTE_NOVO" | "TROCA_DE_PLANO" | "MUDANCA_DE_SITUACAO" | "SUSPENSAO" | "REATIVACAO";
+            plano?: string;
+            nomeDoPlano?: string;
+            /** @enum {string} */
+            periodicidade?: "MENSAL" | "SEMESTRAL" | "ANUAL";
+            /** @enum {string} */
+            status?: "TESTE" | "ATIVA" | "SUSPENSA" | "CANCELADA";
+            feitoPor?: string;
         };
         GeracaoResumo: {
             /** Format: uuid */
@@ -1861,6 +2065,54 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PlanoNoCatalogo"];
+                };
+            };
+        };
+    };
+    atual: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SindicoAtual"];
+                };
+            };
+        };
+    };
+    trocar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoNovoSindico"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SindicoRegistrado"];
                 };
             };
         };
@@ -2304,6 +2556,74 @@ export interface operations {
             };
         };
     };
+    encerrar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    desbloquear: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LoginNaPlataforma"];
+                };
+            };
+        };
+    };
+    bloquear: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoBloqueio"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LoginNaPlataforma"];
+                };
+            };
+        };
+    };
     listar_1: {
         parameters: {
             query?: never;
@@ -2365,6 +2685,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    reconvidar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoNovoConvite"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ConviteGerado"];
+                };
             };
         };
     };
@@ -2557,7 +2903,7 @@ export interface operations {
             };
         };
     };
-    encerrar: {
+    encerrar_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -3326,6 +3672,28 @@ export interface operations {
             };
         };
     };
+    buscar: {
+        parameters: {
+            query: {
+                email: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LoginNaPlataforma"][];
+                };
+            };
+        };
+    };
     obter_4: {
         parameters: {
             query?: never;
@@ -3344,6 +3712,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CondominioNaPlataforma"];
+                };
+            };
+        };
+    };
+    historico_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AlteracaoDaAssinatura"][];
                 };
             };
         };

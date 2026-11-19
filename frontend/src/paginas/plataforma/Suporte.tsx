@@ -5,7 +5,7 @@ import { api, dados } from '../../api/cliente'
 import type { RegistroDeSuporte } from '../../api/tipos'
 import { AreaDeTexto, Selecao } from '../../componentes/formulario'
 import { Tabela } from '../../componentes/Tabela'
-import { Aviso, Botao, Cartao, Carregando, MensagemDeErro, TituloDaPagina } from '../../componentes/ui'
+import { Aviso, Botao, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina } from '../../componentes/ui'
 import { useSessao } from '../../sessao/contexto'
 import { dataHora } from '../../util/formato'
 
@@ -49,7 +49,7 @@ export function Suporte() {
             opcoes={(clientes.data ?? []).map((c) => ({ valor: c.id ?? '', rotulo: c.nome ?? '' }))} />
           <AreaDeTexto rotulo="Motivo" required minLength={10} maxLength={500} value={motivo} onChange={(e) => setMotivo(e.target.value)}
             ajuda="Obrigatório (mínimo de 10 letras). Fica registrado na auditoria abaixo." />
-          <Aviso>O acesso é <strong>somente leitura</strong> e vence sozinho. Para sair antes, use "Voltar ao painel" na faixa amarela.</Aviso>
+          <Aviso>O acesso é <strong>somente leitura</strong> e vence sozinho em 1 hora. "Voltar ao painel", na faixa amarela, encerra antes.</Aviso>
           <MensagemDeErro erro={abrir.error} />
           <Botao type="submit" carregando={abrir.isPending} disabled={!condominioId || motivo.trim().length < 10} className="w-full md:w-auto">
             Entrar no condomínio (somente leitura)
@@ -68,12 +68,31 @@ export function Suporte() {
               { titulo: 'Condomínio', valor: (r) => <span className="font-medium">{nomeDe(r.condominioId)}</span> },
               { titulo: 'Quem', valor: (r) => r.administradorEmail },
               { titulo: 'Início', valor: (r) => dataHora(r.inicio) },
-              { titulo: 'Vence', valor: (r) => dataHora(r.expiraEm) },
+              { titulo: 'Situação', valor: (r) => <SituacaoDoAcesso registro={r} /> },
               { titulo: 'Motivo', valor: (r) => <span className="whitespace-pre-line">{r.motivo}</span> },
             ]}
           />
         )}
       </section>
     </div>
+  )
+}
+
+/** Em andamento (com o botão para encerrar), encerrado antes do prazo ou vencido. */
+function SituacaoDoAcesso({ registro }: { registro: RegistroDeSuporte }) {
+  const cache = useQueryClient()
+  const [agora] = useState(() => Date.now())
+  const encerrar = useMutation({
+    mutationFn: async () => dados(await api.POST('/api/plataforma/suporte/{id}/encerramento', { params: { path: { id: registro.id! } } })),
+    onSuccess: () => cache.invalidateQueries({ queryKey: ['plataforma', 'suporte'] }),
+    onError: (e) => window.alert(e.message),
+  })
+  if (registro.encerradoEm) return <span>Encerrado em {dataHora(registro.encerradoEm)}</span>
+  if (registro.expiraEm && new Date(registro.expiraEm).getTime() <= agora) return <span>Venceu em {dataHora(registro.expiraEm)}</span>
+  return (
+    <span className="flex flex-wrap items-center gap-2">
+      <Etiqueta cor="amarelo">Em andamento até {dataHora(registro.expiraEm)}</Etiqueta>
+      <button className="text-sm text-red-700 underline" disabled={encerrar.isPending} onClick={() => encerrar.mutate()}>Encerrar</button>
+    </span>
   )
 }

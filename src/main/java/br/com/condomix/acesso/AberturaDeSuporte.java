@@ -67,6 +67,14 @@ class AberturaDeSuporte implements SuporteAoCondominio {
 	}
 
 	@Override
+	@Transactional
+	public void encerrar(UUID acessoId) {
+		acessos.findById(acessoId)
+				.orElseThrow(() -> new NaoEncontradoException("Acesso de suporte não encontrado"))
+				.encerrar(Instant.now(relogio));
+	}
+
+	@Override
 	@Transactional(readOnly = true)
 	public List<RegistroDeSuporte> historico() {
 		List<AcessoDeSuporte> lista = acessos.findTop200ByOrderByInicioDesc();
@@ -74,7 +82,7 @@ class AberturaDeSuporte implements SuporteAoCondominio {
 				.stream().collect(Collectors.toMap(Usuario::getId, Usuario::getEmail, (a, b) -> a));
 		return lista.stream()
 				.map(a -> new RegistroDeSuporte(a.getId(), a.getAdministradorId(), emails.get(a.getAdministradorId()),
-						a.getCondominioId(), a.getMotivo(), a.getInicio(), a.getExpiraEm()))
+						a.getCondominioId(), a.getMotivo(), a.getInicio(), a.getExpiraEm(), a.getEncerradoEm()))
 				.toList();
 	}
 

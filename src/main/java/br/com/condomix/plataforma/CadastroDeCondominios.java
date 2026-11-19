@@ -12,8 +12,15 @@ public interface CadastroDeCondominios {
 	record NovoCondominio(String nome, TipoCondominio tipo, String cnpj, String codigoPlano, Periodicidade periodicidade) {
 	}
 
-	/** @return o id do condomínio, que é o tenant_id dos dados dele */
-	UUID cadastrar(NovoCondominio novo);
+	/**
+	 * @param registradoPor quem cadastrou (vai para o histórico da assinatura); vazio quando é o sistema
+	 * @return o id do condomínio, que é o tenant_id dos dados dele
+	 */
+	UUID cadastrar(NovoCondominio novo, UUID registradoPor);
+
+	default UUID cadastrar(NovoCondominio novo) {
+		return cadastrar(novo, null);
+	}
 
 	default UUID cadastrar(String nome, TipoCondominio tipo, String codigoPlano, Periodicidade periodicidade) {
 		return cadastrar(new NovoCondominio(nome, tipo, null, codigoPlano, periodicidade));

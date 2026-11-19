@@ -60,7 +60,13 @@ public class AutenticacaoService {
 			senhas.matches(senha, hashFicticio);
 			throw new CredenciaisInvalidasException();
 		}
-		if (!senhas.matches(senha, usuario.getSenhaHash()) || !usuario.isAtivo()) {
+		if (!senhas.matches(senha, usuario.getSenhaHash())) {
+			throw new CredenciaisInvalidasException();
+		}
+		if (usuario.isBloqueado()) {
+			throw new AcessoBloqueadoException();
+		}
+		if (!usuario.isAtivo()) {
 			throw new CredenciaisInvalidasException();
 		}
 		usuario.registrarAcesso(Instant.now(relogio));

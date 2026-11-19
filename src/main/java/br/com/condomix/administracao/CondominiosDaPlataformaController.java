@@ -39,9 +39,13 @@ class CondominiosDaPlataformaController {
 
 	private final IngressoDeCliente ingresso;
 
-	CondominiosDaPlataformaController(PainelDeCondominios painel, IngressoDeCliente ingresso) {
+	private final HistoricoDaAssinatura historico;
+
+	CondominiosDaPlataformaController(PainelDeCondominios painel, IngressoDeCliente ingresso,
+			HistoricoDaAssinatura historico) {
 		this.painel = painel;
 		this.ingresso = ingresso;
+		this.historico = historico;
 	}
 
 	record PedidoClienteNovo(
@@ -89,22 +93,30 @@ class CondominiosDaPlataformaController {
 	@Operation(summary = "Suspender: ninguém do condomínio consegue mais entrar")
 	@PostMapping("/{id}/suspensao")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	void suspender(@PathVariable UUID id) {
-		painel.suspender(id);
+	void suspender(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
+		painel.suspender(id, UUID.fromString(jwt.getSubject()));
 	}
 
 	@Operation(summary = "Reativar um condomínio suspenso")
 	@PostMapping("/{id}/reativacao")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	void reativar(@PathVariable UUID id) {
-		painel.reativar(id);
+	void reativar(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
+		painel.reativar(id, UUID.fromString(jwt.getSubject()));
 	}
 
 	@Operation(summary = "Trocar plano, periodicidade ou situação da assinatura",
 			description = "status: TESTE, ATIVA ou SUSPENSA. Trocar plano ou periodicidade guarda a assinatura anterior no histórico.")
 	@PutMapping("/{id}/assinatura")
-	CondominioNaPlataforma alterarAssinatura(@PathVariable UUID id, @Valid @RequestBody PedidoAssinatura pedido) {
-		return painel.alterarAssinatura(id, pedido.plano(), pedido.periodicidade(), pedido.status());
+	CondominioNaPlataforma alterarAssinatura(@PathVariable UUID id, @Valid @RequestBody PedidoAssinatura pedido,
+			@AuthenticationPrincipal Jwt jwt) {
+		return painel.alterarAssinatura(id, pedido.plano(), pedido.periodicidade(), pedido.status(),
+				UUID.fromString(jwt.getSubject()));
+	}
+
+	@Operation(summary = "Histórico da assinatura: cada mudança de plano, de situação e de acesso, com quem fez")
+	@GetMapping("/{id}/historico")
+	List<HistoricoDaAssinatura.AlteracaoDaAssinatura> historico(@PathVariable UUID id) {
+		return historico.doCondominio(id);
 	}
 
 }

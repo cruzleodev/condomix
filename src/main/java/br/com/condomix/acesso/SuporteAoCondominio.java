@@ -12,6 +12,9 @@ public interface SuporteAoCondominio {
 
 	TokenDeSuporte abrir(UUID administradorId, UUID condominioId, String motivo);
 
+	/** Encerra o acesso antes do prazo: o token de suporte deixa de valer na hora. */
+	void encerrar(UUID acessoId);
+
 	/** Os acessos mais recentes, para auditoria. */
 	List<RegistroDeSuporte> historico();
 
@@ -19,7 +22,7 @@ public interface SuporteAoCondominio {
 	}
 
 	record RegistroDeSuporte(UUID id, UUID administradorId, String administradorEmail, UUID condominioId,
-			String motivo, Instant inicio, Instant expiraEm) {
+			String motivo, Instant inicio, Instant expiraEm, Instant encerradoEm) {
 	}
 
 }

@@ -1,28 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { api, dados } from '../../api/cliente'
 import type { ClienteNovo, CondominioNaPlataforma, PedidoClienteNovo } from '../../api/tipos'
 import { LinkDeConvite, Selecao } from '../../componentes/formulario'
 import { Tabela } from '../../componentes/Tabela'
 import { Botao, Campo, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina } from '../../componentes/ui'
 import { data, documento, hojeIso, opcoes, ROTULOS, umAnoDepoisMenosUmDia } from '../../util/formato'
+import { COR_DO_STATUS, usePlanosBase } from './comum'
 
 type Periodicidade = PedidoClienteNovo['periodicidade']
-type Status = NonNullable<NonNullable<CondominioNaPlataforma['assinatura']>['status']>
 
-const COR_DO_STATUS = { TESTE: 'marca', ATIVA: 'verde', SUSPENSA: 'vermelho', CANCELADA: 'cinza' } as const
-
-function usePlanosBase() {
-  const planos = useQuery({ queryKey: ['plataforma', 'planos'], queryFn: async () => dados(await api.GET('/api/plataforma/planos')) })
-  return (planos.data ?? []).filter((p) => p.tipo === 'BASE' && p.ativo)
-}
 
 /** Painel do Condomix: os condomínios clientes, a assinatura de cada um e o cadastro de cliente novo. */
 export function Clientes() {
   const navegar = useNavigate()
   const [novo, setNovo] = useState(false)
-  const [editando, setEditando] = useState<CondominioNaPlataforma | null>(null)
   const clientes = useQuery({ queryKey: ['plataforma', 'condominios'], queryFn: async () => dados(await api.GET('/api/plataforma/condominios')) })
   const lista = clientes.data ?? []
   const ativos = lista.filter((c) => c.ativo).length
@@ -30,9 +23,8 @@ export function Clientes() {
   return (
     <div className="space-y-4">
       <TituloDaPagina subtitulo={clientes.data ? `${lista.length} condomínios · ${ativos} ativos` : undefined}>Clientes</TituloDaPagina>
-      {!novo && !editando && <Botao onClick={() => setNovo(true)}>Novo cliente</Botao>}
+      {!novo && <Botao onClick={() => setNovo(true)}>Novo cliente</Botao>}
       {novo && <CadastroDeCliente aoTerminar={() => setNovo(false)} />}
-      {editando && <EdicaoDeAssinatura cliente={editando} aoTerminar={() => setEditando(null)} />}
 
       {clientes.isPending ? <Carregando /> : clientes.isError ? <MensagemDeErro erro={clientes.error} /> : (
         <Tabela<CondominioNaPlataforma>
@@ -42,7 +34,7 @@ export function Clientes() {
           colunas={[
             { titulo: 'Condomínio', valor: (c) => (
               <span>
-                <span className="font-medium">{c.nome}</span>
+                <Link to={`/plataforma/clientes/${c.id}`} className="font-medium text-marca-700 underline">{c.nome}</Link>
                 <span className="block text-xs text-slate-500">{ROTULOS.tipoDeCondominio[c.tipo ?? 'MISTO']}{c.cnpj ? ` · ${documento(c.cnpj)}` : ''}</span>
               </span>
             ) },
@@ -54,8 +46,7 @@ export function Clientes() {
             { titulo: 'Acesso', valor: (c) => c.ativo ? <Etiqueta cor="verde">Liberado</Etiqueta> : <Etiqueta cor="vermelho">Suspenso</Etiqueta> },
             { titulo: 'Ações', direita: true, valor: (c) => (
               <span className="flex flex-wrap justify-end gap-3 text-sm">
-                <button className="text-marca-700 underline" onClick={() => { setNovo(false); setEditando(c) }}>Assinatura</button>
-                <SuspenderOuReativar cliente={c} />
+                <Link className="text-marca-700 underline" to={`/plataforma/clientes/${c.id}`}>Abrir</Link>
                 <button className="text-marca-700 underline" onClick={() => navegar(`/plataforma/suporte?condominio=${c.id}`)}>Suporte</button>
               </span>
             ) },
@@ -63,29 +54,6 @@ export function Clientes() {
         />
       )}
     </div>
-  )
-}
-
-function SuspenderOuReativar({ cliente }: { cliente: CondominioNaPlataforma }) {
-  const cache = useQueryClient()
-  const acao = useMutation({
-    mutationFn: async () => {
-      const caminho = { params: { path: { id: cliente.id! } } }
-      dados(cliente.ativo
-        ? await api.POST('/api/plataforma/condominios/{id}/suspensao', caminho)
-        : await api.POST('/api/plataforma/condominios/{id}/reativacao', caminho))
-    },
-    onSuccess: () => cache.invalidateQueries({ queryKey: ['plataforma', 'condominios'] }),
-    onError: (e) => window.alert(e.message),
-  })
-  function clicar() {
-    if (cliente.ativo && !window.confirm(`Suspender ${cliente.nome}? Ninguém do condomínio conseguirá entrar até a reativação.`)) return
-    acao.mutate()
-  }
-  return (
-    <button className={cliente.ativo ? 'text-red-700 underline' : 'text-emerald-700 underline'} disabled={acao.isPending} onClick={clicar}>
-      {acao.isPending ? 'Aguarde…' : cliente.ativo ? 'Suspender' : 'Reativar'}
-    </button>
   )
 }
 
@@ -117,8 +85,11 @@ function CadastroDeCliente({ aoTerminar }: { aoTerminar: () => void }) {
       <Cartao titulo={`${criado.condominio?.nome} cadastrado`}>
         <p className="mb-3 text-sm text-slate-600">
           O condomínio começa em teste. O síndico cria a senha pelo link abaixo e já entra como síndico.
+          Se o link se perder, gere outro na página do cliente.
         </p>
-        {criado.conviteDoSindico?.link && <LinkDeConvite link={criado.conviteDoSindico.link} email={criado.conviteDoSindico.email} />}
+        {criado.conviteDoSindico?.link
+          ? <LinkDeConvite link={criado.conviteDoSindico.link} email={criado.conviteDoSindico.email} />
+          : <p className="text-sm text-slate-600">O síndico já tinha login no Condomix: entra com a senha dele.</p>}
         <Botao variante="secundario" className="mt-3 w-full md:w-auto" onClick={aoTerminar}>Fechar</Botao>
       </Cartao>
     )
@@ -154,41 +125,6 @@ function CadastroDeCliente({ aoTerminar }: { aoTerminar: () => void }) {
         <MensagemDeErro erro={cadastrar.error} />
         <div className="flex flex-col gap-2 md:flex-row">
           <Botao type="submit" carregando={cadastrar.isPending} disabled={!plano}>Cadastrar e gerar convite</Botao>
-          <Botao type="button" variante="secundario" onClick={aoTerminar}>Cancelar</Botao>
-        </div>
-      </form>
-    </Cartao>
-  )
-}
-
-function EdicaoDeAssinatura({ cliente, aoTerminar }: { cliente: CondominioNaPlataforma; aoTerminar: () => void }) {
-  const cache = useQueryClient()
-  const planos = usePlanosBase()
-  const [plano, setPlano] = useState(cliente.assinatura?.plano ?? '')
-  const [periodicidade, setPeriodicidade] = useState<Periodicidade>(cliente.assinatura?.periodicidade ?? 'MENSAL')
-  const [status, setStatus] = useState<Status>(cliente.assinatura?.status ?? 'TESTE')
-  const salvar = useMutation({
-    mutationFn: async () => dados(await api.PUT('/api/plataforma/condominios/{id}/assinatura', {
-      params: { path: { id: cliente.id! } }, body: { plano, periodicidade, status },
-    })),
-    onSuccess: () => {
-      cache.invalidateQueries({ queryKey: ['plataforma', 'condominios'] })
-      aoTerminar()
-    },
-  })
-  const { CANCELADA: _cancelada, ...statusPermitidos } = ROTULOS.statusDaAssinatura
-  return (
-    <Cartao titulo={`Assinatura de ${cliente.nome}`}>
-      <form onSubmit={(e) => { e.preventDefault(); salvar.mutate() }} className="space-y-3">
-        <div className="grid gap-3 md:grid-cols-3">
-          <Selecao rotulo="Plano" opcoes={planos.map((p) => ({ valor: p.codigo ?? '', rotulo: p.nome ?? '' }))} value={plano} onChange={(e) => setPlano(e.target.value)} />
-          <Selecao rotulo="Periodicidade" opcoes={opcoes(ROTULOS.periodicidade)} value={periodicidade} onChange={(e) => setPeriodicidade(e.target.value as Periodicidade)} />
-          <Selecao rotulo="Situação" opcoes={opcoes(statusPermitidos)} value={status} onChange={(e) => setStatus(e.target.value as Status)} />
-        </div>
-        <p className="text-xs text-slate-500">Trocar o plano ou a periodicidade guarda a assinatura anterior no histórico.</p>
-        <MensagemDeErro erro={salvar.error} />
-        <div className="flex flex-col gap-2 md:flex-row">
-          <Botao type="submit" carregando={salvar.isPending}>Salvar</Botao>
           <Botao type="button" variante="secundario" onClick={aoTerminar}>Cancelar</Botao>
         </div>
       </form>

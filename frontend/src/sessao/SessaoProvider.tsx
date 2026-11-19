@@ -47,13 +47,16 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  /** Volta à sessão do administrador e encerra o acesso de suporte no servidor (o token de suporte deixa de valer). */
   const sairDoSuporte = useCallback(() => {
-    setSessao((atual) => {
-      const anterior = atual?.anterior ?? null
-      guardar(anterior)
-      return anterior
-    })
-  }, [])
+    const atual = sessaoGuardada()
+    const acesso = atual ? lerToken(atual.token)?.suporte : undefined
+    atualizar(atual?.anterior ?? null)
+    if (acesso) {
+      // Já com o token do administrador. Se falhar, o acesso ainda vence sozinho no prazo.
+      api.POST('/api/plataforma/suporte/{id}/encerramento', { params: { path: { id: acesso } } }).catch(() => undefined)
+    }
+  }, [atualizar])
 
   const sair = useCallback(() => {
     setSaiuPorVontade(true)

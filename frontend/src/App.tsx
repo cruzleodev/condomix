@@ -17,7 +17,9 @@ import { Unidades } from './paginas/gestao/Unidades'
 import { EscolherCondominio } from './paginas/EscolherCondominio'
 import { Inicio } from './paginas/Inicio'
 import { MeusDebitos } from './paginas/MeusDebitos'
+import { Cliente } from './paginas/plataforma/Cliente'
 import { Clientes } from './paginas/plataforma/Clientes'
+import { Logins } from './paginas/plataforma/Logins'
 import { Planos } from './paginas/plataforma/Planos'
 import { Suporte } from './paginas/plataforma/Suporte'
 import { SemAcesso } from './paginas/SemAcesso'
@@ -37,7 +39,9 @@ const rotas = [
           element: <LayoutDaPlataforma />,
           children: [
             { path: '/plataforma', element: <Clientes /> },
+            { path: '/plataforma/clientes/:id', element: <Cliente /> },
             { path: '/plataforma/planos', element: <Planos /> },
+            { path: '/plataforma/logins', element: <Logins /> },
             { path: '/plataforma/suporte', element: <Suporte /> },
           ],
         }],

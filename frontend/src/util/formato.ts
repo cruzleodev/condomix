@@ -108,6 +108,7 @@ export const ROTULOS = {
   tipoDeCondominio: { RESIDENCIAL_VERTICAL: 'Residencial (prédio)', RESIDENCIAL_HORIZONTAL: 'Residencial (casas)', COMERCIAL: 'Comercial', MISTO: 'Misto' },
   periodicidade: { MENSAL: 'Mensal', SEMESTRAL: 'Semestral', ANUAL: 'Anual' },
   statusDaAssinatura: { TESTE: 'Em teste', ATIVA: 'Ativa', SUSPENSA: 'Suspensa', CANCELADA: 'Cancelada' },
+  tipoDeEventoDaAssinatura: { CLIENTE_NOVO: 'Entrou como cliente', TROCA_DE_PLANO: 'Trocou o plano', MUDANCA_DE_SITUACAO: 'Mudou a situação', SUSPENSAO: 'Acesso suspenso', REATIVACAO: 'Acesso reativado' },
   modulo: { DOCUMENTOS: 'Documentos', FINANCEIRO: 'Financeiro', RESERVAS: 'Reservas', WHATSAPP: 'WhatsApp' },
   tipoDeLancamento: { RECEITA: 'Receita', DESPESA: 'Despesa', TRANSFERENCIA_ENTRADA: 'Transferência (entrada)', TRANSFERENCIA_SAIDA: 'Transferência (saída)' },
 } as const

@@ -8,8 +8,6 @@ import br.com.condomix.plataforma.CadastroDeCondominios;
 import br.com.condomix.plataforma.PainelDeCondominios;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.UUID;
 
 /**
@@ -18,9 +16,6 @@ import java.util.UUID;
  */
 @Service
 class IngressoDeCliente {
-
-	/** Mesmo limite do mandato (Código Civil, art. 1.347), conferido antes de criar o condomínio. */
-	private static final Period MANDATO_MAXIMO = Period.ofYears(2);
 
 	private final CadastroDeCondominios cadastro;
 
@@ -43,7 +38,7 @@ class IngressoDeCliente {
 	 */
 	ClienteNovo registrar(CadastroDeCondominios.NovoCondominio condominio, IngressoDeSindico.NovoSindico sindico,
 			UUID administradorId) {
-		conferirMandato(sindico.inicioMandato(), sindico.fimMandato());
+		SindicoDoCliente.conferirMandato(sindico.inicioMandato(), sindico.fimMandato());
 		try {
 			DocumentoBrasileiro.normalizar(condominio.cnpj());
 			DocumentoBrasileiro.normalizar(sindico.documento());
@@ -53,19 +48,13 @@ class IngressoDeCliente {
 		}
 		UUID condominioId;
 		try {
-			condominioId = cadastro.cadastrar(condominio);
+			condominioId = cadastro.cadastrar(condominio, administradorId);
 		}
 		catch (IllegalArgumentException e) {
 			throw RegraDeNegocioException.invalido(e.getMessage());
 		}
-		ConviteGerado convite = sindicos.registrar(condominioId, sindico, administradorId);
+		ConviteGerado convite = sindicos.registrar(condominioId, sindico, administradorId).convite();
 		return new ClienteNovo(painel.obter(condominioId), convite);
-	}
-
-	private static void conferirMandato(LocalDate inicio, LocalDate fim) {
-		if (fim.isBefore(inicio) || fim.isAfter(inicio.plus(MANDATO_MAXIMO).minusDays(1))) {
-			throw RegraDeNegocioException.invalido("O mandato do síndico deve terminar depois da posse e durar no máximo 2 anos");
-		}
 	}
 
 }
