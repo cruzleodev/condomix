@@ -44,4 +44,7 @@ public interface FaturaRepository extends JpaRepository<Fatura, UUID> {
 
 	boolean existsBySituacaoAndVencimentoBefore(SituacaoDaFatura situacao, LocalDate limite);
 
+	/** Em modo sistema: as emitidas que venceram na data (o aviso de atraso sai no dia seguinte). */
+	List<Fatura> findBySituacaoAndVencimento(SituacaoDaFatura situacao, LocalDate vencimento);
+
 }

@@ -31,6 +31,8 @@ export default defineConfig({
       workbox: {
         // A API nunca vai para o cache: dados financeiros têm que estar sempre atualizados.
         navigateFallbackDenylist: [/^\/api\//],
+        // Recebe as notificações push e abre o app na tela certa ao tocar nelas.
+        importScripts: ['sw-push.js'],
       },
     }),
   ],

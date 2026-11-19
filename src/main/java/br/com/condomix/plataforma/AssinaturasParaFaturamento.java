@@ -24,11 +24,22 @@ public interface AssinaturasParaFaturamento {
 	/** Quem aparece no boleto: o próprio condomínio. */
 	PagadorDaAssinatura pagador(UUID condominioId);
 
-	/** Suspende o acesso, se ainda estiver ativo. Fica no histórico como feito pelo sistema. */
-	void suspenderPorFaltaDePagamento(UUID condominioId);
+	/**
+	 * Suspende o acesso, se ainda estiver ativo. Fica no histórico como feito pelo sistema.
+	 *
+	 * @return se suspendeu agora (falso: já estava suspenso)
+	 */
+	boolean suspenderPorFaltaDePagamento(UUID condominioId);
 
-	/** Reativa o acesso, mas só se a suspensão foi por falta de pagamento (a manual continua). */
-	void reativarAposPagamento(UUID condominioId);
+	/**
+	 * Reativa o acesso, mas só se a suspensão foi por falta de pagamento (a manual continua).
+	 *
+	 * @return se reativou agora
+	 */
+	boolean reativarAposPagamento(UUID condominioId);
+
+	/** Os testes grátis que terminam na data, para avisar a gestão com antecedência. */
+	List<TesteTerminando> testesTerminandoEm(LocalDate fimDoTeste);
 
 	/** @param preco vazio se o administrador ainda não definiu o preço do plano nesta periodicidade */
 	record AssinaturaCobravel(UUID condominioId, UUID planoId, String nomeDoPlano, Periodicidade periodicidade,
@@ -37,6 +48,10 @@ public interface AssinaturasParaFaturamento {
 
 	record AssinaturaDoCliente(String nomeDoPlano, Periodicidade periodicidade, StatusAssinatura status,
 			LocalDate fimDoTeste, BigDecimal preco, boolean ativo, MotivoDaSuspensao motivoSuspensao) {
+	}
+
+	record TesteTerminando(UUID condominioId, String nomeDoPlano, Periodicidade periodicidade, BigDecimal preco,
+			LocalDate fimDoTeste) {
 	}
 
 	/** @param cnpj só os caracteres, sem pontuação; vazio se não foi cadastrado */

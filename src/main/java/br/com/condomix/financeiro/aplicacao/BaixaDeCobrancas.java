@@ -1,5 +1,7 @@
 package br.com.condomix.financeiro.aplicacao;
 
+import br.com.condomix.financeiro.CobrancaPaga;
+
 import br.com.condomix.compartilhado.NaoEncontradoException;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
 import br.com.condomix.financeiro.dominio.Cobranca;
@@ -51,6 +53,7 @@ public class BaixaDeCobrancas {
 		}
 		Regras.aplicar(() -> cobranca.registrarPagamento(pagoEm, valorPago, forma, observacao, registradoPor));
 		eventos.publishEvent(PagamentoDeCobrancaRegistrado.manual(cobranca.getId()));
+		eventos.publishEvent(paga(cobranca, false));
 		return cobranca;
 	}
 
@@ -63,6 +66,7 @@ public class BaixaDeCobrancas {
 		Cobranca cobranca = buscar(id);
 		Regras.aplicar(() -> cobranca.registrarPagamento(data, valorPago, forma, observacao, null));
 		eventos.publishEvent(new PagamentoDeCobrancaRegistrado(cobranca.getId(), true, tarifa));
+		eventos.publishEvent(paga(cobranca, true));
 		return cobranca;
 	}
 
@@ -78,6 +82,12 @@ public class BaixaDeCobrancas {
 		Regras.aplicar(() -> cobranca.cancelar(motivo, Instant.now(relogio)));
 		eventos.publishEvent(new CobrancaCancelada(cobranca.getId()));
 		return cobranca;
+	}
+
+	/** Para os outros módulos (ex.: a comunicação avisa o morador). */
+	private static CobrancaPaga paga(Cobranca c, boolean peloGateway) {
+		return new CobrancaPaga(c.getTenantId(), c.getId(), c.getUnidadeId(), c.getDescricao(), c.getValorPago(), c.getPagoEm(),
+				peloGateway);
 	}
 
 	private Cobranca buscar(UUID id) {

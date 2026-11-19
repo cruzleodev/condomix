@@ -1,5 +1,8 @@
 package br.com.condomix.financeiro.aplicacao;
 
+import br.com.condomix.financeiro.CobrancaDisponivel;
+import org.springframework.context.ApplicationEventPublisher;
+
 import br.com.condomix.compartilhado.NaoEncontradoException;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
 import br.com.condomix.compartilhado.TenantAtual;
@@ -35,20 +38,35 @@ public class SolicitacaoDeBoletos {
 
 	private final ContaNoGatewayRepository contas;
 
-	public SolicitacaoDeBoletos(BoletoRepository boletos, CobrancaRepository cobrancas, ContaNoGatewayRepository contas) {
+	private final ApplicationEventPublisher eventos;
+
+	public SolicitacaoDeBoletos(BoletoRepository boletos, CobrancaRepository cobrancas, ContaNoGatewayRepository contas,
+			ApplicationEventPublisher eventos) {
 		this.boletos = boletos;
 		this.cobrancas = cobrancas;
 		this.contas = contas;
+		this.eventos = eventos;
 	}
 
-	/** Taxa do mês ou avulsa: com o gateway ligado, cada cobrança ganha o seu boleto. */
+	/**
+	 * Taxa do mês ou avulsa: com o gateway ligado, cada cobrança ganha o seu boleto (e o aviso ao morador sai quando
+	 * ele ficar pronto). Sem o gateway, o aviso sai agora.
+	 */
 	@EventListener
 	void cobrancasEmitidas(CobrancasEmitidas evento) {
-		contaAtiva().ifPresent(conta -> evento.cobrancaIds().forEach(id -> {
-			if (boletos.vigente(id).isEmpty()) {
-				boletos.save(new Boleto(TenantAtual.obrigatorio(), id, conta.getGateway()));
-			}
-		}));
+		Optional<ContaNoGateway> conta = contaAtiva();
+		if (conta.isPresent()) {
+			evento.cobrancaIds().forEach(id -> {
+				if (boletos.vigente(id).isEmpty()) {
+					boletos.save(new Boleto(TenantAtual.obrigatorio(), id, conta.get().getGateway()));
+				}
+			});
+			return;
+		}
+		cobrancas.findAllById(evento.cobrancaIds()).stream()
+				.filter(c -> c.getOrigem() != OrigemCobranca.IMPORTACAO)
+				.forEach(c -> eventos.publishEvent(new CobrancaDisponivel(c.getTenantId(), c.getId(), c.getUnidadeId(),
+						c.getDescricao(), c.getValor(), c.getVencimento(), false)));
 	}
 
 	@EventListener

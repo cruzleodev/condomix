@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { NavLink, Outlet, useNavigate } from 'react-router'
 import { AvisoDaAssinatura } from '../componentes/AvisoDaAssinatura'
+import { Sino } from '../componentes/Sino'
 import { useSessao } from '../sessao/contexto'
 import { itensDoCelular, itensVisiveis, type ItemDeNavegacao } from './navegacao'
 
@@ -14,6 +15,8 @@ export function LayoutDoApp() {
   const navegar = useNavigate()
   const cache = useQueryClient()
   const pagamentoPendente = !!condominio?.pagamentoPendente
+  // No modo suporte e com o acesso suspenso, as notificações não aparecem (a API também não deixa).
+  const comSino = !suporte && !pagamentoPendente
   const principais = itensVisiveis(perfis, pagamentoPendente).filter((i) => i.secao !== 'gestao' && i.para !== '/conta')
   const gestao = itensVisiveis(perfis, pagamentoPendente).filter((i) => i.secao === 'gestao')
   return (
@@ -21,7 +24,10 @@ export function LayoutDoApp() {
       <aside className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col md:bg-marca-800 md:text-white">
         <div className="px-5 py-5">
           <p className="flex items-center gap-2 text-lg font-bold"><img src="/icone.svg" alt="" className="h-8 w-8 rounded-lg" /> Condomix</p>
-          <p className="mt-3 truncate text-sm font-medium text-marca-100" title={condominio?.nome}>{condominio?.nome}</p>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <p className="truncate text-sm font-medium text-marca-100" title={condominio?.nome}>{condominio?.nome}</p>
+            {comSino && <Sino claro />}
+          </div>
         </div>
         <nav aria-label="Menu" className="flex-1 space-y-1 overflow-y-auto px-3">
           {principais.map((item) => <ItemLateral key={item.para} item={item} />)}
@@ -44,9 +50,12 @@ export function LayoutDoApp() {
             <button className="font-semibold underline" onClick={() => { cache.clear(); sairDoSuporte(); navegar('/plataforma') }}>Voltar ao painel</button>
           </div>
         )}
-        <header className="sticky top-0 z-10 bg-marca-700 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] text-white shadow md:hidden">
-          <p className="text-xs uppercase tracking-wide text-marca-100">Condomix</p>
-          <p className="truncate font-semibold">{condominio?.nome ?? 'Condomínio'}</p>
+        <header className="sticky top-0 z-10 flex items-center justify-between gap-2 bg-marca-700 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] text-white shadow md:hidden">
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-wide text-marca-100">Condomix</p>
+            <p className="truncate font-semibold">{condominio?.nome ?? 'Condomínio'}</p>
+          </div>
+          {comSino && <Sino claro />}
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-4 md:px-8 md:pb-10 md:pt-8">
           {!suporte && !pagamentoPendente && <AvisoDaAssinatura />}

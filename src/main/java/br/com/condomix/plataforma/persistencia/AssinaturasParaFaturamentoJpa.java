@@ -98,27 +98,40 @@ class AssinaturasParaFaturamentoJpa implements AssinaturasParaFaturamento {
 	}
 
 	@Override
-	public void suspenderPorFaltaDePagamento(UUID condominioId) {
-		transacao.executeWithoutResult(s -> {
+	public boolean suspenderPorFaltaDePagamento(UUID condominioId) {
+		return Boolean.TRUE.equals(transacao.execute(s -> {
 			Condominio condominio = buscar(condominioId);
-			if (condominio.isAtivo()) {
-				condominio.suspender(MotivoDaSuspensao.FALTA_DE_PAGAMENTO);
-				historico.save(EventoDeAssinatura.doAcesso(condominioId, Instant.now(relogio),
-						TipoDeEventoDaAssinatura.SUSPENSAO_POR_FALTA_DE_PAGAMENTO, null));
+			if (!condominio.isAtivo()) {
+				return false;
 			}
-		});
+			condominio.suspender(MotivoDaSuspensao.FALTA_DE_PAGAMENTO);
+			historico.save(EventoDeAssinatura.doAcesso(condominioId, Instant.now(relogio),
+					TipoDeEventoDaAssinatura.SUSPENSAO_POR_FALTA_DE_PAGAMENTO, null));
+			return true;
+		}));
 	}
 
 	@Override
-	public void reativarAposPagamento(UUID condominioId) {
-		transacao.executeWithoutResult(s -> {
+	public boolean reativarAposPagamento(UUID condominioId) {
+		return Boolean.TRUE.equals(transacao.execute(s -> {
 			Condominio condominio = buscar(condominioId);
-			if (condominio.isSuspensoPorFaltaDePagamento()) {
-				condominio.reativar();
-				historico.save(EventoDeAssinatura.doAcesso(condominioId, Instant.now(relogio),
-						TipoDeEventoDaAssinatura.REATIVACAO_APOS_PAGAMENTO, null));
+			if (!condominio.isSuspensoPorFaltaDePagamento()) {
+				return false;
 			}
-		});
+			condominio.reativar();
+			historico.save(EventoDeAssinatura.doAcesso(condominioId, Instant.now(relogio),
+					TipoDeEventoDaAssinatura.REATIVACAO_APOS_PAGAMENTO, null));
+			return true;
+		}));
+	}
+
+	@Override
+	public List<TesteTerminando> testesTerminandoEm(LocalDate fimDoTeste) {
+		return TenantAtual.comoSistema(() -> transacao.execute(s -> assinaturas.testesVencidos(fimDoTeste).stream()
+				.filter(a -> fimDoTeste.equals(a.getFimDoTeste()))
+				.map(a -> new TesteTerminando(a.getTenantId(), a.getPlano().getNome(), a.getPeriodicidade(),
+						a.getPeriodicidade().precoDe(a.getPlano()), a.getFimDoTeste()))
+				.toList()));
 	}
 
 	private Condominio buscar(UUID condominioId) {
