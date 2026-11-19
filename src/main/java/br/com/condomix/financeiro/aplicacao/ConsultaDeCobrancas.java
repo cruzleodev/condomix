@@ -3,9 +3,11 @@ package br.com.condomix.financeiro.aplicacao;
 import br.com.condomix.acesso.CadastroParaCobranca;
 import br.com.condomix.acesso.CadastroParaCobranca.UnidadeCobravel;
 import br.com.condomix.compartilhado.NaoEncontradoException;
+import br.com.condomix.financeiro.dominio.Boleto;
 import br.com.condomix.financeiro.dominio.Cobranca;
 import br.com.condomix.financeiro.dominio.Encargos;
 import br.com.condomix.financeiro.dominio.StatusCobranca;
+import br.com.condomix.financeiro.persistencia.BoletoRepository;
 import br.com.condomix.financeiro.persistencia.CobrancaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,16 +39,20 @@ public class ConsultaDeCobrancas {
 
 	private final CadastroParaCobranca cadastro;
 
+	private final BoletoRepository boletos;
+
 	private final Clock relogio;
 
-	public ConsultaDeCobrancas(CobrancaRepository cobrancas, CadastroParaCobranca cadastro, Clock relogio) {
+	public ConsultaDeCobrancas(CobrancaRepository cobrancas, CadastroParaCobranca cadastro, BoletoRepository boletos,
+			Clock relogio) {
 		this.cobrancas = cobrancas;
 		this.cadastro = cadastro;
+		this.boletos = boletos;
 		this.relogio = relogio;
 	}
 
-	/** Uma cobrança com o valor atualizado para hoje e a descrição da unidade. */
-	public record CobrancaHoje(Cobranca cobranca, String unidade, boolean vencida, Encargos encargos) {
+	/** Uma cobrança com o valor atualizado para hoje, a descrição da unidade e o boleto (vazio se não tem). */
+	public record CobrancaHoje(Cobranca cobranca, String unidade, boolean vencida, Encargos encargos, Boleto boleto) {
 	}
 
 	/**
@@ -62,13 +68,15 @@ public class ConsultaDeCobrancas {
 				Sort.by(Sort.Order.desc("vencimento"), Sort.Order.asc("unidadeId")));
 		Map<UUID, String> nomes = nomesDasUnidades();
 		LocalDate hoje = hoje();
-		return cobrancas.findAll(CobrancaRepository.filtros(competencia == null ? null : competencia.atDay(1), status, unidadeId), pedido)
-				.map(c -> hoje(c, nomes, hoje));
+		Page<Cobranca> encontradas = cobrancas.findAll(
+				CobrancaRepository.filtros(competencia == null ? null : competencia.atDay(1), status, unidadeId), pedido);
+		Map<UUID, Boleto> doPedido = boletosDe(encontradas.getContent());
+		return encontradas.map(c -> hoje(c, nomes, hoje, doPedido));
 	}
 
 	public CobrancaHoje obter(UUID id) {
 		Cobranca c = cobrancas.findById(id).orElseThrow(() -> new NaoEncontradoException("Cobrança não encontrada"));
-		return hoje(c, nomesDasUnidades(), hoje());
+		return hoje(c, nomesDasUnidades(), hoje(), boletosDe(List.of(c)));
 	}
 
 	/** Unidades com cobranças vencidas, das que devem há mais tempo para as mais recentes. */
@@ -98,13 +106,23 @@ public class ConsultaDeCobrancas {
 			return List.of();
 		}
 		Map<UUID, String> nomes = nomesDasUnidades();
-		return cobrancas.daUnidades(unidades, hoje.minusMonths(MESES_DE_HISTORICO)).stream()
-				.map(c -> hoje(c, nomes, hoje)).toList();
+		List<Cobranca> lista = cobrancas.daUnidades(unidades, hoje.minusMonths(MESES_DE_HISTORICO));
+		Map<UUID, Boleto> doUsuario = boletosDe(lista);
+		return lista.stream().map(c -> hoje(c, nomes, hoje, doUsuario)).toList();
 	}
 
-	private static CobrancaHoje hoje(Cobranca c, Map<UUID, String> nomes, LocalDate hoje) {
+	private static CobrancaHoje hoje(Cobranca c, Map<UUID, String> nomes, LocalDate hoje, Map<UUID, Boleto> boletos) {
 		return new CobrancaHoje(c, nomes.getOrDefault(c.getUnidadeId(), "(unidade desativada)"), c.vencidaEm(hoje),
-				c.getStatus() == StatusCobranca.CANCELADA ? null : c.encargosEm(hoje));
+				c.getStatus() == StatusCobranca.CANCELADA ? null : c.encargosEm(hoje), boletos.get(c.getId()));
+	}
+
+	/** Os boletos vigentes das cobranças, numa consulta só. */
+	private Map<UUID, Boleto> boletosDe(List<Cobranca> lista) {
+		if (lista.isEmpty()) {
+			return Map.of();
+		}
+		return boletos.vigentes(lista.stream().map(Cobranca::getId).toList()).stream()
+				.collect(Collectors.toMap(Boleto::getCobrancaId, Function.identity(), (a, b) -> a));
 	}
 
 	private Map<UUID, String> nomesDasUnidades() {

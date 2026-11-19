@@ -6,11 +6,13 @@ import br.com.condomix.compartilhado.NaoEncontradoException;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
 import br.com.condomix.compartilhado.TenantAtual;
 import br.com.condomix.financeiro.dominio.Cobranca;
+import br.com.condomix.financeiro.dominio.CobrancasEmitidas;
 import br.com.condomix.financeiro.dominio.Dinheiro;
 import br.com.condomix.financeiro.dominio.ItemDeCobranca;
 import br.com.condomix.financeiro.dominio.OrigemCobranca;
 import br.com.condomix.financeiro.dominio.TipoDeItem;
 import br.com.condomix.financeiro.persistencia.CobrancaRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,13 +41,16 @@ public class EmissaoAvulsa {
 
 	private final CobrancaRepository cobrancas;
 
+	private final ApplicationEventPublisher eventos;
+
 	private final Clock relogio;
 
 	public EmissaoAvulsa(CadastroParaCobranca cadastro, ConfiguracaoDeCobrancas configuracoes,
-			CobrancaRepository cobrancas, Clock relogio) {
+			CobrancaRepository cobrancas, ApplicationEventPublisher eventos, Clock relogio) {
 		this.cadastro = cadastro;
 		this.configuracoes = configuracoes;
 		this.cobrancas = cobrancas;
+		this.eventos = eventos;
 		this.relogio = relogio;
 	}
 
@@ -61,9 +66,11 @@ public class EmissaoAvulsa {
 				.filter(u -> u.id().equals(unidadeId)).findFirst()
 				.orElseThrow(() -> new NaoEncontradoException("Unidade não encontrada ou desativada"));
 		var item = new ItemDeCobranca(tipo, descricao, Dinheiro.reais(valor));
-		return cobrancas.save(Regras.aplicar(() -> new Cobranca(new Cobranca.Emissao(TenantAtual.obrigatorio(),
+		Cobranca cobranca = cobrancas.save(Regras.aplicar(() -> new Cobranca(new Cobranca.Emissao(TenantAtual.obrigatorio(),
 				unidade.id(), unidade.responsavel() == null ? null : unidade.responsavel().pessoaId(),
 				OrigemCobranca.AVULSA, null, null, descricao, vencimento, List.of(item), configuracoes.atual(), criadaPor))));
+		eventos.publishEvent(new CobrancasEmitidas(List.of(cobranca.getId())));
+		return cobranca;
 	}
 
 }

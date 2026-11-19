@@ -33,7 +33,10 @@ import java.util.UUID;
  *   <li>o que foi pago <b>a mais</b> que o valor da cobrança é multa e juros por atraso;</li>
  *   <li>o que foi pago <b>a menos</b> (encargos ou parte perdoados) sai das maiores parcelas primeiro.</li>
  * </ul>
- * Roda na mesma transação da baixa: se falhar, a baixa também não acontece.
+ * Pago pelo gateway, o dinheiro entra na conta do gateway, e a tarifa cobrada vira uma despesa (Tarifas bancárias)
+ * ligada à mesma cobrança: estornando o pagamento, as duas saem do caixa.
+ *
+ * <p>Roda na mesma transação da baixa: se falhar, a baixa também não acontece.
  */
 @Component
 class EntradaNoCaixa {
@@ -56,7 +59,9 @@ class EntradaNoCaixa {
 	@EventListener
 	void pagamentoRegistrado(PagamentoDeCobrancaRegistrado evento) {
 		Cobranca cobranca = cobrancas.findById(evento.cobrancaId()).orElseThrow();
-		ContaFinanceira conta = plano.contaDeRecebimento(cobranca.getPagoEm());
+		ContaFinanceira conta = evento.peloGateway()
+				? plano.contaDoGateway(cobranca.getPagoEm())
+				: plano.contaDeRecebimento(cobranca.getPagoEm());
 		UUID tenant = TenantAtual.obrigatorio();
 		parcelas(cobranca).forEach((categoria, valor) -> {
 			if (valor.signum() > 0) {
@@ -65,6 +70,12 @@ class EntradaNoCaixa {
 						cobranca.getDescricao(), valor, null, cobranca.getId(), null)));
 			}
 		});
+		if (evento.tarifa() != null && evento.tarifa().signum() > 0) {
+			lancamentos.save(Regras.aplicar(() -> Lancamento.movimento(tenant, conta,
+					plano.categoria(CategoriaPadrao.TARIFAS_BANCARIAS), TipoDeLancamento.DESPESA, OrigemDoLancamento.COBRANCA,
+					cobranca.getPagoEm(), "Tarifa do boleto/Pix: " + cobranca.getDescricao(), evento.tarifa(), null,
+					cobranca.getId(), null)));
+		}
 	}
 
 	@EventListener

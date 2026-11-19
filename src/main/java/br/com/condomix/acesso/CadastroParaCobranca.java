@@ -3,6 +3,7 @@ package br.com.condomix.acesso;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -19,6 +20,13 @@ public interface CadastroParaCobranca {
 
 	/** Unidades cujas cobranças o usuário logado pode ver ("meus débitos"): ele é proprietário ou inquilino. */
 	Set<UUID> unidadesDoPagador(UUID usuarioId, LocalDate data);
+
+	/** Os dados de quem paga, para o boleto: nome, CPF/CNPJ e e-mail. Vazio se a pessoa não existe no condomínio. */
+	Optional<DadosDoPagador> pagador(UUID pessoaId);
+
+	/** @param documento CPF ou CNPJ, só dígitos; vazio se não foi cadastrado */
+	record DadosDoPagador(UUID pessoaId, String nome, String documento, String email) {
+	}
 
 	/**
 	 * @param responsavel quem paga: o proprietário; sem proprietário, o inquilino; sem os dois, o morador.
