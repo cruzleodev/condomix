@@ -19,7 +19,7 @@ export function Entrar() {
     try {
       const resultado = await entrar(email, senha)
       const destino = (local.state as { de?: string } | null)?.de ?? '/'
-      navegar(resultado === 'pronto' ? destino : resultado === 'escolher' ? '/condominio' : '/plataforma', { replace: true })
+      navegar(resultado === 'pronto' ? destino : resultado === 'escolher' ? '/condominio' : '/', { replace: true })
     } catch (e) {
       setErro(e)
     } finally {

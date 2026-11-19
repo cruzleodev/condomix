@@ -7,7 +7,9 @@ import { expirado, lerToken } from './jwt'
 
 function inicial(): SessaoGuardada | null {
   const guardada = sessaoGuardada()
-  return guardada && !expirado(guardada.token) ? guardada : null
+  if (guardada && !expirado(guardada.token)) return guardada
+  const anterior = guardada?.anterior
+  return anterior && !expirado(anterior.token) ? anterior : null
 }
 
 export function SessaoProvider({ children }: { children: ReactNode }) {
@@ -20,7 +22,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    aoExpirarSessao(() => setSessao(null))
+    aoExpirarSessao(() => setSessao(sessaoGuardada()))
     return () => aoExpirarSessao(null)
   }, [])
 
@@ -36,6 +38,22 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     const resposta: Sessao = dados(await api.POST('/api/auth/condominio', { body: { condominioId } }))
     atualizar({ token: resposta.token ?? '', condominios: resposta.condominios ?? [] })
   }, [atualizar])
+
+  const entrarComoSuporte = useCallback((token: string, condominio: { id: string; nome: string }) => {
+    setSessao((atual) => {
+      const nova: SessaoGuardada = { token, condominios: [{ ...condominio, perfis: ['SUPORTE'] }], anterior: atual }
+      guardar(nova)
+      return nova
+    })
+  }, [])
+
+  const sairDoSuporte = useCallback(() => {
+    setSessao((atual) => {
+      const anterior = atual?.anterior ?? null
+      guardar(anterior)
+      return anterior
+    })
+  }, [])
 
   const sair = useCallback(() => {
     setSaiuPorVontade(true)
@@ -53,13 +71,16 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
       condominio: sessao?.condominios.find((c) => c.id === condominioId) ?? null,
       condominios: sessao?.condominios ?? [],
       perfis,
+      suporte: conteudo?.suporte ? { expiraEm: new Date(conteudo.exp * 1000) } : null,
+      entrarComoSuporte,
+      sairDoSuporte,
       saiuPorVontade,
       entrar,
       escolherCondominio,
       sair,
       tem: (...procurados: string[]) => procurados.some((p) => perfis.includes(p)),
     }
-  }, [sessao, saiuPorVontade, entrar, escolherCondominio, sair])
+  }, [sessao, saiuPorVontade, entrar, escolherCondominio, sair, entrarComoSuporte, sairDoSuporte])
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
 }

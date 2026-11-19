@@ -105,6 +105,10 @@ export const ROTULOS = {
   statusDaCobranca: { ABERTA: 'Em aberto', PAGA: 'Paga', CANCELADA: 'Cancelada' },
   origemDaCobranca: { GERACAO_MENSAL: 'Taxa do mês', AVULSA: 'Avulsa', IMPORTACAO: 'Importada' },
   tipoDeConta: { CONTA_CORRENTE: 'Conta corrente', POUPANCA: 'Poupança', APLICACAO: 'Aplicação', CAIXA_FISICO: 'Caixa físico' },
+  tipoDeCondominio: { RESIDENCIAL_VERTICAL: 'Residencial (prédio)', RESIDENCIAL_HORIZONTAL: 'Residencial (casas)', COMERCIAL: 'Comercial', MISTO: 'Misto' },
+  periodicidade: { MENSAL: 'Mensal', SEMESTRAL: 'Semestral', ANUAL: 'Anual' },
+  statusDaAssinatura: { TESTE: 'Em teste', ATIVA: 'Ativa', SUSPENSA: 'Suspensa', CANCELADA: 'Cancelada' },
+  modulo: { DOCUMENTOS: 'Documentos', FINANCEIRO: 'Financeiro', RESERVAS: 'Reservas', WHATSAPP: 'WhatsApp' },
   tipoDeLancamento: { RECEITA: 'Receita', DESPESA: 'Despesa', TRANSFERENCIA_ENTRADA: 'Transferência (entrada)', TRANSFERENCIA_SAIDA: 'Transferência (saída)' },
 } as const
 
@@ -156,4 +160,10 @@ export function lerReais(texto: string): number | undefined {
   if (!limpo) return undefined
   const numero = Number(limpo.includes(',') ? limpo.replace(/\./g, '').replace(',', '.') : limpo)
   return Number.isFinite(numero) ? numero : undefined
+}
+
+/** "2026-11-19T14:05:00Z" → "19/11/2026 11:05" (no fuso de quem está vendo). */
+export function dataHora(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '')
 }
