@@ -175,6 +175,33 @@ export function periodoDaFatura(inicio: string | null | undefined, fimExclusivo:
   return `${data(inicio)} a ${data(ultimoDia)}`
 }
 
+/** "18:00:00" → "18h"; "18:30:00" → "18h30". */
+export function hora(texto: string | null | undefined): string {
+  if (!texto) return ''
+  const [h, m] = texto.split(':')
+  return m && m !== '00' ? `${Number(h)}h${m}` : `${Number(h)}h`
+}
+
+/** Um horário de espaço: "Noite (18h às 23h)". */
+export function horario(nome: string | null | undefined, inicio: string | null | undefined, fim: string | null | undefined): string {
+  return `${nome ?? ''} (${hora(inicio)} às ${hora(fim)})`
+}
+
+const DIAS_DA_SEMANA = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb']
+
+/** "2026-12-20" → "dom, 20/12/2026" (sem fuso: a data da API é só o dia). */
+export function diaDaSemana(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  const [ano, mes, dia] = iso.slice(0, 10).split('-').map(Number)
+  return `${DIAS_DA_SEMANA[new Date(Date.UTC(ano, mes - 1, dia)).getUTCDay()]}, ${data(iso)}`
+}
+
+/** Soma dias a uma data da API: ("2026-12-30", 3) → "2027-01-02". */
+export function somarDias(iso: string, dias: number): string {
+  const [ano, mes, dia] = iso.split('-').map(Number)
+  return new Date(Date.UTC(ano, mes - 1, dia + dias)).toISOString().slice(0, 10)
+}
+
 /** Lê um valor digitado em reais ("1.234,56", "1234.56", "1234,5") → 1234.56. Vazio ou inválido → undefined. */
 export function lerReais(texto: string): number | undefined {
   const limpo = texto.replace(/R\$|\s/g, '')

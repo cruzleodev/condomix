@@ -25,8 +25,8 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 14 | [Administrador: convite e troca de síndico, bloqueio de login, fim do suporte e histórico da assinatura](etapas/14-admin-suporte-acessos.md) | `feature/admin-suporte-acessos` | Concluída |
 | 15 | [Boletos e Pix pelo gateway (Asaas), 2ª via e baixa automática](etapas/15-boletos-pix.md) | `feature/boletos-pix` | Concluída |
 | 16 | [Cobrança da assinatura do Condomix: teste grátis, faturas com boleto e Pix, suspensão por atraso](etapas/16-assinatura-pelo-gateway.md) | `feature/assinatura-gateway` | Concluída |
-| 17 | Reservas: espaços, agenda, regras e aluguel (backend e telas) | — | Próxima |
-| 18 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Pendente |
+| 17 | [Reservas: espaços, agenda, regras e aluguel](etapas/17-reservas.md) | `feature/reservas` | Concluída |
+| 18 | Mensageria e notificações: RabbitMQ, e-mail e push | — | Próxima |
 | 19 | App nas lojas (Capacitor) | — | Pendente |
 | 20 | Bot de WhatsApp | — | Pendente |
 
@@ -43,6 +43,7 @@ Futuro, sem data: assembleias online (convocação, pauta, votação e ata).
 | Mandato vencido sem eleição | **Prorrogar com aviso** até a posse do sucessor (padrão). Configurável por condomínio para "suspender", conforme a convenção |
 | Administrador da plataforma | Papel `ADMIN_PLATAFORMA`, fora dos condomínios: gerencia condomínios, planos, assinaturas e usuários pela aplicação, nunca direto no banco. Não vê dados internos dos condomínios, exceto em "modo suporte" temporário e auditado (LGPD). Pode bloquear um login (em todos os condomínios) e cuidar do síndico do cliente (novo convite, troca) |
 | Desconto do síndico | Desconto ou isenção definidos no mandato, aplicados à unidade indicada só enquanto o mandato vigorar (proporcional aos dias). Síndico profissional recebe remuneração, que é despesa, não desconto. Implementado como uma `RegraDeDesconto` |
+| Reservas | A reserva vale na hora, se passar nas regras do espaço (antecedência, limite por mês, bloqueio de inadimplente) e o horário estiver livre. Com aluguel, vira cobrança avulsa da unidade. Cancelar no prazo do espaço cancela o aluguel; depois, continua devido (a gestão pode dispensar). Por ora, liberadas em todos os planos |
 | "Meus dados" | Telas como "minhas cobranças" e "minhas reservas" usam os vínculos da pessoa com unidades, não o perfil MORADOR |
 
 ## Decisões de arquitetura

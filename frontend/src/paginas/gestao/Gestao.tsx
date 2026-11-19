@@ -13,6 +13,7 @@ const ATALHOS: { para: string; titulo: string; texto: string; papeis?: string[] 
   { para: '/gestao/taxa', titulo: 'Taxa do mês', texto: 'Como a taxa é cobrada, simulação e geração das cobranças.' },
   { para: '/gestao/cobrancas', titulo: 'Cobranças', texto: 'Quem pagou, baixa de pagamentos, avulsas e inadimplência.' },
   { para: '/gestao/caixa', titulo: 'Caixa', texto: 'Contas, despesas, transferências e extrato.' },
+  { para: '/gestao/espacos', titulo: 'Espaços e reservas', texto: 'Salão, churrasqueira: horários, aluguel, regras e a agenda.' },
   { para: '/balancete', titulo: 'Balancete', texto: 'Prestação de contas do mês.' },
   { para: '/gestao/assinatura', titulo: 'Assinatura do Condomix', texto: 'O plano do condomínio e as faturas, com Pix e boleto.', papeis: GESTAO },
 ]

@@ -9,6 +9,7 @@ import { Documentos } from './paginas/Documentos'
 import { Entrar } from './paginas/Entrar'
 import { Assinatura } from './paginas/gestao/Assinatura'
 import { Caixa } from './paginas/gestao/Caixa'
+import { Espacos } from './paginas/gestao/Espacos'
 import { Cobrancas } from './paginas/gestao/Cobrancas'
 import { Gestao } from './paginas/gestao/Gestao'
 import { Mandatos } from './paginas/gestao/Mandatos'
@@ -16,8 +17,10 @@ import { Moradores } from './paginas/gestao/Moradores'
 import { TaxaDoMes } from './paginas/gestao/TaxaDoMes'
 import { Unidades } from './paginas/gestao/Unidades'
 import { EscolherCondominio } from './paginas/EscolherCondominio'
+import { AgendaDoEspaco } from './paginas/AgendaDoEspaco'
 import { Inicio } from './paginas/Inicio'
 import { MeusDebitos } from './paginas/MeusDebitos'
+import { Reservas } from './paginas/Reservas'
 import { Cliente } from './paginas/plataforma/Cliente'
 import { Clientes } from './paginas/plataforma/Clientes'
 import { Faturas } from './paginas/plataforma/Faturas'
@@ -58,6 +61,8 @@ const rotas = [
       children: [
         { path: '/', element: <Inicio /> },
         { path: '/debitos', element: <MeusDebitos /> },
+        { path: '/reservas', element: <Reservas /> },
+        { path: '/reservas/:id', element: <AgendaDoEspaco /> },
         { path: '/documentos', element: <Documentos /> },
         { path: '/balancete', element: <Balancete /> },
         { path: '/conta', element: <Conta /> },
@@ -71,6 +76,7 @@ const rotas = [
             { path: '/gestao/taxa', element: <TaxaDoMes /> },
             { path: '/gestao/cobrancas', element: <Cobrancas /> },
             { path: '/gestao/caixa', element: <Caixa /> },
+            { path: '/gestao/espacos', element: <Espacos /> },
           ],
         },
         {

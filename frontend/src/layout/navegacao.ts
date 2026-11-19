@@ -20,6 +20,7 @@ export interface ItemDeNavegacao {
 export const ITENS: ItemDeNavegacao[] = [
   { para: '/', rotulo: 'Início', icone: '⌂', noCelular: true },
   { para: '/debitos', rotulo: 'Meus débitos', icone: 'R$', noCelular: true },
+  { para: '/reservas', rotulo: 'Reservas', icone: '◷', noCelular: true },
   { para: '/documentos', rotulo: 'Documentos', icone: '▤', noCelular: true },
   { para: '/balancete', rotulo: 'Balancete', icone: '◔' },
   { para: '/gestao', rotulo: 'Gestão', icone: '⚙', papeis: ACOMPANHAMENTO, noCelular: true },
@@ -29,6 +30,7 @@ export const ITENS: ItemDeNavegacao[] = [
   { para: '/gestao/taxa', rotulo: 'Taxa do mês', icone: '%', papeis: ACOMPANHAMENTO, secao: 'gestao' },
   { para: '/gestao/cobrancas', rotulo: 'Cobranças', icone: '$', papeis: ACOMPANHAMENTO, secao: 'gestao' },
   { para: '/gestao/caixa', rotulo: 'Caixa', icone: '⊟', papeis: ACOMPANHAMENTO, secao: 'gestao' },
+  { para: '/gestao/espacos', rotulo: 'Espaços e reservas', icone: '◫', papeis: ACOMPANHAMENTO, secao: 'gestao' },
   { para: '/gestao/assinatura', rotulo: 'Assinatura', icone: '✦', papeis: GESTAO, secao: 'gestao', comPagamentoPendente: true },
   { para: '/conta', rotulo: 'Conta', icone: '●', noCelular: true, comPagamentoPendente: true },
 ]
@@ -38,11 +40,14 @@ export function itensVisiveis(perfis: string[], pagamentoPendente = false): Item
   return ITENS.filter((i) => (!i.papeis || i.papeis.some((p) => perfis.includes(p))) && (!pagamentoPendente || i.comPagamentoPendente))
 }
 
-/** Barra de baixo do celular: sem o item "Gestão", o Balancete ocupa o lugar. */
+/**
+ * Barra de baixo do celular (5 itens): quem tem a aba "Gestão" acha os Documentos pelo Início; o Balancete também
+ * fica no Início (cartão "Caixa do condomínio").
+ */
 export function itensDoCelular(perfis: string[], pagamentoPendente = false): ItemDeNavegacao[] {
   if (pagamentoPendente) return itensVisiveis(perfis, true)
   const visiveis = itensVisiveis(perfis)
   const temGestao = visiveis.some((i) => i.para === '/gestao')
-  return visiveis.filter((i) => i.noCelular || (!temGestao && i.para === '/balancete'))
+  return visiveis.filter((i) => i.noCelular && !(temGestao && i.para === '/documentos'))
     .sort((a, b) => ITENS.indexOf(a) - ITENS.indexOf(b))
 }

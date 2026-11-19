@@ -256,6 +256,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/espacos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Um espaço */
+        get: operations["obter_3"];
+        /** Alterar o espaço (as reservas já feitas guardam o horário e o valor de quando foram feitas) */
+        put: operations["alterar_2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/documentos/{id}": {
         parameters: {
             query?: never;
@@ -264,9 +282,9 @@ export interface paths {
             cookie?: never;
         };
         /** Dados de um documento */
-        get: operations["obter_3"];
+        get: operations["obter_4"];
         /** Corrigir os dados de um documento (síndico ou administradora) */
-        put: operations["alterar_2"];
+        put: operations["alterar_3"];
         post?: never;
         /**
          * Remover documento da lista (síndico ou administradora)
@@ -350,6 +368,47 @@ export interface paths {
          * @description Ex.: {"bloco": "A", "tipo": "APARTAMENTO", "identificacoes": ["101", "102", "201", "202"]}
          */
         post: operations["criarLote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reservas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Reservas do condomínio no período (gestão e conselho) */
+        get: operations["doCondominio"];
+        put?: never;
+        /**
+         * Reservar um horário de um espaço
+         * @description Vale na hora, se passar nas regras do espaço. Se o espaço cobra, o aluguel vira cobrança avulsa da unidade, vencendo no dia da reserva.
+         */
+        post: operations["reservar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reservas/{id}/cancelamento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancelar uma reserva
+         * @description Até o dia da reserva. No prazo do espaço, o aluguel é cancelado; depois dele, continua devido.
+         */
+        post: operations["cancelar"];
         delete?: never;
         options?: never;
         head?: never;
@@ -498,7 +557,7 @@ export interface paths {
          * Cancelar (perdoar) a fatura
          * @description O boleto é cancelado no gateway. O período não é cobrado de novo. Se era a fatura que mantinha o acesso suspenso, o acesso volta.
          */
-        post: operations["cancelar"];
+        post: operations["cancelar_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -796,7 +855,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Cancelar um lançamento manual ou uma transferência */
-        post: operations["cancelar_1"];
+        post: operations["cancelar_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -855,7 +914,7 @@ export interface paths {
          * Cancelar uma geração (e as cobranças dela)
          * @description Não é possível se alguma cobrança já foi paga.
          */
-        post: operations["cancelar_2"];
+        post: operations["cancelar_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -975,6 +1034,61 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/espacos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Espaços comuns
+         * @description A gestão vê também os desativados.
+         */
+        get: operations["listar_4"];
+        put?: never;
+        /** Cadastrar um espaço comum, com os horários, o aluguel e as regras */
+        post: operations["cadastrar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/espacos/{id}/reativacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reativar o espaço */
+        post: operations["reativar_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/espacos/{id}/desativacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Desativar: o espaço para de aceitar reservas (as feitas continuam valendo) */
+        post: operations["desativar_3"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/documentos": {
         parameters: {
             query?: never;
@@ -986,7 +1100,7 @@ export interface paths {
          * Listar ou buscar documentos
          * @description Com 'busca', procura no título e na descrição (sem diferenciar acentos) e ordena por relevância. Sem 'busca', lista os mais recentes primeiro.
          */
-        get: operations["listar_4"];
+        get: operations["listar_5"];
         put?: never;
         /**
          * Publicar documento (síndico ou administradora)
@@ -1067,7 +1181,7 @@ export interface paths {
          * Cobranças do condomínio (filtros opcionais)
          * @description competencia: "2026-12"; status: ABERTA, PAGA, CANCELADA.
          */
-        get: operations["listar_5"];
+        get: operations["listar_6"];
         put?: never;
         /**
          * Cobrança avulsa para uma unidade
@@ -1145,7 +1259,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Cancelar uma cobrança em aberto */
-        post: operations["cancelar_3"];
+        post: operations["cancelar_4"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1300,6 +1414,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/reservas/unidades": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Unidades para as quais posso reservar
+         * @description A gestão: todas as ativas. O morador: as suas (proprietário, inquilino ou morador).
+         */
+        get: operations["unidades"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plataforma/planos": {
         parameters: {
             query?: never;
@@ -1308,7 +1442,7 @@ export interface paths {
             cookie?: never;
         };
         /** Planos, módulos e preços */
-        get: operations["listar_6"];
+        get: operations["listar_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1345,7 +1479,7 @@ export interface paths {
             cookie?: never;
         };
         /** Faturas de todos os clientes (ou de um, com condominioId), as mais recentes primeiro */
-        get: operations["listar_7"];
+        get: operations["listar_8"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1379,7 +1513,7 @@ export interface paths {
             cookie?: never;
         };
         /** Um condomínio */
-        get: operations["obter_4"];
+        get: operations["obter_5"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1413,7 +1547,7 @@ export interface paths {
             cookie?: never;
         };
         /** Um mandato */
-        get: operations["obter_5"];
+        get: operations["obter_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1496,6 +1630,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/eu/reservas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Minhas reservas: as das minhas unidades, dos últimos 30 dias em diante */
+        get: operations["minhas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/eu/cobrancas": {
         parameters: {
             query?: never;
@@ -1507,7 +1658,7 @@ export interface paths {
          * Meus débitos: cobranças das minhas unidades (proprietário ou inquilino)
          * @description Em aberto, com multa e juros até hoje, e as dos últimos 12 meses.
          */
-        get: operations["minhas"];
+        get: operations["minhas_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1525,6 +1676,26 @@ export interface paths {
         };
         /** Minha 2ª via: boleto e Pix de uma cobrança das minhas unidades */
         get: operations["minha"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/espacos/{id}/agenda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Agenda do espaço: cada dia, cada horário livre, ocupado ou da minha unidade
+         * @description Até 62 dias de cada vez. Só a gestão vê qual unidade reservou.
+         */
+        get: operations["agenda"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1575,7 +1746,7 @@ export interface paths {
             cookie?: never;
         };
         /** Uma cobrança, com o valor atualizado para hoje */
-        get: operations["obter_6"];
+        get: operations["obter_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1874,6 +2045,60 @@ export interface components {
             jurosMensalPercentual?: number;
             fundoReservaPercentual?: number;
         };
+        PedidoEspaco: {
+            nome: string;
+            descricao?: string;
+            /** Format: int32 */
+            capacidade?: number;
+            valorAluguel?: number;
+            /** Format: int32 */
+            antecedenciaMinimaDias?: number;
+            /** Format: int32 */
+            antecedenciaMaximaDias?: number;
+            /** Format: int32 */
+            limitePorMes?: number;
+            bloqueiaInadimplente?: boolean;
+            /** Format: int32 */
+            diasParaCancelar?: number;
+            horarios: components["schemas"]["PedidoHorario"][];
+        };
+        PedidoHorario: {
+            nome: string;
+            /** Format: time-local */
+            inicio: string;
+            /** Format: time-local */
+            fim: string;
+        };
+        EspacoResposta: {
+            /** Format: uuid */
+            id?: string;
+            nome?: string;
+            descricao?: string;
+            /** Format: int32 */
+            capacidade?: number;
+            valorAluguel?: number;
+            regras?: components["schemas"]["RegrasDeReserva"];
+            horarios?: components["schemas"]["HorarioDoEspaco"][];
+            ativo?: boolean;
+        };
+        HorarioDoEspaco: {
+            nome?: string;
+            /** Format: time-local */
+            inicio?: string;
+            /** Format: time-local */
+            fim?: string;
+        };
+        RegrasDeReserva: {
+            /** Format: int32 */
+            antecedenciaMinimaDias?: number;
+            /** Format: int32 */
+            antecedenciaMaximaDias?: number;
+            /** Format: int32 */
+            limitePorMes?: number;
+            bloqueiaInadimplente?: boolean;
+            /** Format: int32 */
+            diasParaCancelar?: number;
+        };
         FormularioEdicao: {
             titulo: string;
             /** @enum {string} */
@@ -1908,6 +2133,56 @@ export interface components {
             /** @enum {string} */
             tipo: "APARTAMENTO" | "CASA" | "SALA" | "LOJA" | "OUTRO";
             identificacoes: string[];
+        };
+        PedidoReserva: {
+            /** Format: uuid */
+            espacoId: string;
+            /** Format: date */
+            data: string;
+            horario: string;
+            /** Format: uuid */
+            unidadeId: string;
+            observacao?: string;
+        };
+        ReservaResposta: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            espacoId?: string;
+            espaco?: string;
+            /** Format: uuid */
+            unidadeId?: string;
+            unidade?: string;
+            /** Format: date */
+            data?: string;
+            horario?: string;
+            /** Format: time-local */
+            inicio?: string;
+            /** Format: time-local */
+            fim?: string;
+            /** @enum {string} */
+            situacao?: "CONFIRMADA" | "CANCELADA";
+            valor?: number;
+            /** Format: uuid */
+            cobrancaId?: string;
+            observacao?: string;
+            /** Format: date */
+            cancelavelSemCustoAte?: string;
+            aconteceu?: boolean;
+            /** Format: date-time */
+            canceladaEm?: string;
+            motivoCancelamento?: string;
+            aluguelMantido?: boolean;
+        };
+        PedidoCancelamentoDeReserva: {
+            motivo?: string;
+            dispensarAluguel?: boolean;
+        };
+        CancelamentoDaReserva: {
+            /** Format: uuid */
+            reservaId?: string;
+            /** @enum {string} */
+            aluguel?: "SEM_ALUGUEL" | "CANCELADO" | "MANTIDO" | "JA_PAGO";
         };
         PedidoSuporte: {
             /** Format: uuid */
@@ -2339,6 +2614,11 @@ export interface components {
             fracoesConferem?: boolean;
             blocos?: string[];
         };
+        UnidadeParaReserva: {
+            /** Format: uuid */
+            id?: string;
+            descricao?: string;
+        };
         RegistroDeSuporte: {
             /** Format: uuid */
             id?: string;
@@ -2501,6 +2781,23 @@ export interface components {
             pixQrCode?: string;
             /** @enum {string} */
             gateway?: "ASAAS" | "SIMULADO";
+        };
+        DiaNaAgenda: {
+            /** Format: date */
+            data?: string;
+            horarios?: components["schemas"]["HorarioNaAgenda"][];
+        };
+        HorarioNaAgenda: {
+            nome?: string;
+            /** Format: time-local */
+            inicio?: string;
+            /** Format: time-local */
+            fim?: string;
+            /** @enum {string} */
+            situacao?: "LIVRE" | "OCUPADO" | "DA_MINHA_UNIDADE" | "INDISPONIVEL";
+            /** Format: uuid */
+            reservaId?: string;
+            unidade?: string;
         };
         PaginaDocumentoResposta: {
             itens?: components["schemas"]["DocumentoResposta"][];
@@ -3086,12 +3383,60 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["DocumentoResposta"];
+                    "*/*": components["schemas"]["EspacoResposta"];
                 };
             };
         };
     };
     alterar_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoEspaco"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["EspacoResposta"];
+                };
+            };
+        };
+    };
+    obter_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DocumentoResposta"];
+                };
+            };
+        };
+    };
+    alterar_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -3244,6 +3589,79 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["UnidadeResposta"][];
+                };
+            };
+        };
+    };
+    doCondominio: {
+        parameters: {
+            query: {
+                de: string;
+                ate: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReservaResposta"][];
+                };
+            };
+        };
+    };
+    reservar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoReserva"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReservaResposta"];
+                };
+            };
+        };
+    };
+    cancelar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PedidoCancelamentoDeReserva"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CancelamentoDaReserva"];
                 };
             };
         };
@@ -3420,7 +3838,7 @@ export interface operations {
             };
         };
     };
-    cancelar: {
+    cancelar_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -3857,7 +4275,7 @@ export interface operations {
             };
         };
     };
-    cancelar_1: {
+    cancelar_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -3969,7 +4387,7 @@ export interface operations {
             };
         };
     };
-    cancelar_2: {
+    cancelar_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -4169,6 +4587,94 @@ export interface operations {
     };
     listar_4: {
         parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["EspacoResposta"][];
+                };
+            };
+        };
+    };
+    cadastrar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoEspaco"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["EspacoResposta"];
+                };
+            };
+        };
+    };
+    reativar_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["EspacoResposta"];
+                };
+            };
+        };
+    };
+    desativar_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["EspacoResposta"];
+                };
+            };
+        };
+    };
+    listar_5: {
+        parameters: {
             query?: {
                 categoria?: "CONVENCAO" | "REGIMENTO_INTERNO" | "ATA_ASSEMBLEIA" | "LEI_NORMA" | "COMUNICADO" | "OUTRO";
                 /** @description Ex.: convencao, "assembleia geral", obras -piscina */
@@ -4289,7 +4795,7 @@ export interface operations {
             };
         };
     };
-    listar_5: {
+    listar_6: {
         parameters: {
             query?: {
                 competencia?: string;
@@ -4435,7 +4941,7 @@ export interface operations {
             };
         };
     };
-    cancelar_3: {
+    cancelar_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -4646,7 +5152,27 @@ export interface operations {
             };
         };
     };
-    listar_6: {
+    unidades: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UnidadeParaReserva"][];
+                };
+            };
+        };
+    };
+    listar_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -4688,7 +5214,7 @@ export interface operations {
             };
         };
     };
-    listar_7: {
+    listar_8: {
         parameters: {
             query?: {
                 condominioId?: string;
@@ -4732,7 +5258,7 @@ export interface operations {
             };
         };
     };
-    obter_4: {
+    obter_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -4776,7 +5302,7 @@ export interface operations {
             };
         };
     };
-    obter_5: {
+    obter_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -4895,6 +5421,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    "*/*": components["schemas"]["ReservaResposta"][];
+                };
+            };
+        };
+    };
+    minhas_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
                     "*/*": components["schemas"]["CobrancaResposta"][];
                 };
             };
@@ -4918,6 +5464,31 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FormasDePagamento"];
+                };
+            };
+        };
+    };
+    agenda: {
+        parameters: {
+            query: {
+                de: string;
+                ate: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DiaNaAgenda"][];
                 };
             };
         };
@@ -4964,7 +5535,7 @@ export interface operations {
             };
         };
     };
-    obter_6: {
+    obter_7: {
         parameters: {
             query?: never;
             header?: never;
