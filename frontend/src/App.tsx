@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
+import { LayoutDaPlataforma } from './layout/LayoutDaPlataforma'
 import { LayoutDoApp } from './layout/LayoutDoApp'
 import { RotaComPapel, RotaDoCondominio, RotaLogada } from './layout/Rotas'
 import { AceitarConvite } from './paginas/AceitarConvite'
@@ -16,8 +17,11 @@ import { Unidades } from './paginas/gestao/Unidades'
 import { EscolherCondominio } from './paginas/EscolherCondominio'
 import { Inicio } from './paginas/Inicio'
 import { MeusDebitos } from './paginas/MeusDebitos'
-import { Plataforma } from './paginas/Plataforma'
-import { ACOMPANHAMENTO } from './sessao/papeis'
+import { Clientes } from './paginas/plataforma/Clientes'
+import { Planos } from './paginas/plataforma/Planos'
+import { Suporte } from './paginas/plataforma/Suporte'
+import { SemAcesso } from './paginas/SemAcesso'
+import { ACOMPANHAMENTO, PLATAFORMA } from './sessao/papeis'
 
 const rotas = [
   { path: '/entrar', element: <Entrar /> },
@@ -26,7 +30,18 @@ const rotas = [
     element: <RotaLogada />,
     children: [
       { path: '/condominio', element: <EscolherCondominio /> },
-      { path: '/plataforma', element: <Plataforma /> },
+      { path: '/sem-acesso', element: <SemAcesso /> },
+      {
+        element: <RotaComPapel papeis={PLATAFORMA} />,
+        children: [{
+          element: <LayoutDaPlataforma />,
+          children: [
+            { path: '/plataforma', element: <Clientes /> },
+            { path: '/plataforma/planos', element: <Planos /> },
+            { path: '/plataforma/suporte', element: <Suporte /> },
+          ],
+        }],
+      },
     ],
   },
   {

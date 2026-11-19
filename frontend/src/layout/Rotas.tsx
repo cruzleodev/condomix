@@ -6,11 +6,12 @@ import { useSessao } from '../sessao/contexto'
  * devolve a pessoa à tela em que estava; se ela clicou em "Sair", não (o próximo login pode ser de outra pessoa).
  */
 export function RotaDoCondominio() {
-  const { logado, condominioId, tem, saiuPorVontade } = useSessao()
+  const { logado, condominioId, tem, saiuPorVontade, condominios } = useSessao()
   const local = useLocation()
   if (!logado) return <Navigate to="/entrar" replace state={saiuPorVontade ? null : { de: local.pathname }} />
   if (!condominioId) {
-    return <Navigate to={tem('ADMIN_PLATAFORMA') ? '/plataforma' : '/condominio'} replace />
+    const destino = tem('ADMIN_PLATAFORMA') ? '/plataforma' : condominios.length > 0 ? '/condominio' : '/sem-acesso'
+    return <Navigate to={destino} replace />
   }
   return <Outlet />
 }

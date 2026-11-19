@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router'
+import { useQueryClient } from '@tanstack/react-query'
+import { NavLink, Outlet, useNavigate } from 'react-router'
 import { useSessao } from '../sessao/contexto'
 import { itensDoCelular, itensVisiveis, type ItemDeNavegacao } from './navegacao'
 
@@ -8,7 +9,9 @@ import { itensDoCelular, itensVisiveis, type ItemDeNavegacao } from './navegacao
  * - computador (a partir de 768 px): menu lateral fixo e conteúdo largo.
  */
 export function LayoutDoApp() {
-  const { condominio, perfis, email } = useSessao()
+  const { condominio, perfis, email, suporte, sairDoSuporte } = useSessao()
+  const navegar = useNavigate()
+  const cache = useQueryClient()
   const principais = itensVisiveis(perfis).filter((i) => i.secao !== 'gestao' && i.para !== '/conta')
   const gestao = itensVisiveis(perfis).filter((i) => i.secao === 'gestao')
   return (
@@ -33,6 +36,12 @@ export function LayoutDoApp() {
       </aside>
 
       <div className="flex min-h-dvh flex-1 flex-col md:ml-64">
+        {suporte && (
+          <div role="status" className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 bg-amber-400 px-4 py-2 text-sm text-amber-950">
+            <span><strong>Modo suporte</strong> · somente leitura · até {suporte.expiraEm.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · acesso registrado</span>
+            <button className="font-semibold underline" onClick={() => { cache.clear(); sairDoSuporte(); navegar('/plataforma') }}>Voltar ao painel</button>
+          </div>
+        )}
         <header className="sticky top-0 z-10 bg-marca-700 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] text-white shadow md:hidden">
           <p className="text-xs uppercase tracking-wide text-marca-100">Condomix</p>
           <p className="truncate font-semibold">{condominio?.nome ?? 'Condomínio'}</p>

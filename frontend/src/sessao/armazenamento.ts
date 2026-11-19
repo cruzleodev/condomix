@@ -9,6 +9,8 @@ const CHAVE = 'condomix.sessao'
 export interface SessaoGuardada {
   token: string
   condominios: CondominioDisponivel[]
+  /** No modo suporte: a sessão do administrador, para onde o app volta ao sair (ou quando o suporte vence). */
+  anterior?: SessaoGuardada | null
 }
 
 let ouvinteDeExpiracao: (() => void) | null = null
@@ -47,7 +49,8 @@ export function aoExpirarSessao(ouvinte: (() => void) | null): void {
   ouvinteDeExpiracao = ouvinte
 }
 
+/** Token recusado pela API: no modo suporte, volta à sessão do administrador; senão, encerra. */
 export function avisarSessaoExpirada(): void {
-  guardar(null)
+  guardar(memoria?.anterior ?? null)
   ouvinteDeExpiracao?.()
 }

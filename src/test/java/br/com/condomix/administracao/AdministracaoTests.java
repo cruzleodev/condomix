@@ -183,6 +183,14 @@ class AdministracaoTests {
 
 		mvc.perform(get("/api/documentos").header("Authorization", suporte))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.total").value(1));
+		// O suporte lê o cadastro e o financeiro para ajudar o síndico...
+		mvc.perform(get("/api/unidades").header("Authorization", suporte)).andExpect(status().isOk());
+		mvc.perform(get("/api/pessoas").header("Authorization", suporte)).andExpect(status().isOk());
+		mvc.perform(get("/api/cobrancas").header("Authorization", suporte)).andExpect(status().isOk());
+		mvc.perform(get("/api/financeiro/contas").header("Authorization", suporte)).andExpect(status().isOk());
+		// ...mas não grava nada.
+		postJson("/api/unidades", suporte, """
+				{"identificacao": "X", "tipo": "OUTRO"}""").andExpect(status().isForbidden());
 		mvc.perform(multipart("/api/documentos")
 						.file(new MockMultipartFile("arquivo", "x.pdf", "application/pdf", "%PDF-1.7".getBytes()))
 						.param("titulo", "Tentativa").param("categoria", "OUTRO").header("Authorization", suporte))

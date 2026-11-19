@@ -10,6 +10,11 @@ export interface EstadoDaSessao {
   condominio: CondominioDisponivel | null
   condominios: CondominioDisponivel[]
   perfis: string[]
+  /** Preenchido quando o administrador está no modo suporte (somente leitura) de um condomínio. */
+  suporte: { expiraEm: Date } | null
+  /** Abre o condomínio com o token de suporte; a sessão do administrador fica guardada para a volta. */
+  entrarComoSuporte: (token: string, condominio: { id: string; nome: string }) => void
+  sairDoSuporte: () => void
   /** Verdadeiro quando a pessoa clicou em "Sair" (o próximo login pode ser de outra pessoa). */
   saiuPorVontade: boolean
   /** Login de e-mail e senha. Devolve "escolher" quando o usuário tem vários condomínios. */
