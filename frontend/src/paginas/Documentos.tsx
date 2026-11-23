@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { api, dados, requisicaoAutenticada } from '../api/cliente'
 import type { Documento } from '../api/tipos'
 import { Botao, Campo, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina, Vazio } from '../componentes/ui'
+import { abrirArquivo } from '../nativo/app'
 import { useSessao } from '../sessao/contexto'
 import { GESTAO } from '../sessao/papeis'
 import { data, tamanhoDeArquivo } from '../util/formato'
@@ -71,14 +72,7 @@ function ItemDeDocumento({ documento: d }: { documento: Documento }) {
     setAbrindo(true)
     try {
       const resposta = await requisicaoAutenticada(`/api/documentos/${d.id}/arquivo`)
-      const endereco = URL.createObjectURL(await resposta.blob())
-      const link = document.createElement('a')
-      link.href = endereco
-      link.target = '_blank'
-      link.rel = 'noopener'
-      link.download = d.arquivo?.nome ?? 'documento'
-      link.click()
-      setTimeout(() => URL.revokeObjectURL(endereco), 60_000)
+      await abrirArquivo(await resposta.blob(), d.arquivo?.nome ?? 'documento')
     } catch (e) {
       setErro(e)
     } finally {

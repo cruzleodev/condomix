@@ -1472,6 +1472,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/exclusao-da-conta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Excluir a minha conta
+         * @description Apaga o login (e-mail, senha, notificações, push) e tira a pessoa de todos os condomínios. O cadastro e o histórico financeiro ficam com cada condomínio. Pede a senha para confirmar.
+         */
+        post: operations["excluirConta"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/condominio": {
         parameters: {
             query?: never;
@@ -2769,6 +2789,9 @@ export interface components {
             condominioId?: string;
             perfis?: ("SINDICO" | "SUBSINDICO" | "CONSELHEIRO" | "ADMINISTRADORA" | "MORADOR" | "PORTARIA" | "ADMIN_PLATAFORMA" | "SUPORTE")[];
             condominios?: components["schemas"]["CondominioDisponivel"][];
+        };
+        PedidoExclusaoDaConta: {
+            senha: string;
         };
         PedidoSelecaoCondominio: {
             /** Format: uuid */
@@ -5421,6 +5444,28 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["Sessao"];
                 };
+            };
+        };
+    };
+    excluirConta: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoExclusaoDaConta"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

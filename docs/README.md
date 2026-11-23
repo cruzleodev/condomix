@@ -27,8 +27,8 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 16 | [Cobrança da assinatura do Condomix: teste grátis, faturas com boleto e Pix, suspensão por atraso](etapas/16-assinatura-pelo-gateway.md) | `feature/assinatura-gateway` | Concluída |
 | 17 | [Reservas: espaços, agenda, regras e aluguel](etapas/17-reservas.md) | `feature/reservas` | Concluída |
 | 18 | [Notificações: no app, por e-mail e push](etapas/18-notificacoes.md) | `feature/notificacoes` | Concluída |
-| 19 | App nas lojas (Capacitor) | — | Próxima |
-| 20 | Bot de WhatsApp | — | Pendente |
+| 19 | [App nativo (iPhone e Android), sem publicar ainda](etapas/19-app-nativo.md) | `feature/app-nativo` | Concluída |
+| 20 | Bot de WhatsApp | — | Próxima |
 
 A partir da etapa 14, cada etapa é uma **fatia vertical**: entrega o backend **e** as telas juntos.
 

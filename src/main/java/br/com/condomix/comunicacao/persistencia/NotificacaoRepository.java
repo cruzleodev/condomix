@@ -24,4 +24,9 @@ public interface NotificacaoRepository extends JpaRepository<Notificacao, UUID> 
 	@Query("update Notificacao n set n.lidoEm = :quando where n.usuarioId = :usuarioId and n.lidoEm is null")
 	int marcarTodasLidas(UUID usuarioId, Instant quando);
 
+	/** As do condomínio atual (a entrega some junto, pelo ON DELETE CASCADE). */
+	@Modifying
+	@Query("delete from Notificacao n where n.usuarioId = :usuarioId")
+	int apagarDoUsuario(UUID usuarioId);
+
 }

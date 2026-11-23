@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useLocation, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { Botao, Campo, MensagemDeErro } from '../componentes/ui'
 import { useSessao } from '../sessao/contexto'
 
@@ -43,6 +43,9 @@ export function Entrar() {
           <MensagemDeErro erro={erro} />
           <Botao type="submit" carregando={enviando} className="w-full">Entrar</Botao>
         </form>
+        <p className="mt-6 text-center text-sm">
+          <Link to="/privacidade" className="text-marca-100 underline">Política de privacidade</Link>
+        </p>
       </div>
     </div>
   )

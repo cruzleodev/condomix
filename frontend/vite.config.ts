@@ -6,11 +6,13 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // Em desenvolvimento, /api vai para o backend (Spring Boot na porta 8080): o navegador vê tudo
 // na mesma origem e não é preciso liberar CORS.
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     tailwindcss(),
     VitePWA({
+      // No app nativo (modo "app"), o próprio app faz o papel do PWA: sem service worker.
+      disable: mode === 'app',
       registerType: 'autoUpdate',
       includeAssets: ['icone.svg'],
       manifest: {
@@ -38,11 +40,18 @@ export default defineConfig({
   ],
   server: {
     port: 5173,
-    proxy: { '/api': process.env.API_URL ?? 'http://localhost:8080' },
+    proxy: {
+      '/api': {
+        target: process.env.API_URL ?? 'http://localhost:8080',
+        changeOrigin: true,
+        // Para a API, a chamada vem do próprio site: sem o Origin, ela não confunde com o app instalado (CORS).
+        configure: (proxy) => proxy.on('proxyReq', (pedido) => pedido.removeHeader('origin')),
+      },
+    },
   },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/testes/preparacao.ts'],
     css: false,
   },
-})
+}))

@@ -2,12 +2,14 @@ package br.com.condomix.acesso;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -26,10 +28,14 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * Regras de segurança da API.
@@ -69,6 +75,7 @@ class ConfiguracaoSeguranca {
 	SecurityFilterChain seguranca(HttpSecurity http) throws Exception {
 		return http
 				.csrf(AbstractHttpConfigurer::disable)
+				.cors(Customizer.withDefaults())
 				.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(regras -> regras
 						.requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/convites/consulta", "/api/convites/aceite")
@@ -114,6 +121,24 @@ class ConfiguracaoSeguranca {
 		var conversor = new JwtAuthenticationConverter();
 		conversor.setJwtGrantedAuthoritiesConverter(perfis);
 		return conversor;
+	}
+
+	/**
+	 * O app instalado (iPhone e Android) carrega as telas de dentro dele (capacitor://localhost no iPhone,
+	 * https://localhost no Android) e chama a API pelo endereço público: o navegador do app exige o CORS. O site não
+	 * precisa, porque fica na mesma origem da API. Sem cookies: o token vai no cabeçalho Authorization.
+	 */
+	@Bean
+	CorsConfigurationSource corsConfigurationSource(
+			@Value("${condomix.cors.origens:capacitor://localhost,https://localhost}") List<String> origens) {
+		var configuracao = new CorsConfiguration();
+		configuracao.setAllowedOrigins(origens);
+		configuracao.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		configuracao.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+		configuracao.setMaxAge(3600L);
+		var porCaminho = new UrlBasedCorsConfigurationSource();
+		porCaminho.registerCorsConfiguration("/api/**", configuracao);
+		return porCaminho;
 	}
 
 	@Bean

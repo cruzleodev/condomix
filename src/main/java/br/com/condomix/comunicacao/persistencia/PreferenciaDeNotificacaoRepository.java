@@ -12,4 +12,8 @@ public interface PreferenciaDeNotificacaoRepository extends JpaRepository<Prefer
 	@Query("select p from PreferenciaDeNotificacao p where p.chave.usuarioId = :usuarioId")
 	List<PreferenciaDeNotificacao> doUsuario(UUID usuarioId);
 
+	@org.springframework.data.jpa.repository.Modifying
+	@Query("delete from PreferenciaDeNotificacao p where p.chave.usuarioId = :usuarioId")
+	int apagarDoUsuario(UUID usuarioId);
+
 }

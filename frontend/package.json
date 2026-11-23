@@ -10,9 +10,23 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "api:tipos": "openapi-typescript ${API_URL:-http://localhost:8080}/v3/api-docs -o src/api/schema.d.ts"
+    "api:tipos": "openapi-typescript ${API_URL:-http://localhost:8080}/v3/api-docs -o src/api/schema.d.ts",
+    "app:build": "tsc -b && vite build --mode app && cap sync",
+    "app:ios": "npm run app:build && cap open ios",
+    "app:android": "npm run app:build && cap open android",
+    "app:ios:dev": "node scripts/app-dev.mjs ios",
+    "app:android:dev": "node scripts/app-dev.mjs android"
   },
   "dependencies": {
+    "@capacitor-community/file-opener": "^8.0.1",
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/ios": "^8.6.2",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4",
     "@tanstack/react-query": "^5.107.1",
     "openapi-fetch": "^0.17.0",
     "react": "^19.3.1",
@@ -20,6 +34,7 @@
     "react-router": "^8.5.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
     "@tailwindcss/vite": "^4.3.5",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",

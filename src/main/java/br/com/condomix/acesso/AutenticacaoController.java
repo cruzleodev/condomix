@@ -1,5 +1,8 @@
 package br.com.condomix.acesso;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 import br.com.condomix.compartilhado.TenantAtual;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
@@ -26,8 +29,14 @@ class AutenticacaoController {
 
 	private final AutenticacaoService autenticacao;
 
-	AutenticacaoController(AutenticacaoService autenticacao) {
+	private final ExclusaoDeConta exclusao;
+
+	AutenticacaoController(AutenticacaoService autenticacao, ExclusaoDeConta exclusao) {
 		this.autenticacao = autenticacao;
+		this.exclusao = exclusao;
+	}
+
+	record PedidoExclusaoDaConta(@NotBlank String senha) {
 	}
 
 	record PedidoLogin(@NotBlank @Email String email, @NotBlank String senha) {
@@ -50,6 +59,15 @@ class AutenticacaoController {
 	@PostMapping("/auth/condominio")
 	Sessao selecionarCondominio(@Valid @RequestBody PedidoSelecaoCondominio pedido, @AuthenticationPrincipal Jwt jwt) {
 		return autenticacao.selecionarCondominio(UUID.fromString(jwt.getSubject()), pedido.condominioId());
+	}
+
+	@Operation(summary = "Excluir a minha conta",
+			description = "Apaga o login (e-mail, senha, notificações, push) e tira a pessoa de todos os condomínios. "
+					+ "O cadastro e o histórico financeiro ficam com cada condomínio. Pede a senha para confirmar.")
+	@PostMapping("/auth/exclusao-da-conta")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	void excluirConta(@Valid @RequestBody PedidoExclusaoDaConta pedido, @AuthenticationPrincipal Jwt jwt) {
+		exclusao.excluir(UUID.fromString(jwt.getSubject()), pedido.senha());
 	}
 
 	@Operation(summary = "Quem está logado e em qual condomínio")

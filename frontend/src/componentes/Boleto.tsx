@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api, dados } from '../api/cliente'
 import type { BoletoDaCobranca, FormasDePagamento, PagamentoDaFatura } from '../api/tipos'
+import { abrirForaDoApp } from '../nativo/app'
 import { ROTULOS, data, moeda } from '../util/formato'
 import { Aviso, Botao, Carregando, Etiqueta, MensagemDeErro } from './ui'
 
@@ -60,7 +61,8 @@ export function DadosParaPagar({ v }: { v: FormasDePagamento | PagamentoDaFatura
           <h3 className="font-semibold">Boleto</h3>
           <TextoParaCopiar rotulo="Linha digitável" texto={v.linhaDigitavel} />
           {v.url && (
-            <a href={v.url} target="_blank" rel="noreferrer" className="inline-block text-sm text-marca-700 underline">
+            <a href={v.url} target="_blank" rel="noreferrer" className="inline-block text-sm text-marca-700 underline"
+              onClick={(e) => { e.preventDefault(); abrirForaDoApp(v.url ?? '') }}>
               Abrir o boleto em PDF
             </a>
           )}

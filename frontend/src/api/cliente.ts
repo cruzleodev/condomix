@@ -6,9 +6,14 @@ import { tokenAtual, avisarSessaoExpirada } from '../sessao/armazenamento'
  * Cliente da API, tipado pelo OpenAPI. Coloca o token em todas as requisições e, se a API responder 401
  * (token vencido ou inválido), encerra a sessão.
  */
-// Mesma origem da página: em desenvolvimento o Vite repassa /api para o backend.
+/**
+ * Onde está a API. No site, é a mesma origem da página (em desenvolvimento o Vite repassa /api para o backend).
+ * No app nativo publicado, a página vem de dentro do app, então a API é o endereço público (VITE_API_URL).
+ */
+export const enderecoDaApi: string = import.meta.env.VITE_API_URL ?? globalThis.location?.origin ?? ''
+
 export const api = createClient<paths>({
-  baseUrl: globalThis.location?.origin ?? '',
+  baseUrl: enderecoDaApi,
   // Resolve o fetch a cada chamada (e não uma vez só), para que possa ser substituído nos testes.
   fetch: (requisicao) => globalThis.fetch(requisicao),
 })
@@ -57,7 +62,7 @@ export async function requisicaoAutenticada(url: string, opcoes: RequestInit = {
   const cabecalhos = new Headers(opcoes.headers)
   const token = tokenAtual()
   if (token) cabecalhos.set('Authorization', `Bearer ${token}`)
-  const resposta = await fetch(url, { ...opcoes, headers: cabecalhos })
+  const resposta = await fetch(url.startsWith('/') ? enderecoDaApi + url : url, { ...opcoes, headers: cabecalhos })
   if (resposta.status === 401 && token) avisarSessaoExpirada()
   if (!resposta.ok) {
     const corpo = await resposta.json().catch(() => undefined)

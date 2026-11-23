@@ -75,6 +75,11 @@ public class Pessoa {
 		this.usuarioId = Objects.requireNonNull(usuarioId);
 	}
 
+	/** O login da pessoa foi excluído: o cadastro fica no condomínio, sem acesso ao app. */
+	public void desvincularUsuario() {
+		this.usuarioId = null;
+	}
+
 	public void alterarContato(String email, String telefone) {
 		if (email != null && !email.isBlank() && !email.contains("@")) {
 			throw new IllegalArgumentException("E-mail inválido");
