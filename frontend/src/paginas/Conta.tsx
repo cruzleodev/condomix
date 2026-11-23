@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
+import { ExclusaoDaConta } from '../componentes/ExclusaoDaConta'
 import { PreferenciasDeNotificacao } from '../componentes/PreferenciasDeNotificacao'
 import { Botao, Cartao, Etiqueta, TituloDaPagina } from '../componentes/ui'
 import { useSessao } from '../sessao/contexto'
@@ -24,7 +25,9 @@ export function Conta() {
       {tem('ADMIN_PLATAFORMA') && (
         <Botao variante="secundario" className="w-full" onClick={() => navegar('/plataforma')}>Painel da plataforma</Botao>
       )}
-      <Botao variante="perigo" className="w-full" onClick={sair}>Sair</Botao>
+      <Botao variante="secundario" className="w-full" onClick={sair}>Sair</Botao>
+      {!suporte && !tem('ADMIN_PLATAFORMA') && <ExclusaoDaConta />}
+      <p className="text-center text-sm"><Link to="/privacidade" className="text-marca-700 underline">Política de privacidade</Link></p>
     </div>
   )
 }

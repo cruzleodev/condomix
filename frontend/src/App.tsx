@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
 import { LayoutDaPlataforma } from './layout/LayoutDaPlataforma'
 import { LayoutDoApp } from './layout/LayoutDoApp'
 import { RotaComPapel, RotaDoCondominio, RotaLogada } from './layout/Rotas'
+import { prepararAppNativo } from './nativo/app'
 import { AceitarConvite } from './paginas/AceitarConvite'
 import { Balancete } from './paginas/Balancete'
 import { Conta } from './paginas/Conta'
@@ -27,6 +28,7 @@ import { Clientes } from './paginas/plataforma/Clientes'
 import { Faturas } from './paginas/plataforma/Faturas'
 import { Logins } from './paginas/plataforma/Logins'
 import { Planos } from './paginas/plataforma/Planos'
+import { Privacidade } from './paginas/Privacidade'
 import { Suporte } from './paginas/plataforma/Suporte'
 import { SemAcesso } from './paginas/SemAcesso'
 import { ACOMPANHAMENTO, GESTAO, PLATAFORMA } from './sessao/papeis'
@@ -34,6 +36,7 @@ import { ACOMPANHAMENTO, GESTAO, PLATAFORMA } from './sessao/papeis'
 const rotas = [
   { path: '/entrar', element: <Entrar /> },
   { path: '/convite', element: <AceitarConvite /> },
+  { path: '/privacidade', element: <Privacidade /> },
   {
     element: <RotaLogada />,
     children: [
@@ -92,6 +95,9 @@ const rotas = [
 ]
 
 const roteador = createBrowserRouter(rotas)
+
+// No app nativo: barra de status, "voltar" do Android e links condomix:// abrindo a tela certa.
+prepararAppNativo((caminho) => roteador.navigate(caminho))
 
 export function App() {
   return <RouterProvider router={roteador} />

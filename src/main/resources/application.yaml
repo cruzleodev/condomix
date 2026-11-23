@@ -52,6 +52,9 @@ management:
     web:
       exposure:
         include: health,info
+  health:
+    mail:
+      enabled: false   # o e-mail fora do ar não derruba a API: as notificações tentam de novo sozinhas
 
 condomix:
   seguranca:
@@ -79,6 +82,8 @@ condomix:
     processador:
       ativo: true
       intervalo: 10s   # de quanto em quanto tempo os boletos pendentes são emitidos ou cancelados no gateway
+  cors:
+    origens: ${CONDOMIX_CORS_ORIGENS:capacitor://localhost,https://localhost}   # o app instalado (iPhone e Android)
   notificacoes:
     endereco-do-app: ${CONDOMIX_ENDERECO_DO_APP:http://localhost:5173}   # links dos e-mails e do push
     remetente: ${CONDOMIX_EMAIL_REMETENTE:Condomix <avisos@condomix.com.br>}

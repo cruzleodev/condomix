@@ -45,6 +45,9 @@ public class Usuario {
 
 	private UUID bloqueadoPor;
 
+	/** A pessoa excluiu a conta: o login não existe mais (ver {@link #excluir}). */
+	private Instant excluidoEm;
+
 	@CreationTimestamp
 	private Instant criadoEm;
 
@@ -93,6 +96,17 @@ public class Usuario {
 		this.bloqueadoEm = Objects.requireNonNull(quando);
 	}
 
+	/**
+	 * A pessoa excluiu a própria conta: o e-mail vira um endereço que não existe (o mesmo e-mail pode ser convidado de
+	 * novo) e a senha é trocada por uma que ninguém sabe. Os tokens deixam de valer.
+	 */
+	public void excluir(String hashImpossivel, Instant quando) {
+		this.email = "excluido-" + id + "@excluido.condomix.invalid";
+		this.senhaHash = Objects.requireNonNull(hashImpossivel);
+		this.ativo = false;
+		this.excluidoEm = Objects.requireNonNull(quando);
+	}
+
 	public void desbloquear() {
 		if (bloqueadoEm == null) {
 			throw new IllegalStateException("Este login não está bloqueado");
@@ -112,6 +126,7 @@ public class Usuario {
 	public Instant getBloqueadoEm() { return bloqueadoEm; }
 	public String getMotivoBloqueio() { return motivoBloqueio; }
 	public boolean isBloqueado() { return bloqueadoEm != null; }
+	public Instant getExcluidoEm() { return excluidoEm; }
 	public Instant getCriadoEm() { return criadoEm; }
 	public Instant getAtualizadoEm() { return atualizadoEm; }
 

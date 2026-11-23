@@ -15,4 +15,8 @@ public interface InscricaoPushRepository extends JpaRepository<InscricaoPush, UU
 
 	boolean existsByUsuarioId(UUID usuarioId);
 
+	@org.springframework.data.jpa.repository.Modifying
+	@org.springframework.data.jpa.repository.Query("delete from InscricaoPush i where i.usuarioId = :usuarioId")
+	int apagarDoUsuario(UUID usuarioId);
+
 }

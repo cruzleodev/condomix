@@ -30,4 +30,10 @@ public interface PessoaRepository extends JpaRepository<Pessoa, UUID> {
 	/** A pessoa do condomínio atual ligada ao login (para o nome nas notificações). */
 	Optional<Pessoa> findFirstByUsuarioId(UUID usuarioId);
 
+	/** Em modo sistema: os condomínios em que o login tem cadastro (exclusão da conta). */
+	@Query("select p.tenantId from Pessoa p where p.usuarioId = :usuarioId")
+	List<UUID> condominiosDoUsuario(@Param("usuarioId") UUID usuarioId);
+
+	List<Pessoa> findByUsuarioId(UUID usuarioId);
+
 }
