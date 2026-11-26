@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { CampoData } from '../../componentes/CampoData'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -67,7 +68,7 @@ function SecaoDaAssinatura({ cliente }: { cliente: CondominioNaPlataforma }) {
   const a = cliente.assinatura
   if (editando) return <EdicaoDeAssinatura cliente={cliente} aoTerminar={() => setEditando(false)} />
   return (
-    <Cartao titulo="Assinatura" acao={<button className="text-sm text-marca-700 underline" onClick={() => setEditando(true)}>Alterar</button>}>
+    <Cartao titulo="Assinatura" acao={<BotaoDeIcone icone="editar" rotulo="Alterar a assinatura" onClick={() => setEditando(true)} />}>
       {a ? (
         <dl className="space-y-1 text-sm">
           <Linha rotulo="Plano">{a.nomeDoPlano} · {ROTULOS.periodicidade[a.periodicidade ?? 'MENSAL']}</Linha>
@@ -96,7 +97,9 @@ function PrazoDoTeste({ cliente }: { cliente: CondominioNaPlataforma }) {
     return (
       <Linha rotulo="Teste grátis até">
         {atual ? data(atual) : 'sem prazo'}{' '}
-        <button className="ml-1 text-marca-700 underline" onClick={() => { setFim(atual); setEditando(true) }}>mudar</button>
+        <span className="ml-1 inline-flex align-middle">
+          <BotaoDeIcone icone="editar" rotulo="Mudar o fim do teste grátis" onClick={() => { setFim(atual); setEditando(true) }} />
+        </span>
       </Linha>
     )
   }
@@ -151,7 +154,7 @@ function SecaoDosDados({ cliente }: { cliente: CondominioNaPlataforma }) {
     )
   }
   return (
-    <Cartao titulo="Dados para a fatura" acao={<button className="text-sm text-marca-700 underline" onClick={editar}>Alterar</button>}>
+    <Cartao titulo="Dados para a fatura" acao={<BotaoDeIcone icone="editar" rotulo="Alterar os dados para a fatura" onClick={editar} />}>
       <dl className="space-y-1 text-sm">
         <Linha rotulo="CNPJ">{cliente.cnpj ? documento(cliente.cnpj) : <span className="text-red-700">Falta: o boleto não sai sem ele</span>}</Linha>
         <Linha rotulo="E-mail">{cliente.email || '—'}</Linha>

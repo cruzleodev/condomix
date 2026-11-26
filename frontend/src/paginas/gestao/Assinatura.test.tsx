@@ -61,8 +61,10 @@ describe('assinatura do Condomix: condomínio suspenso por falta de pagamento', 
 
     expect(await screen.findByText('O acesso ao Condomix está suspenso por falta de pagamento.')).toBeInTheDocument()
     expect(roteador.state.location.pathname).toBe('/gestao/assinatura')
-    expect(screen.getByText('Venceu em 26/10/2026')).toBeInTheDocument()
-    expect(screen.getByText('19/10/2026 a 18/11/2026')).toBeInTheDocument()
+    // A tabela tem a versão do computador e a do celular: o texto aparece nas duas.
+    expect(screen.getAllByText('Venceu em 26/10/2026').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('19/10/2026 a 18/11/2026').length).toBeGreaterThan(0)
+    expect(screen.getByText('Pagar a fatura de 19/10/2026 a 18/11/2026')).toBeInTheDocument()
     // A fatura atrasada já vem aberta, com o Pix.
     expect(await screen.findByText('00020126BR.GOV.BCB.PIX')).toBeInTheDocument()
   })

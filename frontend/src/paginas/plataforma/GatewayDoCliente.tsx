@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { api, dados } from '../../api/cliente'
@@ -56,7 +57,7 @@ export function GatewayDoCliente({ condominioId }: { condominioId: string }) {
   }
   return (
     <Cartao titulo="Boleto e Pix"
-      acao={<button className="text-sm text-marca-700 underline" onClick={() => setEditando(true)}>{s?.configurado ? 'Trocar a chave' : 'Ligar'}</button>}>
+      acao={<BotaoDeIcone icone={s?.configurado ? 'logins' : 'adicionar'} rotulo={s?.configurado ? 'Trocar a chave' : 'Ligar a conta'} onClick={() => setEditando(true)} />}>
       {s?.configurado ? (
         <div className="space-y-2 text-sm">
           <p>

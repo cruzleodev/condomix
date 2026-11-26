@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { useAdesao } from '../../api/adesao'
 import { CampoNumero } from '../../componentes/CampoNumerico'
 import { CampoData } from '../../componentes/CampoData'
@@ -57,9 +58,10 @@ export function Mandatos() {
                       </div>
                       {m.aviso && <div className="mt-3"><Aviso>{m.aviso}</Aviso></div>}
                       {gerencia && m.situacao !== 'FUTURO' && (
-                        <button className="mt-3 text-sm text-red-700 underline" onClick={() => { setRegistrando(false); setEncerrando(m) }}>
-                          Encerrar antes do prazo
-                        </button>
+                        <div className="mt-2">
+                          <BotaoDeIcone icone="encerrar" rotulo="Encerrar antes do prazo" perigo dica="direita"
+                            onClick={() => { setRegistrando(false); setEncerrando(m) }} />
+                        </div>
                       )}
                     </Cartao>
                   </li>

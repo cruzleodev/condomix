@@ -1,3 +1,4 @@
+import { BotaoComIcone } from '../../componentes/BotaoComIcone'
 import { CampoDinheiro } from '../../componentes/CampoNumerico'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -77,7 +78,7 @@ function CartaoDoPlano({ plano }: { plano: PlanoNoCatalogo }) {
             <div><dt className="text-slate-500">Semestral</dt><dd className="font-medium">{moeda(plano.precoSemestral)}</dd></div>
             <div><dt className="text-slate-500">Anual</dt><dd className="font-medium">{moeda(plano.precoAnual)}</dd></div>
           </dl>
-          <button className="mt-3 text-sm text-marca-700 underline" onClick={abrir}>Alterar preços</button>
+          <div className="mt-3"><BotaoComIcone icone="editar" onClick={abrir}>Alterar preços</BotaoComIcone></div>
         </>
       )}
     </Cartao>

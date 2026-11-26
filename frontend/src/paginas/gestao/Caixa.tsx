@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { useAdesao } from '../../api/adesao'
 import { CampoDinheiro } from '../../componentes/CampoNumerico'
 import { CampoData } from '../../componentes/CampoData'
@@ -256,10 +257,10 @@ function Extrato({ contas, gerencia }: { contas: Conta[]; gerencia: boolean }) {
               valor: (l) => l.cancelado ? <Etiqueta>cancelado</Etiqueta>
                 : l.origem === 'COBRANCA' ? <Etiqueta cor="marca">cobrança</Etiqueta>
                 : gerencia ? (
-                  <button className="text-red-700 underline" onClick={() => {
+                  <BotaoDeIcone icone="cancelar" rotulo="Cancelar o lançamento" perigo onClick={() => {
                     const motivo = window.prompt('Motivo do cancelamento:')
                     if (motivo) cancelar.mutate({ id: l.id ?? '', motivo })
-                  }}>Cancelar</button>
+                  }} />
                 ) : null,
             },
           ]}

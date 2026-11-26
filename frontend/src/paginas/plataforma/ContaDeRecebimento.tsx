@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { api, dados } from '../../api/cliente'
@@ -55,7 +56,7 @@ export function ContaDeRecebimento() {
   }
   return (
     <Cartao titulo={titulo}
-      acao={<button className="text-sm text-marca-700 underline" onClick={() => setEditando(true)}>{c?.configurada ? 'Trocar a chave' : 'Ligar'}</button>}>
+      acao={<BotaoDeIcone icone={c?.configurada ? 'logins' : 'adicionar'} rotulo={c?.configurada ? 'Trocar a chave' : 'Ligar a conta'} onClick={() => setEditando(true)} />}>
       {c?.configurada ? (
         <div className="space-y-2 text-sm">
           <p>

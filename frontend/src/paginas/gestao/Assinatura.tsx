@@ -4,7 +4,9 @@ import { useNavigate } from 'react-router'
 import { api, dados } from '../../api/cliente'
 import type { AssinaturaDoCondominio, FaturaDaAssinatura } from '../../api/tipos'
 import { DadosParaPagar } from '../../componentes/Boleto'
-import { Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina, Vazio } from '../../componentes/ui'
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
+import { Tabela } from '../../componentes/Tabela'
+import { Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina } from '../../componentes/ui'
 import { useSessao } from '../../sessao/contexto'
 import { data, moeda, periodoDaFatura, ROTULOS } from '../../util/formato'
 
@@ -44,6 +46,9 @@ function Conteudo({ a }: { a: AssinaturaDoCondominio }) {
   const faturas = a.faturas ?? []
   const emAberto = faturas.filter((f) => f.situacao !== 'PAGA')
   const pagas = faturas.filter((f) => f.situacao === 'PAGA')
+  // A fatura atrasada já abre com o Pix e o boleto; as outras abrem pelo botão da tabela.
+  const [pagando, setPagando] = useState<string | null>(emAberto.find((f) => f.atrasada && f.situacao === 'EMITIDA')?.id ?? null)
+  const aPagar = emAberto.find((f) => f.id === pagando && f.situacao === 'EMITIDA')
   return (
     <div className="space-y-6">
       {a.suspensaPorFaltaDePagamento && (
@@ -55,71 +60,85 @@ function Conteudo({ a }: { a: AssinaturaDoCondominio }) {
           </p>
         </div>
       )}
-      <Cartao titulo="Plano">
-        <dl className="space-y-1 text-sm">
-          <div className="flex justify-between gap-2"><dt className="text-slate-600">Plano</dt><dd className="font-medium">{a.plano} · {ROTULOS.periodicidade[a.periodicidade ?? 'MENSAL']}</dd></div>
-          <div className="flex justify-between gap-2"><dt className="text-slate-600">Valor</dt><dd>{a.preco != null ? `${moeda(a.preco)} ${POR[a.periodicidade ?? 'MENSAL']}` : 'A combinar'}</dd></div>
-          <div className="flex justify-between gap-2">
-            <dt className="text-slate-600">Situação</dt>
-            <dd>{a.status === 'TESTE'
-              ? <Etiqueta cor="marca">{a.fimDoTeste ? `Teste grátis até ${data(a.fimDoTeste)}` : 'Teste grátis'}</Etiqueta>
-              : <Etiqueta cor={a.status === 'ATIVA' ? 'verde' : 'cinza'}>{ROTULOS.statusDaAssinatura[a.status ?? 'ATIVA']}</Etiqueta>}</dd>
-          </div>
-        </dl>
+      <section>
+        <h2 className="mb-2 text-sm font-semibold uppercase text-slate-500">Plano</h2>
+        <Tabela<AssinaturaDoCondominio>
+          linhas={[a]}
+          chave={() => 'plano'}
+          colunas={[
+            { titulo: 'Plano', valor: (x) => <span className="font-medium">{x.plano}</span> },
+            { titulo: 'Cobrança', valor: (x) => ROTULOS.periodicidade[x.periodicidade ?? 'MENSAL'] },
+            { titulo: 'Valor', valor: (x) => (x.preco != null ? `${moeda(x.preco)} ${POR[x.periodicidade ?? 'MENSAL']}` : 'A combinar'), direita: true },
+            {
+              titulo: 'Situação',
+              valor: (x) => x.status === 'TESTE'
+                ? <Etiqueta cor="marca">{x.fimDoTeste ? `Teste grátis até ${data(x.fimDoTeste)}` : 'Teste grátis'}</Etiqueta>
+                : <Etiqueta cor={x.status === 'ATIVA' ? 'verde' : 'cinza'}>{ROTULOS.statusDaAssinatura[x.status ?? 'ATIVA']}</Etiqueta>,
+            },
+          ]}
+        />
         {a.status === 'TESTE' && a.fimDoTeste && (
-          <p className="mt-3 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-slate-600">
             Depois do teste, a assinatura passa a ser cobrada{a.preco != null && <>: {moeda(a.preco)} {POR[a.periodicidade ?? 'MENSAL']}</>}.
             A fatura chega aqui, com Pix e boleto.
           </p>
         )}
-      </Cartao>
+      </section>
       <section>
         <h2 className="mb-2 text-sm font-semibold uppercase text-slate-500">Faturas em aberto ({emAberto.length})</h2>
-        {emAberto.length === 0 ? <Vazio>Nenhuma fatura em aberto.</Vazio>
-          : <ul className="grid gap-3 md:grid-cols-2">{emAberto.map((f) => <ItemDeFatura key={f.id} fatura={f} />)}</ul>}
+        <TabelaDeFaturas faturas={emAberto} vazio="Nenhuma fatura em aberto." aoPagar={setPagando} />
       </section>
+      {aPagar && (
+        <Cartao titulo={`Pagar a fatura de ${periodoDaFatura(aPagar.periodoInicio, aPagar.periodoFim)}`}
+          acao={<BotaoDeIcone icone="fechar" rotulo="Fechar" onClick={() => setPagando(null)} />}>
+          <PagamentoDaFatura faturaId={aPagar.id ?? ''} />
+        </Cartao>
+      )}
       {pagas.length > 0 && (
         <section>
           <h2 className="mb-2 text-sm font-semibold uppercase text-slate-500">Pagas</h2>
-          <ul className="grid gap-3 md:grid-cols-2">{pagas.map((f) => <ItemDeFatura key={f.id} fatura={f} />)}</ul>
+          <TabelaDeFaturas faturas={pagas} vazio="" />
         </section>
       )}
     </div>
   )
 }
 
-function ItemDeFatura({ fatura: f }: { fatura: FaturaDaAssinatura }) {
-  const [aberto, setAberto] = useState(f.atrasada === true)
-  const pagavel = f.situacao === 'EMITIDA'
-  const situacao = f.situacao === 'PAGA' ? <Etiqueta cor="verde">Paga em {data(f.pagoEm)}</Etiqueta>
+/** As faturas da assinatura: período, vencimento, valor e situação; as que dá para pagar têm o botão de Pix e boleto. */
+function TabelaDeFaturas({ faturas, vazio, aoPagar }: {
+  faturas: FaturaDaAssinatura[]; vazio: string; aoPagar?: (id: string) => void
+}) {
+  return (
+    <Tabela<FaturaDaAssinatura>
+      linhas={faturas}
+      chave={(f) => f.id ?? ''}
+      vazio={vazio}
+      colunas={[
+        { titulo: 'Período', valor: (f) => <span className="font-medium">{periodoDaFatura(f.periodoInicio, f.periodoFim)}</span> },
+        { titulo: 'Valor', valor: (f) => moeda(f.valor), direita: true },
+        { titulo: 'Situação', valor: (f) => <SituacaoDaFatura fatura={f} /> },
+        ...(aoPagar ? [{
+          titulo: 'Ações', direita: true,
+          valor: (f: FaturaDaAssinatura) => f.situacao === 'EMITIDA'
+            ? <BotaoDeIcone icone="cobrancas" rotulo="Pagar com Pix ou boleto" onClick={() => aoPagar(f.id ?? '')} />
+            : null,
+        }] : []),
+      ]}
+    />
+  )
+}
+
+function SituacaoDaFatura({ fatura: f }: { fatura: FaturaDaAssinatura }) {
+  const etiqueta = f.situacao === 'PAGA' ? <Etiqueta cor="verde">Paga em {data(f.pagoEm)}</Etiqueta>
     : f.atrasada ? <Etiqueta cor="vermelho">Venceu em {data(f.vencimento)}</Etiqueta>
     : f.situacao === 'EMITIDA' ? <Etiqueta cor="amarelo">Vence em {data(f.vencimento)}</Etiqueta>
     : <Etiqueta cor="cinza">{ROTULOS.situacaoDaFatura[f.situacao ?? 'A_EMITIR']}</Etiqueta>
   return (
-    <li>
-      <Cartao>
-        <button className="w-full text-left" onClick={() => setAberto(!aberto)} aria-expanded={aberto} disabled={!pagavel}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="font-medium">Assinatura Condomix</p>
-              <p className="text-xs text-slate-500">{periodoDaFatura(f.periodoInicio, f.periodoFim)}</p>
-            </div>
-            <p className="shrink-0 text-right font-semibold">{moeda(f.valor)}</p>
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            {situacao}
-            {pagavel && !aberto && <span className="text-sm font-medium text-marca-700">Pagar com Pix ou boleto ›</span>}
-          </div>
-        </button>
-        {f.situacao === 'A_EMITIR' && <p className="mt-2 text-sm text-slate-600">O boleto está sendo gerado. Volte em instantes.</p>}
-        {f.situacao === 'FALHOU' && <p className="mt-2 text-sm text-slate-600">O boleto ainda não está disponível. Fale com o suporte do Condomix.</p>}
-        {aberto && pagavel && (
-          <div className="mt-3 border-t border-slate-100 pt-3">
-            <PagamentoDaFatura faturaId={f.id ?? ''} />
-          </div>
-        )}
-      </Cartao>
-    </li>
+    <span>
+      {etiqueta}
+      {f.situacao === 'A_EMITIR' && <span className="mt-1 block text-xs text-slate-500">O boleto está sendo gerado. Volte em instantes.</span>}
+      {f.situacao === 'FALHOU' && <span className="mt-1 block text-xs text-slate-500">Boleto ainda indisponível. Fale com o suporte do Condomix.</span>}
+    </span>
   )
 }
 

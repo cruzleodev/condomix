@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { api, dados } from '../../api/cliente'
@@ -87,12 +88,10 @@ function AcaoDoLogin({ login, aoBloquear }: { login: LoginNaPlataforma; aoBloque
   if (login.email === email) return <span className="text-sm text-slate-400">Você</span>
   if (login.bloqueado) {
     return (
-      <button className="text-sm text-emerald-700 underline" disabled={desbloquear.isPending} onClick={() => desbloquear.mutate()}>
-        {desbloquear.isPending ? 'Aguarde…' : 'Desbloquear'}
-      </button>
+      <BotaoDeIcone icone="desbloquear" rotulo="Desbloquear o login" disabled={desbloquear.isPending} onClick={() => desbloquear.mutate()} />
     )
   }
-  return <button className="text-sm text-red-700 underline" onClick={aoBloquear}>Bloquear</button>
+  return <BotaoDeIcone icone="bloquear" rotulo="Bloquear o login" perigo onClick={aoBloquear} />
 }
 
 function Bloqueio({ login, aoTerminar }: { login: LoginNaPlataforma; aoTerminar: () => void }) {

@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { CampoData } from '../../componentes/CampoData'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
@@ -46,9 +47,9 @@ export function Clientes() {
             { titulo: 'Cliente desde', valor: (c) => data(c.criadoEm) },
             { titulo: 'Acesso', valor: (c) => c.ativo ? <Etiqueta cor="verde">Liberado</Etiqueta> : <Etiqueta cor="vermelho">{c.motivoSuspensao === 'FALTA_DE_PAGAMENTO' ? 'Suspenso (pagamento)' : 'Suspenso'}</Etiqueta> },
             { titulo: 'Ações', direita: true, valor: (c) => (
-              <span className="flex flex-wrap justify-end gap-3 text-sm">
-                <Link className="text-marca-700 underline" to={`/plataforma/clientes/${c.id}`}>Abrir</Link>
-                <button className="text-marca-700 underline" onClick={() => navegar(`/plataforma/suporte?condominio=${c.id}`)}>Suporte</button>
+              <span className="flex flex-wrap justify-end md:justify-center gap-1 md:flex-nowrap">
+                <BotaoDeIcone icone="abrir" rotulo="Abrir o cliente" onClick={() => navegar(`/plataforma/clientes/${c.id}`)} />
+                <BotaoDeIcone icone="suporte" rotulo="Entrar em modo suporte" onClick={() => navegar(`/plataforma/suporte?condominio=${c.id}`)} />
               </span>
             ) },
           ]}

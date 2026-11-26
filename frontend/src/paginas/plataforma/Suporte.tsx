@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
@@ -92,7 +93,7 @@ function SituacaoDoAcesso({ registro }: { registro: RegistroDeSuporte }) {
   return (
     <span className="flex flex-wrap items-center gap-2">
       <Etiqueta cor="amarelo">Em andamento até {dataHora(registro.expiraEm)}</Etiqueta>
-      <button className="text-sm text-red-700 underline" disabled={encerrar.isPending} onClick={() => encerrar.mutate()}>Encerrar</button>
+      <BotaoDeIcone icone="encerrar" rotulo="Encerrar o acesso de suporte" perigo dica="direita" disabled={encerrar.isPending} onClick={() => encerrar.mutate()} />
     </span>
   )
 }

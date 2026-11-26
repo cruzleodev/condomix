@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from './BotaoDeIcone'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api, dados } from '../api/cliente'
@@ -60,7 +61,7 @@ export function CancelamentoDeReserva({ reserva: r, gestao, aoCancelar, abertoDe
   const temAluguel = (r.valor ?? 0) > 0 && !!r.cobrancaId
   const noPrazo = hojeIso() <= (r.cancelavelSemCustoAte ?? '')
   if (!aberto) {
-    return <button className="mt-3 text-sm font-medium text-red-700 underline" onClick={() => setAberto(true)}>Cancelar a reserva</button>
+    return <div className="mt-2"><BotaoDeIcone icone="cancelar" rotulo="Cancelar a reserva" perigo dica="direita" onClick={() => setAberto(true)} /></div>
   }
   return (
     <form className="mt-3 space-y-3 border-t border-slate-100 pt-3" onSubmit={(e) => { e.preventDefault(); cancelar.mutate() }}>

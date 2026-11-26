@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { CampoData } from '../../componentes/CampoData'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent, type ReactNode } from 'react'
@@ -24,7 +25,7 @@ export function SecaoDoSindico({ condominioId }: { condominioId: string }) {
   if (modo === 'convite' && s) return <NovoConvite condominioId={condominioId} sindico={s} aoTerminar={() => setModo('ver')} />
   if (modo === 'troca') return <TrocaDeSindico condominioId={condominioId} aoTerminar={() => setModo('ver')} />
   return (
-    <Cartao titulo="Síndico" acao={<button className="text-sm text-marca-700 underline" onClick={() => setModo('troca')}>Trocar síndico</button>}>
+    <Cartao titulo="Síndico" acao={<BotaoDeIcone icone="editar" rotulo="Trocar o síndico" onClick={() => setModo('troca')} />}>
       {s ? (
         <>
           <dl className="grid gap-1 text-sm md:grid-cols-2">

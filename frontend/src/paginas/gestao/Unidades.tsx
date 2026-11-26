@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { CampoNumero } from '../../componentes/CampoNumerico'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
@@ -78,7 +79,7 @@ export function Unidades() {
             },
             ...(gerencia ? [{
               titulo: 'Ações', direita: true,
-              valor: (u: Unidade) => <button className="text-marca-700 underline" onClick={() => setFormulario({ editar: u })}>Editar</button>,
+              valor: (u: Unidade) => <BotaoDeIcone icone="editar" rotulo="Editar a unidade" onClick={() => setFormulario({ editar: u })} />,
             }] : []),
           ]}
         />
