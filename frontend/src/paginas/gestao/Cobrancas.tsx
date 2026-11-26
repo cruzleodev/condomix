@@ -140,14 +140,14 @@ function ListaDeCobrancas() {
                 valor: (c) => c.boleto ? (
                   <span>
                     <EtiquetaDoBoleto boleto={c.boleto} />
-                    {c.boleto.situacao === 'FALHOU' && <span className="mt-1 block max-w-xs text-xs text-red-700">{c.boleto.erro}</span>}
+                    {c.boleto.situacao === 'FALHOU' && <span className="mt-1 block max-w-xs text-xs text-red-700 md:mx-auto">{c.boleto.erro}</span>}
                   </span>
                 ) : '—',
               },
               ...(gerencia ? [{
                 titulo: 'Ações', direita: true,
                 valor: (c: Cobranca) => (
-                  <span className="flex flex-wrap justify-end gap-1 md:flex-nowrap">
+                  <span className="flex flex-wrap justify-end md:justify-center gap-1 md:flex-nowrap">
                     {c.status === 'ABERTA' && c.boleto?.situacao === 'EMITIDO' && (
                       <BotaoDeIcone icone="segundaVia" rotulo="2ª via do boleto" onClick={() => setFormulario({ segundaVia: c })} />
                     )}
@@ -160,7 +160,7 @@ function ListaDeCobrancas() {
                         onClick={() => tentarDeNovo.mutate(c.id ?? '')} />
                     )}
                     {c.status === 'ABERTA' && (
-                      <BotaoDeIcone icone="receber" rotulo="Registrar o recebimento" onClick={() => setFormulario({ pagar: c })} />
+                      <BotaoDeIcone icone="cobrancas" rotulo="Registrar o recebimento" onClick={() => setFormulario({ pagar: c })} />
                     )}
                     {c.status === 'ABERTA' && (
                       <BotaoDeIcone icone="cancelar" rotulo="Cancelar a cobrança" perigo onClick={() => {

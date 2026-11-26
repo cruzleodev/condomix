@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { CampoData } from '../../componentes/CampoData'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
@@ -53,9 +54,7 @@ export function Moradores() {
           colunas={[
             {
               titulo: 'Nome',
-              valor: (p) => gerencia
-                ? <button className="font-medium text-marca-700 underline" onClick={() => { setConvite(null); setEditando(p) }}>{p.nome}</button>
-                : <span className="font-medium">{p.nome}</span>,
+              valor: (p) => <span className="font-medium">{p.nome}</span>,
             },
             { titulo: 'CPF/CNPJ', valor: (p) => documento(p.documento) || '—' },
             { titulo: 'Contato', valor: (p) => [p.email, telefone(p.telefone)].filter(Boolean).join(' · ') || '—' },
@@ -67,9 +66,19 @@ export function Moradores() {
             {
               titulo: 'Acesso', direita: true,
               valor: (p) => p.temLogin ? <Etiqueta cor="verde">tem acesso</Etiqueta>
-                : gerencia ? <button className="text-marca-700 underline" onClick={() => { setConvite(null); setConvidando(p) }}>Convidar</button>
                 : <Etiqueta>sem acesso</Etiqueta>,
             },
+            ...(gerencia ? [{
+              titulo: 'Ações', direita: true,
+              valor: (p: Pessoa) => (
+                <span className="flex justify-end md:justify-center gap-1">
+                  <BotaoDeIcone icone="editar" rotulo="Editar o cadastro" onClick={() => { setConvite(null); setEditando(p) }} />
+                  {!p.temLogin && (
+                    <BotaoDeIcone icone="convidar" rotulo="Convidar para o app" onClick={() => { setConvite(null); setConvidando(p) }} />
+                  )}
+                </span>
+              ),
+            }] : []),
           ]}
         />
       )}

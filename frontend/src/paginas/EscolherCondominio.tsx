@@ -1,3 +1,4 @@
+import { BotaoComIcone } from '../componentes/BotaoComIcone'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { MensagemDeErro, TituloDaPagina } from '../componentes/ui'
@@ -49,7 +50,7 @@ export function EscolherCondominio() {
           </li>
         ))}
       </ul>
-      <button onClick={sair} className="mt-6 text-sm text-slate-500 underline">Sair</button>
+      <div className="mt-6"><BotaoComIcone icone="encerrar" onClick={sair}>Sair</BotaoComIcone></div>
     </div>
   )
 }

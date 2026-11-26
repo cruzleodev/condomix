@@ -1,3 +1,4 @@
+import { BotaoComIcone } from '../componentes/BotaoComIcone'
 import { Cartao, TituloDaPagina } from '../componentes/ui'
 import { useSessao } from '../sessao/contexto'
 
@@ -12,7 +13,7 @@ export function SemAcesso() {
           Seu login ainda não tem acesso a nenhum condomínio ativo. Peça um convite ao síndico ou à administradora.
         </p>
       </Cartao>
-      <button onClick={sair} className="mt-6 text-sm text-slate-500 underline">Sair</button>
+      <div className="mt-6"><BotaoComIcone icone="encerrar" onClick={sair}>Sair</BotaoComIcone></div>
     </div>
   )
 }

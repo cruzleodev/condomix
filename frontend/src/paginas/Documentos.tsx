@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../componentes/BotaoDeIcone'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { api, dados, requisicaoAutenticada } from '../api/cliente'
@@ -56,7 +57,9 @@ export function Documentos() {
       {termo && (
         <p className="-mt-1 mb-3 text-sm text-slate-600">
           Resultados para "{termo}".{' '}
-          <button type="button" className="text-marca-700 underline" onClick={() => { setBusca(''); setTermo('') }}>Limpar a busca</button>
+          <span className="inline-flex align-middle">
+            <BotaoDeIcone icone="fechar" rotulo="Limpar a busca" dica="direita" onClick={() => { setBusca(''); setTermo('') }} />
+          </span>
         </p>
       )}
       {/* No celular, uma lista (ocupa uma linha); no computador, onde sobra espaço, as etiquetas. */}

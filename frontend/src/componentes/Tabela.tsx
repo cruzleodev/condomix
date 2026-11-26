@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 export interface Coluna<T> {
   titulo: string
   valor: (linha: T) => ReactNode
-  /** Alinha à direita (valores, ações). */
+  /** Coluna de valores ou ações. Hoje sem efeito visual: na tabela, todas as colunas ficam centralizadas. */
   direita?: boolean
 }
 
@@ -26,7 +26,7 @@ export function Tabela<T>({ linhas, colunas, chave, vazio = 'Nada por aqui.' }:
           <tbody className="divide-y divide-slate-100">
             {linhas.map((linha) => (
               <tr key={chave(linha)} className="hover:bg-slate-50">
-                {colunas.map((c) => <td key={c.titulo} className={`px-4 py-3 align-top ${c.direita ? 'text-right' : ''}`}>{c.valor(linha)}</td>)}
+                {colunas.map((c) => <td key={c.titulo} className="px-4 py-3 text-center align-middle">{c.valor(linha)}</td>)}
               </tr>
             ))}
           </tbody>

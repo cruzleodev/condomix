@@ -1,3 +1,5 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
+import { BotaoComIcone } from '../../componentes/BotaoComIcone'
 import { CampoDinheiro, CampoNumero } from '../../componentes/CampoNumerico'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
@@ -80,11 +82,12 @@ function AcoesDoEspaco({ espaco: e, aoEditar }: { espaco: Espaco; aoEditar: () =
     onSuccess: () => cache.invalidateQueries({ queryKey: ['reservas'] }),
   })
   return (
-    <span className="inline-flex flex-wrap justify-end gap-x-3 gap-y-1 text-sm">
-      <button className="text-marca-700 underline" onClick={aoEditar}>Editar</button>
-      <button className="text-marca-700 underline" disabled={alternar.isPending} onClick={() => {
-        if (!e.ativo || window.confirm(`Desativar ${e.nome}? Ele deixa de aceitar reservas; as já feitas continuam valendo.`)) alternar.mutate()
-      }}>{e.ativo ? 'Desativar' : 'Reativar'}</button>
+    <span className="inline-flex flex-wrap justify-end md:justify-center gap-1 text-sm md:flex-nowrap">
+      <BotaoDeIcone icone="editar" rotulo="Editar o espaço" onClick={aoEditar} />
+      <BotaoDeIcone icone={e.ativo ? 'desativar' : 'reativar'} rotulo={e.ativo ? 'Desativar o espaço' : 'Reativar o espaço'}
+        perigo={e.ativo} disabled={alternar.isPending} onClick={() => {
+          if (!e.ativo || window.confirm(`Desativar ${e.nome}? Ele deixa de aceitar reservas; as já feitas continuam valendo.`)) alternar.mutate()
+        }} />
       <MensagemDeErro erro={alternar.error} />
     </span>
   )
@@ -162,13 +165,11 @@ function FormularioDeEspaco({ espaco, aoTerminar }: { espaco: Espaco | null; aoT
               <Campo rotulo="Das" type="time" required value={h.inicio} onChange={(e) => mudar(i, 'inicio', e.target.value)} />
               <Campo rotulo="Às" type="time" required value={h.fim} onChange={(e) => mudar(i, 'fim', e.target.value)}
                 ref={(campo) => campo?.setCustomValidity(h.inicio && h.fim && h.fim <= h.inicio ? 'O fim precisa ser depois do início.' : '')} />
-              <button type="button" className="min-h-11 px-2 text-sm text-red-700 underline disabled:text-slate-300" disabled={horarios.length === 1}
-                onClick={() => setHorarios(horarios.filter((_, j) => j !== i))}>Tirar</button>
+              <BotaoDeIcone icone="remover" rotulo="Tirar este horário" perigo disabled={horarios.length === 1}
+                onClick={() => setHorarios(horarios.filter((_, j) => j !== i))} />
             </div>
           ))}
-          <button type="button" className="text-sm text-marca-700 underline" onClick={() => setHorarios([...horarios, { nome: '', inicio: '', fim: '' }])}>
-            + Outro horário
-          </button>
+          <BotaoComIcone icone="adicionar" onClick={() => setHorarios([...horarios, { nome: '', inicio: '', fim: '' }])}>Outro horário</BotaoComIcone>
         </fieldset>
         <fieldset className="space-y-3">
           <legend className="mb-1 text-sm font-semibold text-slate-700">Regras</legend>
@@ -222,14 +223,14 @@ function ReservasDoCondominio({ gestao }: { gestao: boolean }) {
             {
               titulo: 'Ações', direita: true,
               valor: (r) => gestao && r.situacao === 'CONFIRMADA' && !r.aconteceu
-                ? <button className="text-sm text-red-700 underline" onClick={() => setCancelando(r)}>Cancelar</button> : null,
+                ? <BotaoDeIcone icone="cancelar" rotulo="Cancelar a reserva" perigo onClick={() => setCancelando(r)} /> : null,
             },
           ]}
         />
       )}
       {cancelando && (
         <Cartao titulo={`Cancelar: ${cancelando.espaco}, ${diaDaSemana(cancelando.data)}, unidade ${cancelando.unidade}`}
-          acao={<button className="text-sm text-marca-700 underline" onClick={() => setCancelando(null)}>Fechar</button>}>
+          acao={<BotaoDeIcone icone="fechar" rotulo="Fechar" onClick={() => setCancelando(null)} />}>
           <CancelamentoDeReserva key={cancelando.id} reserva={cancelando} gestao abertoDeInicio />
         </Cartao>
       )}

@@ -1,3 +1,5 @@
+import { BotaoComIcone } from '../../componentes/BotaoComIcone'
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { CampoDinheiro, CampoNumero } from '../../componentes/CampoNumerico'
 import { CampoData } from '../../componentes/CampoData'
 import { CampoMes } from '../../componentes/CampoMes'
@@ -59,7 +61,7 @@ function ComoCobra({ configuracao: c, gerencia }: { configuracao: Configuracao; 
 
   if (!editando) {
     return (
-      <Cartao titulo="Como a taxa é cobrada" acao={gerencia && <button className="text-sm text-marca-700 underline" onClick={() => setEditando(true)}>Alterar</button>}>
+      <Cartao titulo="Como a taxa é cobrada" acao={gerencia && <BotaoDeIcone icone="editar" rotulo="Alterar como a taxa é cobrada" onClick={() => setEditando(true)} />}>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <div className="col-span-2"><dt className="text-slate-500">Rateio</dt><dd className="font-medium">{c.tipoRateioRotulo}</dd></div>
           <div><dt className="text-slate-500">Vencimento</dt><dd>todo dia {c.diaVencimento}</dd></div>
@@ -138,7 +140,12 @@ function Grupos({ gerencia }: { gerencia: boolean }) {
             ) : (
               <p className="mt-1 text-slate-600">
                 {(g.unidades ?? []).length === 0 ? 'Nenhuma unidade' : (g.unidades ?? []).map(nomeDa).join(', ')}
-                {gerencia && <> · <button className="text-marca-700 underline" onClick={() => { setMarcadas(g.unidades ?? []); setEditando(g.id ?? null) }}>escolher unidades</button></>}
+                {gerencia && (
+                  <span className="ml-1 inline-flex align-middle">
+                    <BotaoDeIcone icone="editar" rotulo="Escolher as unidades do grupo" dica="direita"
+                      onClick={() => { setMarcadas(g.unidades ?? []); setEditando(g.id ?? null) }} />
+                  </span>
+                )}
               </p>
             )}
           </li>
@@ -208,8 +215,9 @@ function Geracao() {
               <Botao type="button" variante="perigo" onClick={() => { setExtras(extras.filter((_, j) => j !== i)); mudou() }}>Remover</Botao>
             </div>
           ))}
-          <button type="button" className="text-sm text-marca-700 underline"
-            onClick={() => setExtras([...extras, { descricao: '', valor: '', rateio: 'FRACAO_IDEAL' }])}>+ Taxa extra (obra, rateio)</button>
+          <BotaoComIcone icone="adicionar" onClick={() => setExtras([...extras, { descricao: '', valor: '', rateio: 'FRACAO_IDEAL' }])}>
+            Taxa extra (obra, rateio)
+          </BotaoComIcone>
         </div>
         <div className="md:col-span-3"><MensagemDeErro erro={simular.error ?? gerar.error} /></div>
         <div className="md:col-span-3"><Botao type="submit" carregando={simular.isPending}>Simular</Botao></div>
@@ -269,10 +277,8 @@ function Historico({ gerencia }: { gerencia: boolean }) {
               {g.valorOrdinariaTotal != null && ` · ${moeda(g.valorOrdinariaTotal)}`}
             </span>
             {g.canceladaEm ? <Etiqueta>cancelada</Etiqueta> : gerencia && (
-              <button className="text-red-700 underline" disabled={cancelar.isPending}
-                onClick={() => { if (window.confirm(`Cancelar a taxa de ${competencia(g.competencia)} e todas as cobranças dela?`)) cancelar.mutate(g.id ?? '') }}>
-                Cancelar geração
-              </button>
+              <BotaoDeIcone icone="cancelar" rotulo="Cancelar a geração e as cobranças dela" perigo disabled={cancelar.isPending}
+                onClick={() => { if (window.confirm(`Cancelar a taxa de ${competencia(g.competencia)} e todas as cobranças dela?`)) cancelar.mutate(g.id ?? '') }} />
             )}
           </li>
         ))}

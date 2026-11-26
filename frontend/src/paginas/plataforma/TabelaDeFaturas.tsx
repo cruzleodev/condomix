@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -49,7 +50,7 @@ export function TabelaDeFaturas({ faturas, mostrarCliente }: { faturas: FaturaDe
       />
       {segundaVia && (
         <Cartao titulo={`2ª via · ${segundaVia.condominio}`}
-          acao={<button className="text-sm text-marca-700 underline" onClick={() => setSegundaVia(null)}>Fechar</button>}>
+          acao={<BotaoDeIcone icone="fechar" rotulo="Fechar" onClick={() => setSegundaVia(null)} />}>
           <SegundaViaDaFatura faturaId={segundaVia.id ?? ''} />
         </Cartao>
       )}
@@ -77,15 +78,19 @@ function AcoesDaFatura({ fatura: f, aoPedirSegundaVia }: { fatura: FaturaDeClien
   const emAberto = f.situacao === 'EMITIDA'
   const podeCancelar = f.situacao === 'A_EMITIR' || f.situacao === 'EMITIDA' || f.situacao === 'FALHOU'
   return (
-    <span className="inline-flex flex-col items-end gap-1">
-      <span className="flex flex-wrap justify-end gap-x-3 gap-y-1 text-sm">
-        {emAberto && <button className="text-marca-700 underline" onClick={aoPedirSegundaVia}>2ª via</button>}
-        {emAberto && f.gateway === 'SIMULADO' && <button className="text-marca-700 underline" disabled={acao.isPending} onClick={() => acao.mutate('simular')}>Simular pagamento</button>}
-        {f.situacao === 'FALHOU' && <button className="text-marca-700 underline" disabled={acao.isPending} onClick={() => acao.mutate('tentar')}>Tentar de novo</button>}
+    <span className="inline-flex flex-col items-end gap-1 md:items-center">
+      <span className="flex flex-wrap justify-end md:justify-center gap-1 md:flex-nowrap">
+        {emAberto && <BotaoDeIcone icone="segundaVia" rotulo="2ª via da fatura" onClick={aoPedirSegundaVia} />}
+        {emAberto && f.gateway === 'SIMULADO' && (
+          <BotaoDeIcone icone="simular" rotulo="Simular pagamento (testes)" disabled={acao.isPending} onClick={() => acao.mutate('simular')} />
+        )}
+        {f.situacao === 'FALHOU' && (
+          <BotaoDeIcone icone="tentarDeNovo" rotulo="Tentar emitir de novo" disabled={acao.isPending} onClick={() => acao.mutate('tentar')} />
+        )}
         {podeCancelar && (
-          <button className="text-red-700 underline" disabled={acao.isPending} onClick={() => {
+          <BotaoDeIcone icone="cancelar" rotulo="Cancelar a fatura" perigo disabled={acao.isPending} onClick={() => {
             if (window.confirm(`Cancelar a fatura de ${moeda(f.valor)} de ${f.condominio}? O período não será cobrado.`)) acao.mutate('cancelar')
-          }}>Cancelar</button>
+          }} />
         )}
       </span>
       <MensagemDeErro erro={acao.error} />

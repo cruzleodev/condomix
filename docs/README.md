@@ -29,6 +29,7 @@ Cada etapa é feita numa branch `feature/*` e documentada aqui ao terminar.
 | 18 | [Notificações: no app, por e-mail e push](etapas/18-notificacoes.md) | `feature/notificacoes` | Concluída |
 | 19 | [App nativo (iPhone e Android), sem publicar ainda](etapas/19-app-nativo.md) | `feature/app-nativo` | Concluída |
 | 19.1 | [Ajustes de telas: campos, calendários, tabelas, menus e celular](etapas/19.1-ajustes-de-telas.md) | `feature/ajustes-de-telas` | Concluída |
+| 19.2 | [Ações em ícones, tabelas centralizadas e assinatura em tabela](etapas/19.2-acoes-em-icones.md) | `feature/acoes-em-icones` | Concluída |
 | 20 | Bot de WhatsApp | — | Próxima |
 
 A partir da etapa 14, cada etapa é uma **fatia vertical**: entrega o backend **e** as telas juntos.
