@@ -40,10 +40,10 @@ public class ConsultaDeBoletos {
 		return pagavel(cobrancas.findById(cobrancaId).orElseThrow(() -> new NaoEncontradoException("Cobrança não encontrada")));
 	}
 
-	/** Para o morador: só das unidades de que ele é proprietário ou inquilino ("meus débitos"). */
+	/** Para o morador: só das unidades de que ele é proprietário, inquilino ou morador ("meus débitos"). */
 	public Boleto doPagador(UUID usuarioId, UUID cobrancaId) {
 		Cobranca cobranca = cobrancas.findById(cobrancaId)
-				.filter(c -> cadastro.unidadesDoPagador(usuarioId, LocalDate.now(relogio)).contains(c.getUnidadeId()))
+				.filter(c -> cadastro.unidadesComDebitosVisiveis(usuarioId, LocalDate.now(relogio)).contains(c.getUnidadeId()))
 				.orElseThrow(() -> new NaoEncontradoException("Cobrança não encontrada"));
 		return pagavel(cobranca);
 	}

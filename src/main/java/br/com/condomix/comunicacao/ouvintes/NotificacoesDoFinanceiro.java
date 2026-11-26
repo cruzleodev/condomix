@@ -29,7 +29,7 @@ class NotificacoesDoFinanceiro {
 	@Async
 	@TransactionalEventListener
 	void cobrancaDisponivel(CobrancaDisponivel e) {
-		central.notificar(e.condominioId(), d -> d.pagadoresDaUnidade(e.unidadeId()), new NovaNotificacao(GrupoDeNotificacao.COBRANCAS,
+		central.notificar(e.condominioId(), d -> d.quemAcompanhaOsDebitos(e.unidadeId()), new NovaNotificacao(GrupoDeNotificacao.COBRANCAS,
 				"cobranca-disponivel:" + e.cobrancaId(),
 				e.comBoletoEPix() ? "Boleto e Pix disponíveis" : "Nova cobrança",
 				e.descricao() + ": " + moeda(e.valor()) + ", vence em " + data(e.vencimento()) + "."
@@ -40,7 +40,7 @@ class NotificacoesDoFinanceiro {
 	@Async
 	@TransactionalEventListener
 	void cobrancaVenceEmBreve(CobrancaVenceEmBreve e) {
-		central.notificar(e.condominioId(), d -> d.pagadoresDaUnidade(e.unidadeId()), new NovaNotificacao(GrupoDeNotificacao.COBRANCAS,
+		central.notificar(e.condominioId(), d -> d.quemAcompanhaOsDebitos(e.unidadeId()), new NovaNotificacao(GrupoDeNotificacao.COBRANCAS,
 				"cobranca-vence:" + e.cobrancaId() + ":" + e.vencimento(),
 				"Vencimento chegando",
 				e.descricao() + ": " + moeda(e.valor()) + ", vence em " + data(e.vencimento()) + ".",
@@ -50,7 +50,7 @@ class NotificacoesDoFinanceiro {
 	@Async
 	@TransactionalEventListener
 	void cobrancaPaga(CobrancaPaga e) {
-		central.notificar(e.condominioId(), d -> d.pagadoresDaUnidade(e.unidadeId()), new NovaNotificacao(GrupoDeNotificacao.COBRANCAS,
+		central.notificar(e.condominioId(), d -> d.quemAcompanhaOsDebitos(e.unidadeId()), new NovaNotificacao(GrupoDeNotificacao.COBRANCAS,
 				"cobranca-paga:" + e.cobrancaId() + ":" + e.data(),
 				"Pagamento confirmado",
 				e.descricao() + ": recebemos " + moeda(e.valorPago()) + " em " + data(e.data()) + ". Obrigado!",

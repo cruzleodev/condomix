@@ -175,7 +175,7 @@ class FinanceiroTests {
 	}
 
 	@Test
-	void meusDebitosMostramSoAsUnidadesDoPagador() throws Exception {
+	void meusDebitosMostramAsUnidadesDoProprietarioInquilinoEMorador() throws Exception {
 		List<String> ids = unidades("A", "101", "102");
 		configurar("IGUALITARIO", 0);
 		Usuario ana = cenario.usuario("ana");
@@ -192,6 +192,22 @@ class FinanceiroTests {
 				.andExpect(jsonPath("$[0].descricao").value("Taxa condominial %02d/%d".formatted(proximoMes.getMonthValue(), proximoMes.getYear())))
 				.andExpect(jsonPath("$[0].valorAtualizado").value(500.00));
 		mvc.perform(get("/api/eu/cobrancas").header("Authorization", sindico)).andExpect(jsonPath("$", hasSize(0)));
+
+		// O morador da A-101 também vê os débitos dela; o dependente, não.
+		Usuario bruno = cenario.usuario("bruno");
+		cenario.perfil(condominio, bruno, Perfil.MORADOR);
+		String pessoaBruno = cenario.pessoa(condominio, "Bruno", bruno).getId().toString();
+		enviar(post("/api/pessoas/{id}/vinculos", pessoaBruno), sindico, """
+				{"unidadeId": "%s", "tipo": "MORADOR"}""".formatted(ids.get(0))).andExpect(status().isCreated());
+		mvc.perform(get("/api/eu/cobrancas").header("Authorization", cenario.token(bruno)))
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$[0].unidade").value("A-101"));
+		Usuario dani = cenario.usuario("dani");
+		cenario.perfil(condominio, dani, Perfil.MORADOR);
+		String pessoaDani = cenario.pessoa(condominio, "Dani", dani).getId().toString();
+		enviar(post("/api/pessoas/{id}/vinculos", pessoaDani), sindico, """
+				{"unidadeId": "%s", "tipo": "DEPENDENTE"}""".formatted(ids.get(0))).andExpect(status().isCreated());
+		mvc.perform(get("/api/eu/cobrancas").header("Authorization", cenario.token(dani))).andExpect(jsonPath("$", hasSize(0)));
 	}
 
 	@Test

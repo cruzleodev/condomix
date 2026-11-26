@@ -23,7 +23,7 @@ reserva confirmada, fatura do Condomix atrasada, documento novo... O aviso apare
 
 | Grupo | Quando | Para quem |
 |---|---|---|
-| **Cobranças** | Cobrança nova (com o boleto ligado, quando o boleto e o Pix ficam prontos); **3 dias antes do vencimento**; pagamento confirmado (pelo boleto/Pix ou baixa do síndico) | Proprietário e inquilino da unidade |
+| **Cobranças** | Cobrança nova (com o boleto ligado, quando o boleto e o Pix ficam prontos); **3 dias antes do vencimento**; pagamento confirmado (pelo boleto/Pix ou baixa do síndico) | Proprietário, inquilino e morador da unidade (o morador entrou na etapa 19.3) |
 | **Reservas** | Reserva confirmada (inclusive feita pela gestão); **lembrete na véspera**; reserva cancelada (com o motivo e se o aluguel continua) | Proprietário, inquilino e morador da unidade |
 | **Assinatura do Condomix** | Fatura disponível; fatura vencida (no dia seguinte, com a data da suspensão); acesso suspenso e liberado; **teste grátis acabando** (7 dias antes) | Síndico e administradora |
 | **Documentos** | Documento novo publicado | Todos do condomínio |

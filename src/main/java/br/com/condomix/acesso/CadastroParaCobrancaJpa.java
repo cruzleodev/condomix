@@ -25,7 +25,12 @@ class CadastroParaCobrancaJpa implements CadastroParaCobranca {
 	private static final List<TipoVinculo> ORDEM_DO_RESPONSAVEL =
 			List.of(TipoVinculo.PROPRIETARIO, TipoVinculo.INQUILINO, TipoVinculo.MORADOR);
 
-	private static final Set<TipoVinculo> PAGADORES = EnumSet.of(TipoVinculo.PROPRIETARIO, TipoVinculo.INQUILINO);
+	/**
+	 * Quem vê os débitos da unidade ("Meus débitos", boleto e Pix): proprietário, inquilino e morador.
+	 * O dependente (ex.: filho menor) não vê.
+	 */
+	private static final Set<TipoVinculo> VEEM_OS_DEBITOS =
+			EnumSet.of(TipoVinculo.PROPRIETARIO, TipoVinculo.INQUILINO, TipoVinculo.MORADOR);
 
 	private final UnidadeRepository unidades;
 
@@ -69,9 +74,9 @@ class CadastroParaCobrancaJpa implements CadastroParaCobranca {
 	}
 
 	@Override
-	public Set<UUID> unidadesDoPagador(UUID usuarioId, LocalDate data) {
+	public Set<UUID> unidadesComDebitosVisiveis(UUID usuarioId, LocalDate data) {
 		return vinculos.vigentesDoUsuario(usuarioId, data).stream()
-				.filter(v -> PAGADORES.contains(v.getTipo()))
+				.filter(v -> VEEM_OS_DEBITOS.contains(v.getTipo()))
 				.map(v -> v.getUnidade().getId())
 				.collect(Collectors.toSet());
 	}

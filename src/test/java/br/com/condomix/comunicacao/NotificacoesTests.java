@@ -114,10 +114,15 @@ class NotificacoesTests {
 	}
 
 	@Test
-	void cobrancaNovaVaiParaOSinoEPorEmailDeQuemPagaEDepoisOPagamento() throws Exception {
+	void cobrancaNovaVaiParaOSinoEPorEmailDeQuemAcompanhaOsDebitosEDepoisOPagamento() throws Exception {
+		// Além da proprietária: um morador (também é avisado) e um dependente (não é).
+		String tokenBruno = cenario.token(vinculado("bruno", "Bruno Morador", "MORADOR"));
+		String tokenDani = cenario.token(vinculado("dani", "Dani Dependente", "DEPENDENTE"));
 		String cobranca = avulsa(cenario.hoje().plusDays(10));
 
 		notificacoes(tokenAna, 1);
+		notificacoes(tokenBruno, 1);
+		mvc.perform(get("/api/notificacoes").header("Authorization", tokenDani)).andExpect(jsonPath("$", empty()));
 		mvc.perform(get("/api/notificacoes").header("Authorization", tokenAna))
 				.andExpect(jsonPath("$[0].titulo").value("Nova cobrança"))
 				.andExpect(jsonPath("$[0].texto").value(containsString("Multa por barulho: R$ 120,00, vence em ")))
@@ -275,6 +280,15 @@ class NotificacoesTests {
 	}
 
 	/** Espera as notificações chegarem (os ouvintes rodam em segundo plano). */
+	private Usuario vinculado(String apelido, String nome, String tipo) throws Exception {
+		Usuario usuario = cenario.usuario(apelido);
+		cenario.perfil(condominio, usuario, Perfil.MORADOR);
+		String pessoa = cenario.pessoa(condominio, nome, usuario).getId().toString();
+		enviar(post("/api/pessoas/{id}/vinculos", pessoa), sindico, """
+				{"unidadeId": "%s", "tipo": "%s"}""".formatted(unidade, tipo)).andExpect(status().isCreated());
+		return usuario;
+	}
+
 	private void notificacoes(String token, int quantas) {
 		await().atMost(Duration.ofSeconds(10)).untilAsserted(() ->
 				mvc.perform(get("/api/notificacoes").header("Authorization", token)).andExpect(jsonPath("$", hasSize(quantas))));

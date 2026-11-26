@@ -1818,7 +1818,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Meus débitos: cobranças das minhas unidades (proprietário ou inquilino)
+         * Meus débitos: cobranças das minhas unidades (proprietário, inquilino ou morador)
          * @description Em aberto, com multa e juros até hoje, e as dos últimos 12 meses.
          */
         get: operations["minhas_1"];

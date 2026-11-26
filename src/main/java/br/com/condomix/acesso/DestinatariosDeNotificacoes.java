@@ -10,8 +10,8 @@ import java.util.UUID;
  */
 public interface DestinatariosDeNotificacoes {
 
-	/** Proprietários e inquilinos da unidade (quem paga). */
-	List<Destinatario> pagadoresDaUnidade(UUID unidadeId);
+	/** Quem acompanha os débitos da unidade: proprietários, inquilinos e moradores (o dependente, não). */
+	List<Destinatario> quemAcompanhaOsDebitos(UUID unidadeId);
 
 	/** Proprietários, inquilinos e moradores da unidade (quem usa). */
 	List<Destinatario> ocupantesDaUnidade(UUID unidadeId);
