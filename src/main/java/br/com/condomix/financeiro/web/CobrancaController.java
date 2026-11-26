@@ -137,7 +137,7 @@ class CobrancaController {
 		return importacao.importar(arquivo.getBytes(), UUID.fromString(jwt.getSubject()));
 	}
 
-	@Operation(summary = "Meus débitos: cobranças das minhas unidades (proprietário ou inquilino)",
+	@Operation(summary = "Meus débitos: cobranças das minhas unidades (proprietário, inquilino ou morador)",
 			description = "Em aberto, com multa e juros até hoje, e as dos últimos 12 meses.")
 	@GetMapping("/eu/cobrancas")
 	List<CobrancaResposta> minhas(@AuthenticationPrincipal Jwt jwt) {

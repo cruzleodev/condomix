@@ -18,8 +18,8 @@ public interface CadastroParaCobranca {
 	/** Mandatos com desconto na taxa que valeram em algum dia do período. */
 	List<BeneficioDeMandato> beneficiosNoPeriodo(LocalDate inicio, LocalDate fim);
 
-	/** Unidades cujas cobranças o usuário logado pode ver ("meus débitos"): ele é proprietário ou inquilino. */
-	Set<UUID> unidadesDoPagador(UUID usuarioId, LocalDate data);
+	/** Unidades cujas cobranças o usuário logado pode ver ("meus débitos"): ele é proprietário, inquilino ou morador. */
+	Set<UUID> unidadesComDebitosVisiveis(UUID usuarioId, LocalDate data);
 
 	/** Os dados de quem paga, para o boleto: nome, CPF/CNPJ e e-mail. Vazio se a pessoa não existe no condomínio. */
 	Optional<DadosDoPagador> pagador(UUID pessoaId);

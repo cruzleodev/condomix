@@ -26,7 +26,9 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 class DestinatariosDeNotificacoesJpa implements DestinatariosDeNotificacoes {
 
-	private static final Set<TipoVinculo> PAGADORES = EnumSet.of(TipoVinculo.PROPRIETARIO, TipoVinculo.INQUILINO);
+	/** Os mesmos que veem "Meus débitos" (CadastroParaCobranca): proprietário, inquilino e morador. */
+	private static final Set<TipoVinculo> ACOMPANHAM_OS_DEBITOS =
+			EnumSet.of(TipoVinculo.PROPRIETARIO, TipoVinculo.INQUILINO, TipoVinculo.MORADOR);
 
 	private static final Set<TipoVinculo> OCUPANTES = EnumSet.of(TipoVinculo.PROPRIETARIO, TipoVinculo.INQUILINO, TipoVinculo.MORADOR);
 
@@ -53,8 +55,8 @@ class DestinatariosDeNotificacoesJpa implements DestinatariosDeNotificacoes {
 	}
 
 	@Override
-	public List<Destinatario> pagadoresDaUnidade(UUID unidadeId) {
-		return daUnidade(unidadeId, PAGADORES);
+	public List<Destinatario> quemAcompanhaOsDebitos(UUID unidadeId) {
+		return daUnidade(unidadeId, ACOMPANHAM_OS_DEBITOS);
 	}
 
 	@Override

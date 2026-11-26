@@ -64,7 +64,7 @@ public class CentralDeNotificacoes {
 	}
 
 	/**
-	 * Notifica, no condomínio, quem {@code quem} escolher (ex.: os pagadores de uma unidade).
+	 * Notifica, no condomínio, quem {@code quem} escolher (ex.: quem acompanha os débitos de uma unidade).
 	 *
 	 * @return quantas notificações foram criadas (repetidas não contam)
 	 */

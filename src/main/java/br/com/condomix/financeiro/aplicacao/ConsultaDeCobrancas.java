@@ -98,10 +98,10 @@ public class ConsultaDeCobrancas {
 				.toList();
 	}
 
-	/** "Meus débitos": cobranças em aberto e as dos últimos 12 meses das unidades de que o usuário é proprietário ou inquilino. */
+	/** "Meus débitos": cobranças em aberto e as dos últimos 12 meses das unidades de que o usuário é proprietário, inquilino ou morador. */
 	public List<CobrancaHoje> doUsuario(UUID usuarioId) {
 		LocalDate hoje = hoje();
-		Set<UUID> unidades = cadastro.unidadesDoPagador(usuarioId, hoje);
+		Set<UUID> unidades = cadastro.unidadesComDebitosVisiveis(usuarioId, hoje);
 		if (unidades.isEmpty()) {
 			return List.of();
 		}

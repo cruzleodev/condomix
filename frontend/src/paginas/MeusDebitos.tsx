@@ -7,7 +7,7 @@ import { atualizarEnquantoProcessa } from '../util/boleto'
 import { Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina, Vazio } from '../componentes/ui'
 import { competencia, data, moeda } from '../util/formato'
 
-/** As cobranças das unidades em que sou proprietário ou inquilino: em aberto (com multa e juros até hoje) e pagas. */
+/** As cobranças das unidades em que sou proprietário, inquilino ou morador: em aberto (com multa e juros até hoje) e pagas. */
 export function MeusDebitos() {
   const cobrancas = useQuery({
     queryKey: ['cobrancas', 'minhas'],
