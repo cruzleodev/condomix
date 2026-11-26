@@ -1,3 +1,4 @@
+import { CampoData } from '../../componentes/CampoData'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
@@ -117,9 +118,9 @@ function CadastroDeCliente({ aoTerminar }: { aoTerminar: () => void }) {
           <Campo rotulo="E-mail" type="email" required value={f.sindicoEmail} onChange={muda('sindicoEmail')} />
           <Campo rotulo="CPF ou CNPJ (opcional)" value={f.sindicoDocumento} onChange={muda('sindicoDocumento')} />
           <div className="grid grid-cols-2 gap-3">
-            <Campo rotulo="Início do mandato" type="date" required value={f.inicio}
-              onChange={(e) => setF({ ...f, inicio: e.target.value, fim: e.target.value ? umAnoDepoisMenosUmDia(e.target.value) : f.fim })} />
-            <Campo rotulo="Fim do mandato" type="date" required value={f.fim} onChange={muda('fim')} />
+            <CampoData rotulo="Início do mandato" required valor={f.inicio}
+              aoMudar={(v) => setF({ ...f, inicio: v, fim: v ? umAnoDepoisMenosUmDia(v) : f.fim })} />
+            <CampoData rotulo="Fim do mandato" required valor={f.fim} aoMudar={(v) => setF({ ...f, fim: v })} />
           </div>
         </fieldset>
         <MensagemDeErro erro={cadastrar.error} />

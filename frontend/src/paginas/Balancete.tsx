@@ -1,12 +1,15 @@
+import { useAdesao } from '../api/adesao'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api, dados } from '../api/cliente'
+import { CampoMes } from '../componentes/CampoMes'
 import { Cartao, Carregando, MensagemDeErro, TituloDaPagina, Vazio } from '../componentes/ui'
 import { competencia, mesAtual, moeda } from '../util/formato'
 
 /** Prestação de contas do mês, aberta a todos do condomínio. */
 export function Balancete() {
   const [mes, setMes] = useState(mesAtual())
+  const { inicioDoHistorico } = useAdesao()
   const balancete = useQuery({
     queryKey: ['balancete', mes],
     queryFn: async () => dados(await api.GET('/api/financeiro/balancete', { params: { query: { competencia: mes } } })),
@@ -15,11 +18,9 @@ export function Balancete() {
   return (
     <div>
       <TituloDaPagina subtitulo="Prestação de contas do condomínio.">Balancete</TituloDaPagina>
-      <label className="mb-4 block">
-        <span className="mb-1 block text-sm font-medium text-slate-700">Mês</span>
-        <input type="month" value={mes} max={mesAtual()} onChange={(e) => e.target.value && setMes(e.target.value)}
-          className="min-h-11 rounded-xl border border-slate-300 bg-white px-3" />
-      </label>
+      <div className="mb-4 md:max-w-xs">
+        <CampoMes rotulo="Mês" valor={mes} min={inicioDoHistorico?.slice(0, 7)} max={mesAtual()} aoMudar={setMes} />
+      </div>
       {balancete.isPending ? <Carregando /> : balancete.isError ? <MensagemDeErro erro={balancete.error} /> : b && (
         <div className="grid gap-4 md:grid-cols-2">
           <Cartao titulo={`Resumo de ${competencia(b.competencia)}`} className="md:col-span-2">

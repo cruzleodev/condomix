@@ -28,7 +28,7 @@ export function Entrar() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col justify-center bg-marca-700 px-4 py-10">
+    <div className="flex min-h-dvh flex-col justify-center bg-marca-700 px-4 pb-[max(2.5rem,var(--area-segura-base))] pt-[max(2.5rem,var(--area-segura-topo))]">
       <div className="mx-auto w-full max-w-sm">
         <div className="mb-8 text-center text-white">
           <img src="/icone.svg" alt="" className="mx-auto mb-3 h-16 w-16 rounded-2xl" />

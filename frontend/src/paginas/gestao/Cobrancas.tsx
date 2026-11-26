@@ -1,3 +1,8 @@
+import { BotaoDeIcone } from '../../componentes/BotaoDeIcone'
+import { Paginacao } from '../../componentes/Paginacao'
+import { CampoDinheiro } from '../../componentes/CampoNumerico'
+import { CampoData } from '../../componentes/CampoData'
+import { CampoMes } from '../../componentes/CampoMes'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { api, dados, requisicaoAutenticada } from '../../api/cliente'
@@ -43,12 +48,13 @@ function ListaDeCobrancas() {
   const [mes, setMes] = useState('')
   const [status, setStatus] = useState('')
   const [pagina, setPagina] = useState(0)
+  const [tamanho, setTamanho] = useState(10)
   const [formulario, setFormulario] = useState<Formulario>('nenhum')
 
   const cobrancas = useQuery({
-    queryKey: ['cobrancas', 'lista', mes, status, pagina],
+    queryKey: ['cobrancas', 'lista', mes, status, pagina, tamanho],
     queryFn: async () => dados(await api.GET('/api/cobrancas', {
-      params: { query: { competencia: mes || undefined, status: (status || undefined) as 'ABERTA' | undefined, pagina, tamanho: 50 } },
+      params: { query: { competencia: mes || undefined, status: (status || undefined) as 'ABERTA' | undefined, pagina, tamanho } },
     })),
     refetchInterval: (q) => atualizarEnquantoProcessa(q.state.data?.itens),
   })
@@ -94,8 +100,8 @@ function ListaDeCobrancas() {
         </Cartao>
       )}
 
-      <div className="grid grid-cols-2 gap-3 md:max-w-lg">
-        <Campo rotulo="Mês" type="month" value={mes} onChange={(e) => { setMes(e.target.value); setPagina(0) }} ajuda="Vazio: todos." />
+      <div className="grid items-start gap-3 sm:grid-cols-[18rem_18rem]">
+        <CampoMes rotulo="Mês" valor={mes} permiteVazio aoMudar={(m) => { setMes(m); setPagina(0) }} />
         <Selecao rotulo="Situação" value={status} vazio="Todas" opcoes={opcoes(ROTULOS.statusDaCobranca)}
           onChange={(e) => { setStatus(e.target.value); setPagina(0) }} />
       </div>
@@ -141,39 +147,41 @@ function ListaDeCobrancas() {
               ...(gerencia ? [{
                 titulo: 'Ações', direita: true,
                 valor: (c: Cobranca) => (
-                  <span className="flex flex-wrap justify-end gap-3">
+                  <span className="flex flex-wrap justify-end gap-1 md:flex-nowrap">
                     {c.status === 'ABERTA' && c.boleto?.situacao === 'EMITIDO' && (
-                      <button className="text-marca-700 underline" onClick={() => setFormulario({ segundaVia: c })}>2ª via</button>
+                      <BotaoDeIcone icone="segundaVia" rotulo="2ª via do boleto" onClick={() => setFormulario({ segundaVia: c })} />
                     )}
                     {c.status === 'ABERTA' && c.boleto?.situacao === 'EMITIDO' && c.boleto.gateway === 'SIMULADO' && (
-                      <button className="text-emerald-700 underline" disabled={simular.isPending} onClick={() => simular.mutate(c.id ?? '')}>Simular pagamento</button>
+                      <BotaoDeIcone icone="simular" rotulo="Simular pagamento (testes)" disabled={simular.isPending}
+                        onClick={() => simular.mutate(c.id ?? '')} />
                     )}
                     {c.boleto?.situacao === 'FALHOU' && (
-                      <button className="text-marca-700 underline" disabled={tentarDeNovo.isPending} onClick={() => tentarDeNovo.mutate(c.id ?? '')}>Tentar de novo</button>
+                      <BotaoDeIcone icone="tentarDeNovo" rotulo="Tentar emitir o boleto de novo" disabled={tentarDeNovo.isPending}
+                        onClick={() => tentarDeNovo.mutate(c.id ?? '')} />
                     )}
-                    {c.status === 'ABERTA' && <button className="text-marca-700 underline" onClick={() => setFormulario({ pagar: c })}>Receber</button>}
                     {c.status === 'ABERTA' && (
-                      <button className="text-red-700 underline" onClick={() => {
+                      <BotaoDeIcone icone="receber" rotulo="Registrar o recebimento" onClick={() => setFormulario({ pagar: c })} />
+                    )}
+                    {c.status === 'ABERTA' && (
+                      <BotaoDeIcone icone="cancelar" rotulo="Cancelar a cobrança" perigo onClick={() => {
                         const motivo = window.prompt('Motivo do cancelamento:')
                         if (motivo) cancelar.mutate({ id: c.id ?? '', motivo })
-                      }}>Cancelar</button>
+                      }} />
                     )}
                     {c.status === 'PAGA' && (
-                      <button className="text-red-700 underline" onClick={() => {
+                      <BotaoDeIcone icone="estornar" rotulo="Estornar o pagamento" perigo onClick={() => {
                         if (window.confirm('Desfazer o pagamento? O valor sai do caixa.')) estornar.mutate(c.id ?? '')
-                      }}>Estornar</button>
+                      }} />
                     )}
                   </span>
                 ),
               }] : []),
             ]}
           />
-          {(p?.totalPaginas ?? 0) > 1 && (
-            <div className="flex items-center justify-center gap-3 text-sm">
-              <Botao variante="secundario" disabled={pagina === 0} onClick={() => setPagina(pagina - 1)}>Anterior</Botao>
-              <span>Página {pagina + 1} de {p?.totalPaginas}</span>
-              <Botao variante="secundario" disabled={pagina + 1 >= (p?.totalPaginas ?? 1)} onClick={() => setPagina(pagina + 1)}>Próxima</Botao>
-            </div>
+          {(p?.total ?? 0) > 0 && (
+            <Paginacao pagina={pagina} totalPaginas={p?.totalPaginas ?? 1} total={p?.total ?? 0} tamanho={tamanho}
+              aoMudarPagina={setPagina} aoMudarTamanho={(t) => { setTamanho(t); setPagina(0) }}
+              rotuloDoTotal={(n) => (n === 1 ? '1 cobrança' : `${n} cobranças`)} />
           )}
         </>
       )}
@@ -205,9 +213,9 @@ function Pagamento({ cobranca: c, aoTerminar }: { cobranca: Cobranca; aoTerminar
         Valor {moeda(c.valor)}{(c.diasDeAtraso ?? 0) > 0 && <> · hoje, com multa e juros: <strong>{moeda(c.valorAtualizado)}</strong></>}
       </p>
       <form onSubmit={(e) => { e.preventDefault(); pagar.mutate() }} className="grid gap-3 md:grid-cols-2">
-        <Campo rotulo="Data do pagamento" type="date" required max={hojeIso()} value={dataPagamento} onChange={(e) => setDataPagamento(e.target.value)} />
+        <CampoData rotulo="Data do pagamento" required max={hojeIso()} valor={dataPagamento} aoMudar={(v) => setDataPagamento(v)} />
         <Selecao rotulo="Forma" value={forma} onChange={(e) => setForma(e.target.value)} opcoes={opcoes(ROTULOS.formaDePagamento)} />
-        <Campo rotulo="Valor recebido (R$)" inputMode="decimal" value={valor} onChange={(e) => setValor(e.target.value)}
+        <CampoDinheiro rotulo="Valor recebido (R$)" valor={valor} aoMudar={(v) => setValor(v)}
           ajuda="Vazio: o valor com multa e juros na data. Menor: encargos perdoados." />
         <Campo rotulo="Observação (opcional)" value={observacao} onChange={(e) => setObservacao(e.target.value)} />
         <div className="md:col-span-2"><MensagemDeErro erro={pagar.error} /></div>
@@ -241,8 +249,8 @@ function Avulsa({ aoTerminar }: { aoTerminar: () => void }) {
           opcoes={(unidades.data ?? []).map((u) => ({ valor: u.id ?? '', rotulo: u.descricao ?? '' }))} />
         <Selecao rotulo="Tipo" value={tipo} onChange={(e) => setTipo(e.target.value)} opcoes={opcoes(ROTULOS.itemAvulso)} />
         <Campo rotulo="Descrição" required value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Ex.: Salão de festas 20/12" />
-        <Campo rotulo="Valor (R$)" inputMode="decimal" required value={valor} onChange={(e) => setValor(e.target.value)} />
-        <Campo rotulo="Vencimento" type="date" required value={vencimento} onChange={(e) => setVencimento(e.target.value)} />
+        <CampoDinheiro rotulo="Valor (R$)" required valor={valor} aoMudar={(v) => setValor(v)} />
+        <CampoData rotulo="Vencimento" required valor={vencimento} aoMudar={(v) => setVencimento(v)} />
         <div className="md:col-span-2"><MensagemDeErro erro={emitir.error} /></div>
         <div className="flex gap-2 md:col-span-2">
           <Botao type="submit" carregando={emitir.isPending}>Lançar cobrança</Botao>

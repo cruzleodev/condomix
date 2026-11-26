@@ -12,6 +12,32 @@ html, body, #root {
   min-height: 100%;
 }
 
+/*
+ * Área segura: o espaço ocupado pelo relógio, pela câmera (notch / Dynamic Island) e pela barrinha de baixo.
+ * No iPhone vem do env(); no Android, o Capacitor também injeta --safe-area-inset-* quando o WebView não tem
+ * env(). Usamos o maior dos dois, e zero no navegador do computador.
+ */
+:root {
+  --area-segura-topo: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+  --area-segura-base: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+}
+
+/*
+ * Nada pode ficar mais largo que a tela do aparelho (iPhone, Android, qualquer tamanho):
+ * - itens de grade podem encolher: sem isso, um texto longo cortado com "…" (ex.: dentro de um botão, no Safari do
+ *   iPhone) deixa a coluna da largura do texto inteiro, e a tela passa a arrastar para o lado;
+ * - palavras compridas quebram em vez de vazar;
+ * - por segurança, a página nunca rola na horizontal ("clip" não atrapalha o cabeçalho fixo das tabelas).
+ */
+.grid > * {
+  min-width: 0;
+}
+
+html, body {
+  overflow-x: clip;
+  overflow-wrap: break-word;
+}
+
 body {
   @apply bg-slate-50 text-slate-800 antialiased;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;

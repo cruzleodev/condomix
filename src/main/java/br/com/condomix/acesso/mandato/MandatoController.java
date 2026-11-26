@@ -74,7 +74,7 @@ class MandatoController {
 	MandatoResposta registrar(@Valid @RequestBody PedidoMandato pedido, @AuthenticationPrincipal Jwt jwt) {
 		var novo = new RegistroDeMandatos.NovoMandato(pedido.pessoaId(), pedido.cargo(), pedido.inicio(),
 				pedido.fimPrevisto(), pedido.ataEleicaoId(), pedido.descontoPercentual(), pedido.unidadeBeneficiadaId());
-		var mandato = registro.registrar(novo, UUID.fromString(jwt.getSubject()));
+		var mandato = registro.registrarEleicao(novo, UUID.fromString(jwt.getSubject()));
 		return MandatoResposta.de(consulta.obter(mandato.getId()));
 	}
 

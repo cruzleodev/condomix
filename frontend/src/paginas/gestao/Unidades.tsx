@@ -1,3 +1,4 @@
+import { CampoNumero } from '../../componentes/CampoNumerico'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { api, dados } from '../../api/cliente'
@@ -129,7 +130,7 @@ function FormularioDeUnidade({ unidade, aoTerminar }: { unidade?: Unidade; aoTer
         <Campo rotulo="Bloco (opcional)" value={bloco} maxLength={30} onChange={(e) => setBloco(e.target.value)} ajuda="Torre, bloco ou quadra." />
         <Campo rotulo="Identificação" required value={identificacao} maxLength={30} onChange={(e) => setIdentificacao(e.target.value)} ajuda="Ex.: 101, Casa 12, Sala 3." />
         <Selecao rotulo="Tipo" value={tipo} onChange={(e) => setTipo(e.target.value)} opcoes={opcoes(ROTULOS.tipoDeUnidade)} />
-        <Campo rotulo="Fração ideal (%)" inputMode="decimal" value={fracao} onChange={(e) => setFracao(e.target.value)} ajuda="Ex.: 2,5 para 2,5%. Opcional." />
+        <CampoNumero rotulo="Fração ideal (%)" casas={6} max={100} valor={fracao} aoMudar={(v) => setFracao(v)} ajuda="Ex.: 2,5 para 2,5%. Opcional." />
         <div className="md:col-span-2"><MensagemDeErro erro={salvar.error ?? desativar.error} /></div>
         <div className="flex flex-wrap gap-2 md:col-span-2">
           <Botao type="submit" carregando={salvar.isPending}>Salvar</Botao>
@@ -172,8 +173,8 @@ function FormularioDeLote({ aoTerminar }: { aoTerminar: () => void }) {
         <Campo rotulo="Bloco (opcional)" value={bloco} onChange={(e) => setBloco(e.target.value)} />
         <Selecao rotulo="Tipo" value={tipo} onChange={(e) => setTipo(e.target.value)} opcoes={opcoes(ROTULOS.tipoDeUnidade)} />
         <div className="flex items-end gap-2 md:col-span-2">
-          <Campo rotulo="Sequência: de" inputMode="numeric" value={de} onChange={(e) => setDe(e.target.value)} />
-          <Campo rotulo="até" inputMode="numeric" value={ate} onChange={(e) => setAte(e.target.value)} />
+          <CampoNumero rotulo="Sequência: de" valor={de} aoMudar={(v) => setDe(v)} />
+          <CampoNumero rotulo="até" valor={ate} aoMudar={(v) => setAte(v)} />
           <Botao type="button" variante="secundario" onClick={gerarFaixa}>Gerar</Botao>
         </div>
         <div className="md:col-span-2">

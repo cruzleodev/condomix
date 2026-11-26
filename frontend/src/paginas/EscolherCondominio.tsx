@@ -25,7 +25,7 @@ export function EscolherCondominio() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6">
+    <div className="mx-auto max-w-2xl px-4 pb-6 pt-[max(1.5rem,var(--area-segura-topo))]">
       <TituloDaPagina subtitulo="Você tem acesso a mais de um. Pode trocar depois, em Conta.">Escolha o condomínio</TituloDaPagina>
       <MensagemDeErro erro={erro} />
       <ul className="mt-3 space-y-3">

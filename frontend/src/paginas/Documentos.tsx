@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { api, dados, requisicaoAutenticada } from '../api/cliente'
 import type { Documento } from '../api/tipos'
+import { Selecao } from '../componentes/formulario'
 import { Botao, Campo, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina, Vazio } from '../componentes/ui'
 import { abrirArquivo } from '../nativo/app'
 import { useSessao } from '../sessao/contexto'
@@ -13,6 +14,7 @@ export function Documentos() {
   const { tem } = useSessao()
   const [busca, setBusca] = useState('')
   const [termo, setTermo] = useState('')
+  const [semTermo, setSemTermo] = useState(false)
   const [categoria, setCategoria] = useState<string>('')
   const [publicando, setPublicando] = useState(false)
 
@@ -31,15 +33,38 @@ export function Documentos() {
         publicando ? <FormularioDePublicacao aoTerminar={() => setPublicando(false)} categorias={categorias.data ?? []} />
           : <Botao className="mb-4 w-full md:w-auto" onClick={() => setPublicando(true)}>Publicar documento</Botao>
       )}
-      <form className="mb-3 flex gap-2 md:max-w-xl" onSubmit={(e) => { e.preventDefault(); setTermo(busca.trim()) }}>
+      <form className="mb-3 flex gap-2 md:max-w-xl" onSubmit={(e) => {
+        e.preventDefault()
+        // Sem nada escrito: se já havia uma busca, volta a mostrar tudo; senão, explica o que fazer.
+        setSemTermo(!busca.trim() && !termo)
+        setTermo(busca.trim())
+      }}>
         <input
-          type="search" placeholder="Buscar (ex.: convenção, piscina)" value={busca} onChange={(e) => setBusca(e.target.value)}
+          type="search" placeholder="Buscar (ex.: convenção, piscina)" value={busca}
+          onChange={(e) => { setBusca(e.target.value); setSemTermo(false) }}
+          aria-describedby={semTermo ? 'busca-vazia' : undefined}
           className="min-h-11 flex-1 rounded-xl border border-slate-300 bg-white px-3 outline-none focus:border-marca-600"
           aria-label="Buscar documentos"
         />
         <Botao type="submit" variante="secundario">Buscar</Botao>
       </form>
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+      {semTermo && (
+        <p id="busca-vazia" role="status" className="-mt-1 mb-3 text-sm text-amber-800">
+          Digite uma palavra para buscar, por exemplo: convenção, piscina ou assembleia.
+        </p>
+      )}
+      {termo && (
+        <p className="-mt-1 mb-3 text-sm text-slate-600">
+          Resultados para "{termo}".{' '}
+          <button type="button" className="text-marca-700 underline" onClick={() => { setBusca(''); setTermo('') }}>Limpar a busca</button>
+        </p>
+      )}
+      {/* No celular, uma lista (ocupa uma linha); no computador, onde sobra espaço, as etiquetas. */}
+      <div className="mb-4 md:hidden">
+        <Selecao rotulo="Categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)} vazio="Todas"
+          opcoes={(categorias.data ?? []).map((c) => ({ valor: c.codigo ?? '', rotulo: c.rotulo ?? '' }))} />
+      </div>
+      <div className="mb-4 hidden flex-wrap gap-2 md:flex">
         <Filtro ativo={categoria === ''} onClick={() => setCategoria('')}>Todas</Filtro>
         {(categorias.data ?? []).map((c) => (
           <Filtro key={c.codigo} ativo={categoria === c.codigo} onClick={() => setCategoria(c.codigo ?? '')}>{c.rotulo}</Filtro>

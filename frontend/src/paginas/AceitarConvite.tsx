@@ -40,7 +40,7 @@ export function AceitarConvite() {
 
   const c = convite.data
   return (
-    <div className="flex min-h-dvh flex-col justify-center bg-marca-700 px-4 py-10">
+    <div className="flex min-h-dvh flex-col justify-center bg-marca-700 px-4 pb-[max(2.5rem,var(--area-segura-base))] pt-[max(2.5rem,var(--area-segura-topo))]">
       <div className="mx-auto w-full max-w-sm">
         <h1 className="mb-6 text-center text-2xl font-bold text-white">Convite para o Condomix</h1>
         <Cartao>

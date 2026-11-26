@@ -4,11 +4,11 @@ import { Link, useParams } from 'react-router'
 import { api, dados } from '../api/cliente'
 import type { DiaNaAgenda, Espaco, HorarioNaAgenda } from '../api/tipos'
 import { Selecao } from '../componentes/formulario'
-import { Aviso, Botao, Campo, Cartao, Carregando, MensagemDeErro, TituloDaPagina, Vazio } from '../componentes/ui'
+import { Aviso, Botao, Campo, Cartao, Carregando, MensagemDeErro, TituloDaPagina } from '../componentes/ui'
 import { useSessao } from '../sessao/contexto'
 import { GESTAO } from '../sessao/papeis'
-import { competencia, data, diaDaSemana, hojeIso, horario, mesAtual, moeda, periodoDoMes, proximoMes, somarDias } from '../util/formato'
-import { resumoDasRegras } from '../util/reservas'
+import { competencia, data, diaDaSemana, hojeIso, horario, mesAtual, mesPorExtenso, moeda, semanasDoMes, periodoDoMes, proximoMes, somarDias, somarMeses } from '../util/formato'
+import { resumoDasRegras, situacaoDoDia, type SituacaoDoDia } from '../util/reservas'
 
 interface Escolha {
   dia: string
@@ -21,6 +21,7 @@ export function AgendaDoEspaco() {
   const [mes, setMes] = useState(mesAtual())
   const [escolha, setEscolha] = useState<Escolha | null>(null)
   const [reservado, setReservado] = useState<string | null>(null)
+  const [diaAberto, setDiaAberto] = useState<string | null>(null)
   const espaco = useQuery({
     queryKey: ['reservas', 'espaco', id],
     queryFn: async () => dados(await api.GET('/api/espacos/{id}', { params: { path: { id } } })),
@@ -33,41 +34,125 @@ export function AgendaDoEspaco() {
   if (espaco.isPending) return <Carregando />
   if (espaco.isError) return <MensagemDeErro erro={espaco.error} />
   const e = espaco.data
-  const dias = (agenda.data ?? []).filter((d) => (d.horarios ?? []).some((h) => h.situacao !== 'INDISPONIVEL'))
-  const anterior = mesAnterior(mes)
+  const porDia = new Map((agenda.data ?? []).map((d) => [d.data ?? '', d]))
+  const temHorarioNoMes = (agenda.data ?? []).some((d) => situacaoDoDia(d.horarios ?? []) !== 'INDISPONIVEL')
+  const diaEscolhido = diaAberto ? porDia.get(diaAberto) : undefined
+  const anterior = somarMeses(mes, -1)
+  function trocarDeMes(novo: string) {
+    setMes(novo)
+    setDiaAberto(null)
+  }
   return (
     <div className="space-y-4">
       <Link to="/reservas" className="text-sm text-marca-700 underline">← Reservas</Link>
       <TituloDaPagina subtitulo={(e.valorAluguel ?? 0) > 0 ? `Aluguel de ${moeda(e.valorAluguel)} por reserva` : 'Sem aluguel'}>{e.nome}</TituloDaPagina>
       <ul className="list-disc space-y-0.5 pl-5 text-sm text-slate-600">{resumoDasRegras(e).map((f) => <li key={f}>{f}</li>)}</ul>
-      {reservado && <p role="status" className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-900 ring-1 ring-emerald-200">{reservado}</p>}
-      {escolha && (
-        <ConfirmacaoDaReserva espaco={e} escolha={escolha} aoCancelar={() => setEscolha(null)}
-          aoReservar={(texto) => { setEscolha(null); setReservado(texto) }} />
-      )}
-      <div className="flex items-center justify-between gap-2">
-        <Botao variante="secundario" disabled={anterior < mesAtual()} onClick={() => setMes(anterior)} aria-label="Mês anterior">‹</Botao>
-        <p className="font-semibold capitalize">{competencia(mes)}</p>
-        <Botao variante="secundario" onClick={() => setMes(proximoMes(mes))} aria-label="Próximo mês">›</Botao>
+      <div className="grid gap-4 md:grid-cols-[minmax(0,26rem)_1fr] md:items-start">
+        <Cartao>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <Botao variante="secundario" disabled={anterior < mesAtual()} onClick={() => trocarDeMes(anterior)} aria-label="Mês anterior">‹</Botao>
+            <p className="font-semibold first-letter:uppercase">{mesPorExtenso(mes)}</p>
+            <Botao variante="secundario" onClick={() => trocarDeMes(proximoMes(mes))} aria-label="Próximo mês">›</Botao>
+          </div>
+          {agenda.isPending ? <Carregando /> : agenda.isError ? <MensagemDeErro erro={agenda.error} /> : (
+            <>
+              <Calendario mes={mes} porDia={porDia} diaAberto={diaAberto}
+                aoAbrir={(dia) => {
+                  setDiaAberto(dia)
+                  setReservado(null)
+                  setEscolha(null)
+                  // No celular, os horários ficam embaixo do calendário: rola até eles.
+                  requestAnimationFrame(() => document.getElementById('horarios-do-dia')?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' }))
+                }} />
+              <Legenda />
+              {!temHorarioNoMes && <p className="mt-3 text-sm text-slate-600">Nenhum horário para reservar neste mês.</p>}
+            </>
+          )}
+        </Cartao>
+        <div id="horarios-do-dia" className="space-y-4">
+          {reservado && <p role="status" className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-900 ring-1 ring-emerald-200">{reservado}</p>}
+          {escolha ? (
+            <ConfirmacaoDaReserva espaco={e} escolha={escolha} aoCancelar={() => setEscolha(null)}
+              aoReservar={(texto) => { setEscolha(null); setReservado(texto) }} />
+          ) : diaEscolhido ? (
+            <DiaDaAgenda dia={diaEscolhido} aoEscolher={(h) => { setReservado(null); setEscolha({ dia: diaEscolhido.data ?? '', horario: h }) }} />
+          ) : !agenda.isPending && temHorarioNoMes && (
+            <p className="rounded-2xl bg-white p-4 text-sm text-slate-600 ring-1 ring-slate-200">
+              Toque num dia <strong className="text-emerald-800">livre</strong> ou <strong className="text-amber-800">parcial</strong> para
+              ver os horários e reservar.
+            </p>
+          )}
+        </div>
       </div>
-      {agenda.isPending ? <Carregando /> : agenda.isError ? <MensagemDeErro erro={agenda.error} />
-        : dias.length === 0 ? <Vazio>Nenhum horário para reservar neste mês.</Vazio> : (
-          <ul className="grid gap-3 md:grid-cols-2">
-            {dias.map((d) => <DiaDaAgenda key={d.data} dia={d} aoEscolher={(h) => { setReservado(null); setEscolha({ dia: d.data ?? '', horario: h }) }} />)}
-          </ul>
-        )}
     </div>
   )
 }
 
-function mesAnterior(anoMes: string): string {
-  const [ano, mes] = anoMes.split('-').map(Number)
-  return mes === 1 ? `${ano - 1}-12` : `${ano}-${String(mes - 1).padStart(2, '0')}`
+const CORES: Record<SituacaoDoDia, string> = {
+  LIVRE: 'bg-emerald-50 text-emerald-900 ring-emerald-300 hover:bg-emerald-100',
+  PARCIAL: 'bg-amber-50 text-amber-900 ring-amber-300 hover:bg-amber-100',
+  OCUPADO: 'bg-red-50 text-red-800 ring-red-200 hover:bg-red-100',
+  MINHA: 'bg-sky-100 text-sky-900 ring-sky-300 hover:bg-sky-200',
+  INDISPONIVEL: 'bg-transparent text-slate-300 ring-transparent',
+}
+
+const ROTULOS: Record<SituacaoDoDia, string> = {
+  LIVRE: 'livre', PARCIAL: 'parcialmente reservado', OCUPADO: 'ocupado', MINHA: 'sua reserva', INDISPONIVEL: 'indisponível',
+}
+
+const SEMANA = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
+
+/** O mês em grade, com a cor de cada dia. Dia indisponível não abre; os outros mostram os horários ao lado. */
+function Calendario({ mes, porDia, diaAberto, aoAbrir }: {
+  mes: string; porDia: Map<string, DiaNaAgenda>; diaAberto: string | null; aoAbrir: (dia: string) => void
+}) {
+  return (
+    <table className="w-full table-fixed border-separate border-spacing-1 text-center" aria-label={`Calendário de ${competencia(mes)}`}>
+      <thead>
+        <tr>{SEMANA.map((d, i) => <th key={i} scope="col" className="text-xs font-medium text-slate-500">{d}</th>)}</tr>
+      </thead>
+      <tbody>
+        {semanasDoMes(mes).map((semana, i) => (
+          <tr key={i}>
+            {semana.map((dia, j) => {
+              if (!dia) return <td key={j} />
+              const situacao = situacaoDoDia(porDia.get(dia)?.horarios ?? [])
+              const aberto = dia === diaAberto
+              return (
+                <td key={j}>
+                  <button type="button" disabled={situacao === 'INDISPONIVEL'} onClick={() => aoAbrir(dia)}
+                    aria-label={`${diaDaSemana(dia)}: ${ROTULOS[situacao]}`} aria-pressed={aberto}
+                    className={`aspect-square w-full min-h-10 rounded-lg text-sm font-medium ring-1 ${CORES[situacao]} ${aberto ? 'outline-2 outline-offset-1 outline-marca-700' : ''}`}>
+                    {Number(dia.slice(8))}
+                  </button>
+                </td>
+              )
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
+function Legenda() {
+  const itens: SituacaoDoDia[] = ['LIVRE', 'PARCIAL', 'OCUPADO', 'MINHA']
+  return (
+    <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+      {itens.map((s) => (
+        <li key={s} className="flex items-center gap-1.5">
+          <span aria-hidden className={`inline-block size-3 rounded ring-1 ${CORES[s]}`} />
+          {ROTULOS[s] === 'parcialmente reservado' ? 'parcial' : ROTULOS[s]}
+        </li>
+      ))}
+      <li className="flex items-center gap-1.5"><span aria-hidden className="text-slate-300">12</span> indisponível</li>
+    </ul>
+  )
 }
 
 function DiaDaAgenda({ dia, aoEscolher }: { dia: DiaNaAgenda; aoEscolher: (h: HorarioNaAgenda) => void }) {
   return (
-    <li className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" aria-label="Horários do dia">
       <p className="mb-2 font-medium capitalize">{diaDaSemana(dia.data)}</p>
       <ul className="flex flex-wrap gap-2">
         {(dia.horarios ?? []).map((h) => (
@@ -86,7 +171,7 @@ function DiaDaAgenda({ dia, aoEscolher }: { dia: DiaNaAgenda; aoEscolher: (h: Ho
           </li>
         ))}
       </ul>
-    </li>
+    </section>
   )
 }
 

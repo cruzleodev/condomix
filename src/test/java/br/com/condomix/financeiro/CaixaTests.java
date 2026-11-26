@@ -3,6 +3,7 @@ package br.com.condomix.financeiro;
 import br.com.condomix.CenarioDeTeste;
 import br.com.condomix.TestcontainersConfiguration;
 import br.com.condomix.acesso.Perfil;
+import br.com.condomix.compartilhado.FormatoBrasileiro;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,6 +83,29 @@ class CaixaTests {
 		lancar("DESPESA", corrente, categoria("Energia elétrica"), mes.atDay(1).minusDays(1), 10, "Antes")
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.detail").value(containsString("saldo inicial")));
+		// O caixa aceita até 12 meses antes da adesão (o condomínio foi cadastrado hoje, no teste), a partir do dia 1º.
+		LocalDate inicioDoHistorico = mes.minusMonths(12).atDay(1);
+		lancar("DESPESA", corrente, categoria("Energia elétrica"), inicioDoHistorico.minusDays(1), 10, "Antigo demais")
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.detail").value("A data do lançamento não pode ser antes de "
+						+ FormatoBrasileiro.data(inicioDoHistorico) + ": o Condomix aceita até 12 meses antes da adesão do condomínio ("
+						+ FormatoBrasileiro.data(hoje) + ")."));
+		enviar(post("/api/financeiro/transferencias"), sindico, """
+				{"contaOrigemId": "%s", "contaDestinoId": "%s", "valor": 1, "data": "%s"}"""
+				.formatted(corrente, fundo, inicioDoHistorico.minusDays(1)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.detail").value(containsString("A data da transferência não pode ser antes de")));
+		enviar(post("/api/financeiro/contas"), sindico, """
+				{"nome": "Poupança antiga", "tipo": "POUPANCA", "saldoInicial": 10, "dataSaldoInicial": "%s"}"""
+				.formatted(inicioDoHistorico.minusDays(1)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.detail").value(containsString("A data do saldo inicial não pode ser antes de")));
+		enviar(post("/api/financeiro/contas"), sindico, """
+				{"nome": "Poupança do ano passado", "tipo": "POUPANCA", "saldoInicial": 0, "dataSaldoInicial": "%s"}"""
+				.formatted(inicioDoHistorico)).andExpect(status().isCreated());
+		mvc.perform(get("/api/condominio/adesao").header("Authorization", sindico))
+				.andExpect(jsonPath("$.data").value(hoje.toString()))
+				.andExpect(jsonPath("$.inicioDoHistorico").value(inicioDoHistorico.toString()));
 		String transferencia = JsonPath.read(enviar(post("/api/financeiro/transferencias"), sindico, """
 				{"contaOrigemId": "%s", "contaDestinoId": "%s", "valor": 200}""".formatted(corrente, fundo))
 				.andExpect(status().isCreated()).andReturn().getResponse().getContentAsString(), "$[0].id");

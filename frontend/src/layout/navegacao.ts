@@ -1,3 +1,4 @@
+import type { NomeDoIcone } from '../componentes/Icone'
 import { ACOMPANHAMENTO, GESTAO } from '../sessao/papeis'
 
 /**
@@ -7,7 +8,7 @@ import { ACOMPANHAMENTO, GESTAO } from '../sessao/papeis'
 export interface ItemDeNavegacao {
   para: string
   rotulo: string
-  icone: string
+  icone: NomeDoIcone
   /** Papéis que veem o item; vazio = todos. */
   papeis?: string[]
   /** Aparece na barra de baixo do celular (no máximo 5). */
@@ -18,21 +19,21 @@ export interface ItemDeNavegacao {
 }
 
 export const ITENS: ItemDeNavegacao[] = [
-  { para: '/', rotulo: 'Início', icone: '⌂', noCelular: true },
-  { para: '/debitos', rotulo: 'Meus débitos', icone: 'R$', noCelular: true },
-  { para: '/reservas', rotulo: 'Reservas', icone: '◷', noCelular: true },
-  { para: '/documentos', rotulo: 'Documentos', icone: '▤', noCelular: true },
-  { para: '/balancete', rotulo: 'Balancete', icone: '◔' },
-  { para: '/gestao', rotulo: 'Gestão', icone: '⚙', papeis: ACOMPANHAMENTO, noCelular: true },
-  { para: '/gestao/unidades', rotulo: 'Unidades', icone: '▦', papeis: ACOMPANHAMENTO, secao: 'gestao' },
-  { para: '/gestao/moradores', rotulo: 'Moradores', icone: '☺', papeis: ACOMPANHAMENTO, secao: 'gestao' },
-  { para: '/gestao/mandatos', rotulo: 'Cargos e mandatos', icone: '★', papeis: ACOMPANHAMENTO, secao: 'gestao' },
-  { para: '/gestao/taxa', rotulo: 'Taxa do mês', icone: '%', papeis: ACOMPANHAMENTO, secao: 'gestao' },
-  { para: '/gestao/cobrancas', rotulo: 'Cobranças', icone: '$', papeis: ACOMPANHAMENTO, secao: 'gestao' },
-  { para: '/gestao/caixa', rotulo: 'Caixa', icone: '⊟', papeis: ACOMPANHAMENTO, secao: 'gestao' },
-  { para: '/gestao/espacos', rotulo: 'Espaços e reservas', icone: '◫', papeis: ACOMPANHAMENTO, secao: 'gestao' },
-  { para: '/gestao/assinatura', rotulo: 'Assinatura', icone: '✦', papeis: GESTAO, secao: 'gestao', comPagamentoPendente: true },
-  { para: '/conta', rotulo: 'Conta', icone: '●', noCelular: true, comPagamentoPendente: true },
+  { para: '/', rotulo: 'Início', icone: 'inicio', noCelular: true },
+  { para: '/debitos', rotulo: 'Meus débitos', icone: 'debitos', noCelular: true },
+  { para: '/reservas', rotulo: 'Reservas', icone: 'reservas', noCelular: true },
+  { para: '/documentos', rotulo: 'Documentos', icone: 'documentos', noCelular: true },
+  { para: '/balancete', rotulo: 'Balancete', icone: 'balancete' },
+  { para: '/gestao', rotulo: 'Gestão', icone: 'gestao', papeis: ACOMPANHAMENTO, noCelular: true },
+  { para: '/gestao/unidades', rotulo: 'Unidades', icone: 'predio', papeis: ACOMPANHAMENTO, secao: 'gestao' },
+  { para: '/gestao/moradores', rotulo: 'Moradores', icone: 'pessoas', papeis: ACOMPANHAMENTO, secao: 'gestao' },
+  { para: '/gestao/mandatos', rotulo: 'Cargos e mandatos', icone: 'mandatos', papeis: ACOMPANHAMENTO, secao: 'gestao' },
+  { para: '/gestao/taxa', rotulo: 'Taxa do mês', icone: 'taxa', papeis: ACOMPANHAMENTO, secao: 'gestao' },
+  { para: '/gestao/cobrancas', rotulo: 'Cobranças', icone: 'cobrancas', papeis: ACOMPANHAMENTO, secao: 'gestao' },
+  { para: '/gestao/caixa', rotulo: 'Caixa', icone: 'caixa', papeis: ACOMPANHAMENTO, secao: 'gestao' },
+  { para: '/gestao/espacos', rotulo: 'Espaços e reservas', icone: 'espacos', papeis: ACOMPANHAMENTO, secao: 'gestao' },
+  { para: '/gestao/assinatura', rotulo: 'Assinatura', icone: 'assinatura', papeis: GESTAO, secao: 'gestao', comPagamentoPendente: true },
+  { para: '/conta', rotulo: 'Conta', icone: 'conta', noCelular: true, comPagamentoPendente: true },
 ]
 
 /** Com {@code pagamentoPendente} (condomínio suspenso por falta de pagamento), só a assinatura e a conta. */

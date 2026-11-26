@@ -1,3 +1,7 @@
+import { useAdesao } from '../../api/adesao'
+import { CampoDinheiro } from '../../componentes/CampoNumerico'
+import { CampoData } from '../../componentes/CampoData'
+import { CampoMes } from '../../componentes/CampoMes'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api, dados } from '../../api/cliente'
@@ -80,6 +84,7 @@ function useAtualizarCaixa() {
 
 function NovaConta({ aoTerminar }: { aoTerminar: () => void }) {
   const atualizar = useAtualizarCaixa()
+  const { inicioDoHistorico } = useAdesao()
   const [nome, setNome] = useState('')
   const [tipo, setTipo] = useState('CONTA_CORRENTE')
   const [banco, setBanco] = useState('')
@@ -97,8 +102,8 @@ function NovaConta({ aoTerminar }: { aoTerminar: () => void }) {
         <Campo rotulo="Nome" required value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex.: Conta corrente Banco X" />
         <Selecao rotulo="Tipo" value={tipo} onChange={(e) => setTipo(e.target.value)} opcoes={opcoes(ROTULOS.tipoDeConta)} />
         <Campo rotulo="Banco (opcional)" value={banco} onChange={(e) => setBanco(e.target.value)} />
-        <Campo rotulo="Saldo inicial (R$)" inputMode="decimal" required value={saldo} onChange={(e) => setSaldo(e.target.value)} />
-        <Campo rotulo="Saldo na data de" type="date" required value={desde} onChange={(e) => setDesde(e.target.value)}
+        <CampoDinheiro rotulo="Saldo inicial (R$)" required valor={saldo} aoMudar={(v) => setSaldo(v)} />
+        <CampoData rotulo="Saldo na data de" required valor={desde} aoMudar={(v) => setDesde(v)} min={inicioDoHistorico}
           ajuda="Lançamentos só a partir desta data." />
         <div className="md:col-span-2"><MensagemDeErro erro={criar.error} /></div>
         <div className="flex gap-2 md:col-span-2">
@@ -112,6 +117,7 @@ function NovaConta({ aoTerminar }: { aoTerminar: () => void }) {
 
 function NovoLancamento({ tipo, contas, aoTerminar }: { tipo: 'DESPESA' | 'RECEITA'; contas: Conta[]; aoTerminar: () => void }) {
   const atualizar = useAtualizarCaixa()
+  const { inicioDoHistorico } = useAdesao()
   const categorias = useQuery({ queryKey: ['caixa', 'categorias'], queryFn: async () => dados(await api.GET('/api/financeiro/categorias')) })
   const ativas = contas.filter((c) => c.ativa)
   const [contaId, setContaId] = useState(ativas.find((c) => c.recebimentoPadrao)?.id ?? ativas[0]?.id ?? '')
@@ -135,8 +141,8 @@ function NovoLancamento({ tipo, contas, aoTerminar }: { tipo: 'DESPESA' | 'RECEI
         <Selecao rotulo="Conta" required value={contaId} onChange={(e) => setContaId(e.target.value)}
           opcoes={ativas.map((c) => ({ valor: c.id ?? '', rotulo: c.nome ?? '' }))} />
         <Campo rotulo="Descrição" required value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder={tipo === 'DESPESA' ? 'Ex.: Conta de luz de outubro' : 'Ex.: Venda de sucata'} />
-        <Campo rotulo="Valor (R$)" inputMode="decimal" required value={valor} onChange={(e) => setValor(e.target.value)} />
-        <Campo rotulo="Data" type="date" required value={quando} onChange={(e) => setQuando(e.target.value)} />
+        <CampoDinheiro rotulo="Valor (R$)" required valor={valor} aoMudar={(v) => setValor(v)} />
+        <CampoData rotulo="Data" required valor={quando} aoMudar={(v) => setQuando(v)} min={inicioDoHistorico} />
         <Campo rotulo={tipo === 'DESPESA' ? 'Fornecedor (opcional)' : 'Pagador (opcional)'} value={favorecido} onChange={(e) => setFavorecido(e.target.value)} />
         <div className="md:col-span-2"><MensagemDeErro erro={lancar.error} /></div>
         <div className="flex gap-2 md:col-span-2">
@@ -150,6 +156,7 @@ function NovoLancamento({ tipo, contas, aoTerminar }: { tipo: 'DESPESA' | 'RECEI
 
 function Transferencia({ contas, aoTerminar }: { contas: Conta[]; aoTerminar: () => void }) {
   const atualizar = useAtualizarCaixa()
+  const { inicioDoHistorico } = useAdesao()
   const ativas = contas.filter((c) => c.ativa)
   const [origem, setOrigem] = useState(ativas[0]?.id ?? '')
   const [destino, setDestino] = useState(ativas[1]?.id ?? '')
@@ -167,8 +174,8 @@ function Transferencia({ contas, aoTerminar }: { contas: Conta[]; aoTerminar: ()
       <form onSubmit={(e) => { e.preventDefault(); transferir.mutate() }} className="grid gap-3 md:grid-cols-2">
         <Selecao rotulo="De" value={origem} onChange={(e) => setOrigem(e.target.value)} opcoes={opcoesDeConta} />
         <Selecao rotulo="Para" value={destino} onChange={(e) => setDestino(e.target.value)} opcoes={opcoesDeConta} />
-        <Campo rotulo="Valor (R$)" inputMode="decimal" required value={valor} onChange={(e) => setValor(e.target.value)} />
-        <Campo rotulo="Data" type="date" required value={quando} onChange={(e) => setQuando(e.target.value)} />
+        <CampoDinheiro rotulo="Valor (R$)" required valor={valor} aoMudar={(v) => setValor(v)} />
+        <CampoData rotulo="Data" required valor={quando} aoMudar={(v) => setQuando(v)} min={inicioDoHistorico} />
         <p className="text-xs text-slate-500 md:col-span-2">Transferência não é receita nem despesa: o saldo total não muda.</p>
         <div className="md:col-span-2"><MensagemDeErro erro={transferir.error} /></div>
         <div className="flex gap-2 md:col-span-2">
@@ -206,6 +213,7 @@ function NovaCategoria({ aoTerminar }: { aoTerminar: () => void }) {
 
 function Extrato({ contas, gerencia }: { contas: Conta[]; gerencia: boolean }) {
   const atualizar = useAtualizarCaixa()
+  const { inicioDoHistorico } = useAdesao()
   const [mes, setMes] = useState(mesAtual())
   const [contaId, setContaId] = useState('')
   const [de, ate] = periodoDoMes(mes)
@@ -220,8 +228,8 @@ function Extrato({ contas, gerencia }: { contas: Conta[]; gerencia: boolean }) {
   })
   return (
     <Cartao titulo="Extrato">
-      <div className="mb-3 grid grid-cols-2 gap-3 md:max-w-lg">
-        <Campo rotulo="Mês" type="month" value={mes} onChange={(e) => e.target.value && setMes(e.target.value)} />
+      <div className="mb-3 grid items-start gap-3 sm:grid-cols-[18rem_18rem]">
+        <CampoMes rotulo="Mês" valor={mes} aoMudar={setMes} min={inicioDoHistorico?.slice(0, 7)} />
         <Selecao rotulo="Conta" value={contaId} onChange={(e) => setContaId(e.target.value)} vazio="Todas"
           opcoes={contas.map((c) => ({ valor: c.id ?? '', rotulo: c.nome ?? '' }))} />
       </div>

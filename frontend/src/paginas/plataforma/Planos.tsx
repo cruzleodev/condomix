@@ -1,8 +1,9 @@
+import { CampoDinheiro } from '../../componentes/CampoNumerico'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api, dados } from '../../api/cliente'
 import type { PlanoNoCatalogo } from '../../api/tipos'
-import { Botao, Campo, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina } from '../../componentes/ui'
+import { Botao, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina } from '../../componentes/ui'
 import { lerReais, moeda, ROTULOS } from '../../util/formato'
 
 /** Catálogo de planos do Condomix: os módulos de cada plano e os preços por periodicidade. */
@@ -59,9 +60,9 @@ function CartaoDoPlano({ plano }: { plano: PlanoNoCatalogo }) {
       {editando ? (
         <form onSubmit={(e) => { e.preventDefault(); salvar.mutate() }} className="mt-3 space-y-3">
           <div className="grid grid-cols-3 gap-2">
-            <Campo rotulo="Mensal" inputMode="decimal" value={precos.mensal} onChange={(e) => setPrecos({ ...precos, mensal: e.target.value })} />
-            <Campo rotulo="Semestral" inputMode="decimal" value={precos.semestral} onChange={(e) => setPrecos({ ...precos, semestral: e.target.value })} />
-            <Campo rotulo="Anual" inputMode="decimal" value={precos.anual} onChange={(e) => setPrecos({ ...precos, anual: e.target.value })} />
+            <CampoDinheiro rotulo="Mensal" valor={precos.mensal} aoMudar={(v) => setPrecos({ ...precos, mensal: v })} />
+            <CampoDinheiro rotulo="Semestral" valor={precos.semestral} aoMudar={(v) => setPrecos({ ...precos, semestral: v })} />
+            <CampoDinheiro rotulo="Anual" valor={precos.anual} aoMudar={(v) => setPrecos({ ...precos, anual: v })} />
           </div>
           <MensagemDeErro erro={salvar.error} />
           <div className="flex gap-2">

@@ -8,6 +8,7 @@ import br.com.condomix.acesso.persistencia.PessoaRepository;
 import br.com.condomix.acesso.persistencia.UnidadeRepository;
 import br.com.condomix.compartilhado.NaoEncontradoException;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
+import br.com.condomix.plataforma.AdesaoAoCondomix;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +31,14 @@ public class RegistroDeMandatos {
 
 	private final UnidadeRepository unidades;
 
-	public RegistroDeMandatos(MandatoRepository mandatos, PessoaRepository pessoas, UnidadeRepository unidades) {
+	private final AdesaoAoCondomix adesao;
+
+	public RegistroDeMandatos(MandatoRepository mandatos, PessoaRepository pessoas, UnidadeRepository unidades,
+			AdesaoAoCondomix adesao) {
 		this.mandatos = mandatos;
 		this.pessoas = pessoas;
 		this.unidades = unidades;
+		this.adesao = adesao;
 	}
 
 	public record NovoMandato(UUID pessoaId, Cargo cargo, LocalDate inicio, LocalDate fimPrevisto,
@@ -57,6 +62,15 @@ public class RegistroDeMandatos {
 					+ pedido.cargo().rotulo().toLowerCase() + " em aberto");
 		}
 		return gravar(novo);
+	}
+
+	/**
+	 * Eleição registrada pela gestão do condomínio: a posse não pode ser antes do cadastro do condomínio no Condomix.
+	 * O síndico inicial, cadastrado junto com o cliente, fica de fora: o mandato dele normalmente começou antes.
+	 */
+	public Mandato registrarEleicao(NovoMandato pedido, UUID registradoPor) {
+		adesao.exigirDesdeAAdesao(pedido.inicio(), "A posse");
+		return registrar(pedido, registradoPor);
 	}
 
 	/** Encerramento antecipado. {@code ultimoDia} é o último dia em que a pessoa ainda ocupa o cargo. */

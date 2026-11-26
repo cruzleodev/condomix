@@ -1,5 +1,6 @@
 package br.com.condomix.financeiro.aplicacao;
 
+import br.com.condomix.plataforma.AdesaoAoCondomix;
 import br.com.condomix.compartilhado.NaoEncontradoException;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
 import br.com.condomix.compartilhado.TenantAtual;
@@ -28,11 +29,14 @@ public class MovimentacaoDeCaixa {
 
 	private final PlanoDeContas plano;
 
+	private final AdesaoAoCondomix adesao;
+
 	private final Clock relogio;
 
-	public MovimentacaoDeCaixa(LancamentoRepository lancamentos, PlanoDeContas plano, Clock relogio) {
+	public MovimentacaoDeCaixa(LancamentoRepository lancamentos, PlanoDeContas plano, AdesaoAoCondomix adesao, Clock relogio) {
 		this.lancamentos = lancamentos;
 		this.plano = plano;
+		this.adesao = adesao;
 		this.relogio = relogio;
 	}
 
@@ -48,6 +52,7 @@ public class MovimentacaoDeCaixa {
 			throw RegraDeNegocioException.invalido("A categoria " + categoria.getNome() + " está desativada");
 		}
 		LocalDate data = m.data() != null ? m.data() : LocalDate.now(relogio);
+		adesao.exigirDentroDoHistorico(data, "A data do lançamento");
 		return lancamentos.save(Regras.aplicar(() -> Lancamento.movimento(TenantAtual.obrigatorio(), conta, categoria,
 				m.tipo(), OrigemDoLancamento.MANUAL, data, m.descricao(), m.valor(), m.favorecido(), null, criadoPor)));
 	}
@@ -61,6 +66,7 @@ public class MovimentacaoDeCaixa {
 		ContaFinanceira origem = plano.buscarConta(origemId);
 		ContaFinanceira destino = plano.buscarConta(destinoId);
 		LocalDate quando = data != null ? data : LocalDate.now(relogio);
+		adesao.exigirDentroDoHistorico(quando, "A data da transferência");
 		String texto = descricao == null || descricao.isBlank()
 				? "Transferência " + origem.getNome() + " → " + destino.getNome() : descricao;
 		UUID transferencia = UUID.randomUUID();

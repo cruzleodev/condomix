@@ -1,3 +1,4 @@
+import { CampoData } from '../../componentes/CampoData'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { api, dados } from '../../api/cliente'
@@ -122,9 +123,9 @@ function TrocaDeSindico({ condominioId, aoTerminar }: { condominioId: string; ao
           <Campo rotulo="CPF ou CNPJ (opcional)" value={f.documento} onChange={muda('documento')}
             ajuda="Se já for morador do condomínio, informe para não duplicar o cadastro." />
           <div className="grid grid-cols-2 gap-3">
-            <Campo rotulo="Posse" type="date" required value={f.inicio}
-              onChange={(e) => setF({ ...f, inicio: e.target.value, fim: e.target.value ? umAnoDepoisMenosUmDia(e.target.value) : f.fim })} />
-            <Campo rotulo="Fim do mandato" type="date" required value={f.fim} onChange={muda('fim')} />
+            <CampoData rotulo="Posse" required valor={f.inicio}
+              aoMudar={(v) => setF({ ...f, inicio: v, fim: v ? umAnoDepoisMenosUmDia(v) : f.fim })} />
+            <CampoData rotulo="Fim do mandato" required valor={f.fim} aoMudar={(v) => setF({ ...f, fim: v })} />
           </div>
         </div>
         <MensagemDeErro erro={trocar.error} />
