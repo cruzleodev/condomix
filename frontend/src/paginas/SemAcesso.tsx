@@ -5,7 +5,7 @@ import { useSessao } from '../sessao/contexto'
 export function SemAcesso() {
   const { email, sair } = useSessao()
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6">
+    <div className="mx-auto max-w-2xl px-4 pb-6 pt-[max(1.5rem,var(--area-segura-topo))]">
       <TituloDaPagina subtitulo={email}>Sem acesso a condomínios</TituloDaPagina>
       <Cartao>
         <p className="text-sm text-slate-600">

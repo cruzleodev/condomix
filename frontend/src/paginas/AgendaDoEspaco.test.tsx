@@ -43,7 +43,10 @@ describe('agenda do espaço: reservar um horário livre', () => {
     const roteador = createMemoryRouter([{ path: '/reservas/:id', element: <AgendaDoEspaco /> }], { initialEntries: ['/reservas/e1'] })
     render(<QueryClientProvider client={new QueryClient()}><SessaoProvider><RouterProvider router={roteador} /></SessaoProvider></QueryClientProvider>)
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Noite (18h às 23h)' }))
+    // No calendário, só o dia com horário livre abre; os outros ficam indisponíveis.
+    await userEvent.click(await screen.findByRole('button', { name: /: livre$/ }))
+    expect(screen.getAllByRole('button', { name: /: indisponível$/ })[0]).toBeDisabled()
+    await userEvent.click(screen.getByRole('button', { name: 'Noite (18h às 23h)' }))
     expect(await screen.findByText('Para a unidade A-101.')).toBeInTheDocument()
     expect(screen.getByText(/vira uma cobrança da unidade/)).toHaveTextContent('R$ 150,00')
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar a reserva' }))

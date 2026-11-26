@@ -1901,6 +1901,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/condominio/adesao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Quando o condomínio aderiu ao Condomix
+         * @description Datas anteriores são recusadas nos registros.
+         */
+        get: operations["adesao"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/cobrancas/{id}": {
         parameters: {
             query?: never;
@@ -3027,6 +3047,12 @@ export interface components {
             /** @enum {string} */
             codigo?: "CONVENCAO" | "REGIMENTO_INTERNO" | "ATA_ASSEMBLEIA" | "LEI_NORMA" | "COMUNICADO" | "OUTRO";
             rotulo?: string;
+        };
+        AdesaoDoCondominio: {
+            /** Format: date */
+            data?: string;
+            /** Format: date */
+            inicioDoHistorico?: string;
         };
         PaginaCobrancaResposta: {
             itens?: components["schemas"]["CobrancaResposta"][];
@@ -5952,6 +5978,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CategoriaDeDocumento"][];
+                };
+            };
+        };
+    };
+    adesao: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdesaoDoCondominio"];
                 };
             };
         };

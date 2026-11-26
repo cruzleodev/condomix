@@ -1,10 +1,13 @@
+import { useAdesao } from '../../api/adesao'
+import { CampoNumero } from '../../componentes/CampoNumerico'
+import { CampoData } from '../../componentes/CampoData'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { api, dados } from '../../api/cliente'
 import type { Mandato } from '../../api/tipos'
 import { Selecao } from '../../componentes/formulario'
 import { Tabela } from '../../componentes/Tabela'
-import { Aviso, Botao, Campo, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina, Vazio } from '../../componentes/ui'
+import { Aviso, Botao, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina, Vazio } from '../../componentes/ui'
 import { useSessao } from '../../sessao/contexto'
 import { GESTAO } from '../../sessao/papeis'
 import { data, hojeIso, opcoes, ROTULOS, umAnoDepoisMenosUmDia } from '../../util/formato'
@@ -95,6 +98,7 @@ function RegistroDeEleicao({ aoTerminar }: { aoTerminar: () => void }) {
   const [fim, setFim] = useState(umAnoDepoisMenosUmDia(hojeIso()))
   const [desconto, setDesconto] = useState('')
   const [unidadeId, setUnidadeId] = useState('')
+  const posseMinima = useAdesao().data
 
   const registrar = useMutation({
     mutationFn: async () => dados(await api.POST('/api/mandatos', {
@@ -118,10 +122,11 @@ function RegistroDeEleicao({ aoTerminar }: { aoTerminar: () => void }) {
         <Selecao rotulo="Pessoa eleita" required value={pessoaId} onChange={(e) => setPessoaId(e.target.value)} vazio="Escolha…"
           opcoes={(pessoas.data ?? []).map((p) => ({ valor: p.id ?? '', rotulo: p.nome ?? '' }))} />
         <Selecao rotulo="Cargo" value={cargo} onChange={(e) => setCargo(e.target.value)} opcoes={opcoes(ROTULOS.cargo)} />
-        <Campo rotulo="Posse" type="date" required value={inicio}
-          onChange={(e) => { setInicio(e.target.value); if (e.target.value) setFim(umAnoDepoisMenosUmDia(e.target.value)) }} />
-        <Campo rotulo="Fim do mandato" type="date" required value={fim} onChange={(e) => setFim(e.target.value)} ajuda="No máximo 2 anos." />
-        <Campo rotulo="Desconto na taxa (%) — opcional" inputMode="decimal" value={desconto} onChange={(e) => setDesconto(e.target.value)}
+        <CampoData rotulo="Posse" required valor={inicio} min={posseMinima}
+          ajuda={posseMinima ? `A partir de ${data(posseMinima)}, quando o condomínio foi cadastrado no Condomix.` : undefined}
+          aoMudar={(v) => { setInicio(v); if (v) setFim(umAnoDepoisMenosUmDia(v)) }} />
+        <CampoData rotulo="Fim do mandato" required valor={fim} min={inicio || undefined} aoMudar={(v) => setFim(v)} ajuda="No máximo 2 anos." />
+        <CampoNumero rotulo="Desconto na taxa (%) — opcional" casas={2} max={100} valor={desconto} aoMudar={(v) => setDesconto(v)}
           ajuda="100 para isenção." />
         {desconto && (
           <Selecao rotulo="Unidade com o desconto" required value={unidadeId} onChange={(e) => setUnidadeId(e.target.value)} vazio="Escolha…"
@@ -154,7 +159,7 @@ function Encerramento({ mandato, aoTerminar }: { mandato: Mandato; aoTerminar: (
   return (
     <Cartao titulo={`Encerrar mandato de ${mandato.ocupante?.nome} (${mandato.cargoRotulo})`}>
       <form onSubmit={(e) => { e.preventDefault(); encerrar.mutate() }} className="grid gap-3 md:grid-cols-2">
-        <Campo rotulo="Último dia no cargo" type="date" required value={ultimoDia} onChange={(e) => setUltimoDia(e.target.value)} />
+        <CampoData rotulo="Último dia no cargo" required valor={ultimoDia} aoMudar={(v) => setUltimoDia(v)} />
         <Selecao rotulo="Motivo" value={motivo} onChange={(e) => setMotivo(e.target.value)} opcoes={opcoes(ROTULOS.motivoDeEncerramento)} />
         <div className="md:col-span-2"><MensagemDeErro erro={encerrar.error} /></div>
         <div className="flex gap-2 md:col-span-2">

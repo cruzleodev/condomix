@@ -1,3 +1,4 @@
+import { CampoData } from '../../componentes/CampoData'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
@@ -101,7 +102,7 @@ function PrazoDoTeste({ cliente }: { cliente: CondominioNaPlataforma }) {
   }
   return (
     <form onSubmit={(e) => { e.preventDefault(); salvar.mutate(fim || undefined) }} className="space-y-2 pt-2">
-      <Campo rotulo="Fim do teste grátis" type="date" value={fim} onChange={(e) => setFim(e.target.value)}
+      <CampoData rotulo="Fim do teste grátis" valor={fim} aoMudar={setFim}
         ajuda="Ao chegar, a assinatura fica ativa e a primeira fatura sai. Deixe vazio para um teste sem prazo." />
       <MensagemDeErro erro={salvar.error} />
       <div className="flex flex-col gap-2 md:flex-row">

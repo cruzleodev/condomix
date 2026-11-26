@@ -53,7 +53,7 @@ function ItemDeCobranca({ cobranca: c }: { cobranca: Cobranca }) {
         <button className="w-full text-left" onClick={() => setAberto(!aberto)} aria-expanded={aberto}>
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="truncate font-medium">{c.descricao}</p>
+              <p className="line-clamp-2 font-medium">{c.descricao}</p>
               <p className="text-xs text-slate-500">Unidade {c.unidade}{c.competencia && ` · ${competencia(c.competencia)}`}</p>
             </div>
             <p className="shrink-0 text-right font-semibold">{moeda(c.status === 'PAGA' ? c.valorPago : c.valorAtualizado)}</p>

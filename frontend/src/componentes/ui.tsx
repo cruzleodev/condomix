@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, Ref } from 'react'
 
 /** Componentes visuais básicos, todos pensados primeiro para o celular. */
 
@@ -20,7 +20,7 @@ export function Botao({ variante = 'principal', carregando, children, className 
   )
 }
 
-export function Campo({ rotulo, ajuda, ...resto }: InputHTMLAttributes<HTMLInputElement> & { rotulo: string; ajuda?: string }) {
+export function Campo({ rotulo, ajuda, ...resto }: InputHTMLAttributes<HTMLInputElement> & { rotulo: string; ajuda?: string; ref?: Ref<HTMLInputElement> }) {
   return (
     <label className="block">
       <span className="mb-1 block text-sm font-medium text-slate-700">{rotulo}</span>

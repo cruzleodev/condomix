@@ -10,6 +10,7 @@ import br.com.condomix.acesso.TipoUnidade;
 import br.com.condomix.acesso.Unidade;
 import br.com.condomix.acesso.Usuario;
 import br.com.condomix.acesso.persistencia.UnidadeRepository;
+import br.com.condomix.compartilhado.FormatoBrasileiro;
 import br.com.condomix.compartilhado.TenantAtual;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
@@ -151,8 +152,15 @@ class MandatosTests {
 		registrar(sindico, pessoa, "SUBSINDICO", hoje(), hoje().plusYears(2))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.detail").value(containsString("2 anos")));
+		// Posse antes do cadastro do condomínio no Condomix (hoje, no teste): recusada, mesmo sendo síndico.
 		registrar(sindico, pessoa, "SINDICO", hoje().minusYears(1), hoje().plusMonths(6))
-				.andExpect(status().isConflict());
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.detail").value("A posse não pode ser antes de " + FormatoBrasileiro.data(hoje())
+						+ ", quando o condomínio foi cadastrado no Condomix."));
+		mvc.perform(get("/api/condominio/adesao").header("Authorization", morador))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data").value(hoje().toString()));
+		registrar(sindico, pessoa, "CONSELHEIRO", hoje(), hoje().plusYears(1)).andExpect(status().isCreated());
 		mvc.perform(post("/api/mandatos").header("Authorization", sindico).contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{"pessoaId": "%s", "cargo": "SUBSINDICO", "inicio": "%s", "fimPrevisto": "%s",

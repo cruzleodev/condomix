@@ -38,7 +38,7 @@ export function Faturas() {
           <RodarRotina />
         </Cartao>
       </div>
-      <nav aria-label="Filtrar faturas" className="flex gap-2 overflow-x-auto">
+      <nav aria-label="Filtrar faturas" className="flex flex-wrap gap-2">
         {FILTROS.map((f) => (
           <button key={f.id} onClick={() => setFiltro(f.id)} aria-pressed={filtro === f.id}
             className={`shrink-0 rounded-full px-3 py-1 text-sm ring-1 ${filtro === f.id ? 'bg-marca-700 text-white ring-marca-700' : 'bg-white text-slate-700 ring-slate-300'}`}>

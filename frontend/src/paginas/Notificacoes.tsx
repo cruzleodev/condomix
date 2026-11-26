@@ -1,3 +1,4 @@
+import { Icone, type NomeDoIcone } from '../componentes/Icone'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router'
 import { api, dados } from '../api/cliente'
@@ -5,7 +6,7 @@ import type { Notificacao } from '../api/tipos'
 import { Botao, Carregando, MensagemDeErro, TituloDaPagina, Vazio } from '../componentes/ui'
 import { dataHora } from '../util/formato'
 
-const ICONE = { COBRANCAS: 'R$', RESERVAS: '◷', ASSINATURA: '✦', DOCUMENTOS: '▤' } as const
+const ICONE: Record<string, NomeDoIcone> = { COBRANCAS: 'debitos', RESERVAS: 'reservas', ASSINATURA: 'assinatura', DOCUMENTOS: 'documentos' }
 
 /** As notificações deste condomínio: tocar abre a tela do assunto e marca como lida. */
 export function Notificacoes() {
@@ -37,7 +38,7 @@ export function Notificacoes() {
                 <button onClick={() => abrir(n)}
                   className={`flex w-full gap-3 rounded-2xl p-4 text-left shadow-sm ring-1 ${n.lida ? 'bg-white ring-slate-200' : 'bg-marca-50 ring-marca-200'}`}>
                   <span aria-hidden className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-sm font-semibold text-marca-700 ring-1 ring-slate-200">
-                    {ICONE[n.grupo ?? 'DOCUMENTOS']}
+                    <Icone nome={ICONE[n.grupo ?? 'DOCUMENTOS'] ?? 'documentos'} className="size-4" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-start justify-between gap-2">

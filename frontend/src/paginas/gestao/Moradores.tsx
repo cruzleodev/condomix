@@ -1,3 +1,4 @@
+import { CampoData } from '../../componentes/CampoData'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { api, dados } from '../../api/cliente'
@@ -114,7 +115,7 @@ function CadastroDeMorador({ aoTerminar }: { aoTerminar: (convite: Convite | nul
         <Selecao rotulo="Unidade" required value={unidadeId} onChange={(e) => setUnidadeId(e.target.value)} vazio="Escolha…"
           opcoes={(unidades.data ?? []).map((u) => ({ valor: u.id ?? '', rotulo: u.descricao ?? '' }))} />
         <Selecao rotulo="Vínculo" value={tipo} onChange={(e) => setTipo(e.target.value)} opcoes={opcoes(ROTULOS.vinculo)} />
-        <Campo rotulo="Desde" type="date" required value={inicio} onChange={(e) => setInicio(e.target.value)} />
+        <CampoData rotulo="Desde" required valor={inicio} aoMudar={(v) => setInicio(v)} />
         <label className="flex items-center gap-2 self-end pb-3 text-sm">
           <input type="checkbox" checked={convidar} onChange={(e) => setConvidar(e.target.checked)} className="h-5 w-5 accent-marca-700" />
           Gerar convite de acesso ao app

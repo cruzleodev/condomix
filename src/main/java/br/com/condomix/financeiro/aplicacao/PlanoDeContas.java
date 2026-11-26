@@ -1,5 +1,6 @@
 package br.com.condomix.financeiro.aplicacao;
 
+import br.com.condomix.plataforma.AdesaoAoCondomix;
 import br.com.condomix.compartilhado.NaoEncontradoException;
 import br.com.condomix.compartilhado.RegraDeNegocioException;
 import br.com.condomix.compartilhado.RestricaoDoBanco;
@@ -35,7 +36,10 @@ public class PlanoDeContas {
 
 	private final CategoriaFinanceiraRepository categorias;
 
-	public PlanoDeContas(ContaFinanceiraRepository contas, CategoriaFinanceiraRepository categorias) {
+	private final AdesaoAoCondomix adesao;
+
+	public PlanoDeContas(ContaFinanceiraRepository contas, CategoriaFinanceiraRepository categorias, AdesaoAoCondomix adesao) {
+		this.adesao = adesao;
 		this.contas = contas;
 		this.categorias = categorias;
 	}
@@ -85,6 +89,7 @@ public class PlanoDeContas {
 
 	/** A primeira conta criada vira a de recebimento padrão. */
 	public ContaFinanceira criarConta(DadosDaConta dados, BigDecimal saldoInicial, LocalDate dataSaldoInicial) {
+		adesao.exigirDentroDoHistorico(dataSaldoInicial, "A data do saldo inicial");
 		ContaFinanceira conta = Regras.aplicar(() -> {
 			var nova = new ContaFinanceira(TenantAtual.obrigatorio(), dados.nome(), dados.tipo(), saldoInicial, dataSaldoInicial);
 			nova.alterar(dados.nome(), dados.tipo(), dados.banco(), dados.agencia(), dados.numero());

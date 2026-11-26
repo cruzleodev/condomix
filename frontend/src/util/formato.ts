@@ -215,3 +215,75 @@ export function dataHora(iso: string | null | undefined): string {
   if (!iso) return '—'
   return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '')
 }
+
+/** "2026-11" + 2 → "2027-01". */
+export function somarMeses(anoMes: string, meses: number): string {
+  const [ano, mes] = anoMes.split('-').map(Number)
+  const total = ano * 12 + (mes - 1) + meses
+  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`
+}
+
+const MESES_POR_EXTENSO = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro',
+  'novembro', 'dezembro']
+
+/** "2026-11" → "novembro de 2026". */
+export function mesPorExtenso(anoMes: string): string {
+  const [ano, mes] = anoMes.split('-')
+  return `${MESES_POR_EXTENSO[Number(mes) - 1]} de ${ano}`
+}
+
+/**
+ * As semanas de um mês para o calendário (domingo a sábado). Os dias de fora do mês ficam `null`.
+ * Ex.: "2026-11" começa num domingo: a primeira semana é 01 a 07.
+ */
+export function semanasDoMes(anoMes: string): (string | null)[][] {
+  const [ano, mes] = anoMes.split('-').map(Number)
+  const primeiroDiaDaSemana = new Date(Date.UTC(ano, mes - 1, 1)).getUTCDay()
+  const diasNoMes = new Date(Date.UTC(ano, mes, 0)).getUTCDate()
+  const celulas: (string | null)[] = Array(primeiroDiaDaSemana).fill(null)
+  for (let d = 1; d <= diasNoMes; d++) celulas.push(`${anoMes}-${String(d).padStart(2, '0')}`)
+  while (celulas.length % 7) celulas.push(null)
+  const semanas: (string | null)[][] = []
+  for (let i = 0; i < celulas.length; i += 7) semanas.push(celulas.slice(i, i + 7))
+  return semanas
+}
+
+/** Só números, com as barras no lugar: "23112026" → "23/11/2026". */
+export function mascaraDeData(texto: string): string {
+  const numeros = texto.replace(/\D/g, '').slice(0, 8)
+  return [numeros.slice(0, 2), numeros.slice(2, 4), numeros.slice(4)].filter(Boolean).join('/')
+}
+
+/** "23/11/2026" → "2026-11-23"; vazio se incompleta ou se o dia não existe (ex.: 31/02). */
+export function dataParaIso(texto: string): string {
+  const partes = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(texto)
+  if (!partes) return ''
+  const [, dia, mes, ano] = partes
+  const d = new Date(Date.UTC(Number(ano), Number(mes) - 1, Number(dia)))
+  if (d.getUTCFullYear() !== Number(ano) || d.getUTCMonth() !== Number(mes) - 1 || d.getUTCDate() !== Number(dia)) return ''
+  return `${ano}-${mes}-${dia}`
+}
+
+/**
+ * Máscara de dinheiro: só números, preenchidos a partir dos centavos (como na maquininha).
+ * "15000" → "150,00"; "123456" → "1.234,56"; sem números → "".
+ */
+export function mascaraDeDinheiro(texto: string): string {
+  const numeros = texto.replace(/\D/g, '').replace(/^0+/, '').slice(0, 13)
+  if (!numeros) return ''
+  return (Number(numeros) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+/** Mostra no campo de dinheiro um valor guardado em qualquer formato ("150.5", "150,5", "1.234,56"). */
+export function dinheiroNoCampo(valor: string): string {
+  const numero = lerReais(valor)
+  return numero === undefined ? '' : numero.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+/** Número com vírgula (ex.: percentual): só números e uma vírgula, com até `casas` decimais. "2.5" → "2,5". */
+export function filtrarDecimal(texto: string, casas = 2): string {
+  const limpo = texto.replace(/\./g, ',').replace(/[^\d,]/g, '')
+  const [inteiro, ...resto] = limpo.split(',')
+  if (resto.length === 0) return inteiro
+  return `${inteiro || '0'},${resto.join('').slice(0, casas)}`
+}

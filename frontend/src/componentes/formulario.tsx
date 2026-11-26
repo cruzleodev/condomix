@@ -1,4 +1,5 @@
 import { useState, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { SELECAO, SETA } from './estiloDaSelecao'
 import { Botao } from './ui'
 
 const ESTILO = 'min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-base outline-none focus:border-marca-600 focus:ring-2 focus:ring-marca-100'
@@ -12,7 +13,7 @@ export function Selecao({ rotulo, opcoes, vazio, ...resto }: SelectHTMLAttribute
   return (
     <label className="block">
       <span className="mb-1 block text-sm font-medium text-slate-700">{rotulo}</span>
-      <select className={ESTILO} {...resto}>
+      <select className={`${ESTILO} ${SELECAO}`} style={SETA} {...resto}>
         {vazio !== undefined && <option value="">{vazio}</option>}
         {opcoes.map((o) => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
       </select>

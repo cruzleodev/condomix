@@ -17,10 +17,11 @@ export function Tabela<T>({ linhas, colunas, chave, vazio = 'Nada por aqui.' }:
   const [primeira, ...demais] = colunas
   return (
     <>
-      <div className="hidden overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 md:block">
+      {/* A rolagem fica dentro da tabela, com altura máxima: assim o cabeçalho acompanha ao rolar. */}
+      <div className="hidden max-h-[calc(100dvh-8rem)] overflow-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 md:block">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-            <tr>{colunas.map((c) => <th key={c.titulo} className={`px-4 py-3 font-semibold ${c.direita ? 'text-right' : ''}`}>{c.titulo}</th>)}</tr>
+          <thead className="sticky top-0 z-10 bg-slate-50 text-xs uppercase text-slate-500 shadow-[0_1px_0_var(--color-slate-200)]">
+            <tr>{colunas.map((c) => <th key={c.titulo} className="bg-slate-50 px-4 py-3 text-center font-semibold">{c.titulo}</th>)}</tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {linhas.map((linha) => (

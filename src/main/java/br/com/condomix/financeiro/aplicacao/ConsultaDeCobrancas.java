@@ -64,7 +64,7 @@ public class ConsultaDeCobrancas {
 	}
 
 	public Page<CobrancaHoje> listar(YearMonth competencia, StatusCobranca status, UUID unidadeId, int pagina, int tamanho) {
-		var pedido = PageRequest.of(Math.max(pagina, 0), Math.clamp(tamanho, 1, 200),
+		var pedido = PageRequest.of(Math.max(pagina, 0), Math.clamp(tamanho, 1, 1000),
 				Sort.by(Sort.Order.desc("vencimento"), Sort.Order.asc("unidadeId")));
 		Map<UUID, String> nomes = nomesDasUnidades();
 		LocalDate hoje = hoje();

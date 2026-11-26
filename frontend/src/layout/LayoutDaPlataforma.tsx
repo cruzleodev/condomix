@@ -1,16 +1,17 @@
+import { Icone, type NomeDoIcone } from '../componentes/Icone'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { useSessao } from '../sessao/contexto'
 
-const ITENS = [
+const ITENS: { para: string; rotulo: string; curto?: string; icone: NomeDoIcone; tambem?: string }[] = [
   // Clientes também fica marcado na página de cada cliente (/plataforma/clientes/...).
-  { para: '/plataforma', rotulo: 'Clientes', icone: '▦', tambem: '/plataforma/clientes/' },
-  { para: '/plataforma/faturas', rotulo: 'Faturas', icone: '₿' },
-  { para: '/plataforma/planos', rotulo: 'Planos e preços', icone: '$' },
-  { para: '/plataforma/logins', rotulo: 'Logins', icone: '⚿' },
-  { para: '/plataforma/suporte', rotulo: 'Suporte', icone: '⛑' },
+  { para: '/plataforma', rotulo: 'Clientes', icone: 'predio', tambem: '/plataforma/clientes/' },
+  { para: '/plataforma/faturas', rotulo: 'Faturas', icone: 'faturas' },
+  { para: '/plataforma/planos', rotulo: 'Planos e preços', curto: 'Planos', icone: 'planos' },
+  { para: '/plataforma/logins', rotulo: 'Logins', icone: 'logins' },
+  { para: '/plataforma/suporte', rotulo: 'Suporte', icone: 'suporte' },
 ]
 
-/** Painel do administrador do Condomix: menu lateral no computador, abas em cima no celular. */
+/** Painel do administrador do Condomix: menu lateral no computador e barra embaixo no celular, como no app do condomínio. */
 export function LayoutDaPlataforma() {
   const { email, sair, condominios } = useSessao()
   const { pathname } = useLocation()
@@ -27,7 +28,7 @@ export function LayoutDaPlataforma() {
           {ITENS.map((item) => (
             <NavLink key={item.para} to={item.para} end
               className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${marcado(item, isActive) ? 'bg-white/15 font-semibold' : 'text-slate-300 hover:bg-white/10'}`}>
-              <span aria-hidden className="w-5 text-center">{item.icone}</span>{item.rotulo}
+              <Icone nome={item.icone} className="size-5 shrink-0" />{item.rotulo}
             </NavLink>
           ))}
         </nav>
@@ -38,25 +39,30 @@ export function LayoutDaPlataforma() {
         </div>
       </aside>
 
-      <div className="flex min-h-dvh flex-1 flex-col md:ml-64">
-        <header className="sticky top-0 z-10 bg-slate-900 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] text-white md:hidden">
-          <div className="flex items-center justify-between">
-            <p className="font-semibold">Condomix · Plataforma</p>
-            <button onClick={sair} className="text-sm text-slate-300 underline">Sair</button>
-          </div>
-          <nav aria-label="Menu da plataforma" className="mt-2 flex gap-2 overflow-x-auto">
-            {ITENS.map((item) => (
-              <NavLink key={item.para} to={item.para} end
-                className={({ isActive }) => `shrink-0 rounded-full px-3 py-1 text-sm ${marcado(item, isActive) ? 'bg-white text-slate-900' : 'bg-white/10'}`}>
-                {item.rotulo}
-              </NavLink>
-            ))}
-          </nav>
+      <div className="flex min-h-dvh min-w-0 flex-1 flex-col md:ml-64">
+        <header className="sticky top-0 z-10 flex items-center justify-between bg-slate-900 px-4 pb-3 pt-[max(0.75rem,var(--area-segura-topo))] text-white md:hidden">
+          <p className="font-semibold">Condomix · Plataforma</p>
+          <button onClick={sair} className="text-sm text-slate-300 underline">Sair</button>
         </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-4 md:px-8 md:py-8">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-4 md:px-8 md:py-8">
           <Outlet />
         </main>
       </div>
+
+      <nav aria-label="Menu da plataforma"
+        className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white pb-[var(--area-segura-base)] md:hidden">
+        <ul className="grid grid-cols-5">
+          {ITENS.map((item) => (
+            <li key={item.para}>
+              <NavLink to={item.para} end
+                className={({ isActive }) => `flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs ${marcado(item, isActive) ? 'font-semibold text-slate-900' : 'text-slate-500'}`}>
+                <Icone nome={item.icone} className="size-5" />
+                {'curto' in item ? item.curto : item.rotulo}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </div>
   )
 }

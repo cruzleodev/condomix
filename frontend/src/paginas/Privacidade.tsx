@@ -8,7 +8,7 @@ import { useSessao } from '../sessao/contexto'
 export function Privacidade() {
   const { logado } = useSessao()
   return (
-    <div className="min-h-dvh bg-slate-50 px-4 pb-10 pt-[max(1.5rem,env(safe-area-inset-top))]">
+    <div className="min-h-dvh bg-slate-50 px-4 pb-10 pt-[max(1.5rem,var(--area-segura-topo))]">
       <article className="mx-auto max-w-2xl space-y-4 rounded-2xl bg-white p-6 text-sm leading-relaxed text-slate-700 shadow-sm ring-1 ring-slate-200">
         <Link to={logado ? '/conta' : '/entrar'} className="text-marca-700 underline">← Voltar</Link>
         <h1 className="text-xl font-bold text-slate-900">Política de privacidade do Condomix</h1>

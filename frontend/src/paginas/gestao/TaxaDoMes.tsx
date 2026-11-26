@@ -1,3 +1,6 @@
+import { CampoDinheiro, CampoNumero } from '../../componentes/CampoNumerico'
+import { CampoData } from '../../componentes/CampoData'
+import { CampoMes } from '../../componentes/CampoMes'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { api, dados } from '../../api/cliente'
@@ -73,10 +76,10 @@ function ComoCobra({ configuracao: c, gerencia }: { configuracao: Configuracao; 
         <div className="md:col-span-2">
           <Selecao rotulo="Rateio" value={tipo} onChange={(e) => setTipo(e.target.value)} opcoes={opcoes(ROTULOS.tipoDeRateio)} />
         </div>
-        <Campo rotulo="Dia do vencimento" type="number" min={1} max={28} required value={dia} onChange={(e) => setDia(e.target.value)} ajuda="De 1 a 28." />
-        <Campo rotulo="Fundo de reserva (%)" inputMode="decimal" value={fundo} onChange={(e) => setFundo(e.target.value)} ajuda="Sobre a taxa ordinária." />
-        <Campo rotulo="Multa por atraso (%)" inputMode="decimal" value={multa} onChange={(e) => setMulta(e.target.value)} ajuda="Máximo de 2% (Código Civil)." />
-        <Campo rotulo="Juros ao mês (%)" inputMode="decimal" value={juros} onChange={(e) => setJuros(e.target.value)} />
+        <CampoNumero rotulo="Dia do vencimento" min={1} max={28} required valor={dia} aoMudar={(v) => setDia(v)} ajuda="De 1 a 28." />
+        <CampoNumero rotulo="Fundo de reserva (%)" casas={2} max={100} valor={fundo} aoMudar={(v) => setFundo(v)} ajuda="Sobre a taxa ordinária." />
+        <CampoNumero rotulo="Multa por atraso (%)" casas={2} max={2} valor={multa} aoMudar={(v) => setMulta(v)} ajuda="Máximo de 2% (Código Civil)." />
+        <CampoNumero rotulo="Juros ao mês (%)" casas={2} valor={juros} aoMudar={(v) => setJuros(v)} />
         <div className="md:col-span-2"><MensagemDeErro erro={salvar.error} /></div>
         <div className="flex gap-2 md:col-span-2">
           <Botao type="submit" carregando={salvar.isPending}>Salvar</Botao>
@@ -144,7 +147,7 @@ function Grupos({ gerencia }: { gerencia: boolean }) {
       {gerencia && (
         <form onSubmit={(e) => { e.preventDefault(); criar.mutate() }} className="mt-3 flex flex-wrap items-end gap-2">
           <div className="flex-1"><Campo rotulo="Novo grupo" placeholder="Ex.: Cobertura" required value={nome} onChange={(e) => setNome(e.target.value)} /></div>
-          <div className="w-32"><Campo rotulo="Valor (R$)" inputMode="decimal" required value={valor} onChange={(e) => setValor(e.target.value)} /></div>
+          <div className="w-32"><CampoDinheiro rotulo="Valor (R$)" required valor={valor} aoMudar={(v) => setValor(v)} /></div>
           <Botao type="submit" variante="secundario" carregando={criar.isPending}>Criar</Botao>
           <div className="w-full"><MensagemDeErro erro={criar.error} /></div>
         </form>
@@ -188,18 +191,18 @@ function Geracao() {
   return (
     <Cartao titulo="Gerar a taxa de um mês">
       <form onSubmit={enviar} className="grid gap-3 md:grid-cols-3">
-        <Campo rotulo="Mês" type="month" required value={mes} onChange={(e) => { setMes(e.target.value); mudou() }} />
-        <Campo rotulo="Valor total da taxa (R$)" inputMode="decimal" value={valor} onChange={(e) => { setValor(e.target.value); mudou() }}
+        <CampoMes rotulo="Mês" valor={mes} aoMudar={(m) => { setMes(m); mudou() }} />
+        <CampoDinheiro rotulo="Valor total da taxa (R$)" valor={valor} aoMudar={(v) => { setValor(v); mudou() }}
           ajuda="Total a dividir. No rateio por grupo, deixe vazio." />
-        <Campo rotulo="Vencimento (opcional)" type="date" value={vencimento} onChange={(e) => { setVencimento(e.target.value); mudou() }}
+        <CampoData rotulo="Vencimento (opcional)" valor={vencimento} aoMudar={(v) => { setVencimento(v); mudou() }}
           ajuda="Vazio: o dia configurado." />
         <div className="space-y-2 md:col-span-3">
           {extras.map((x, i) => (
             <div key={i} className="grid gap-2 rounded-xl bg-slate-50 p-2 md:grid-cols-[2fr_1fr_1fr_auto] md:items-end">
               <Campo rotulo="Taxa extra" placeholder="Ex.: Pintura da fachada" value={x.descricao}
                 onChange={(e) => { setExtras(extras.map((y, j) => j === i ? { ...y, descricao: e.target.value } : y)); mudou() }} />
-              <Campo rotulo="Total (R$)" inputMode="decimal" value={x.valor}
-                onChange={(e) => { setExtras(extras.map((y, j) => j === i ? { ...y, valor: e.target.value } : y)); mudou() }} />
+              <CampoDinheiro rotulo="Total (R$)" valor={x.valor}
+                aoMudar={(v) => { setExtras(extras.map((y, j) => j === i ? { ...y, valor: v } : y)); mudou() }} />
               <Selecao rotulo="Divisão" value={x.rateio} opcoes={[{ valor: 'FRACAO_IDEAL', rotulo: 'Fração ideal' }, { valor: 'IGUALITARIO', rotulo: 'Igual' }]}
                 onChange={(e) => { setExtras(extras.map((y, j) => j === i ? { ...y, rateio: e.target.value } : y)); mudou() }} />
               <Botao type="button" variante="perigo" onClick={() => { setExtras(extras.filter((_, j) => j !== i)); mudou() }}>Remover</Botao>

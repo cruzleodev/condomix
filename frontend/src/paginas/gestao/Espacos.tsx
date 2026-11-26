@@ -1,14 +1,35 @@
+import { CampoDinheiro, CampoNumero } from '../../componentes/CampoNumerico'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import { api, dados } from '../../api/cliente'
 import type { Espaco, Reserva } from '../../api/tipos'
 import { CancelamentoDeReserva, EtiquetaDaReserva } from '../../componentes/Reservas'
+import { Selecao } from '../../componentes/formulario'
 import { Tabela } from '../../componentes/Tabela'
 import { Botao, Campo, Cartao, Carregando, Etiqueta, MensagemDeErro, TituloDaPagina } from '../../componentes/ui'
 import { useSessao } from '../../sessao/contexto'
 import { GESTAO } from '../../sessao/papeis'
 import { diaDaSemana, hojeIso, horario, lerReais, moeda, somarDias } from '../../util/formato'
+
+/** Os períodos que podem ser reservados, com as horas sugeridas ao escolher (ajustáveis). */
+const PERIODOS = [
+  { nome: 'Dia inteiro', inicio: '08:00', fim: '22:00' },
+  { nome: 'Manhã', inicio: '08:00', fim: '12:00' },
+  { nome: 'Almoço', inicio: '11:00', fim: '15:00' },
+  { nome: 'Tarde', inicio: '13:00', fim: '18:00' },
+  { nome: 'Noite', inicio: '18:00', fim: '23:00' },
+]
+
+/**
+ * As opções da lista: os períodos ainda não usados neste espaço. Um nome antigo, digitado antes da lista existir,
+ * continua aparecendo, para não sumir ao editar.
+ */
+function opcoesDePeriodo(atual: string, usados: string[]) {
+  const nomes = PERIODOS.map((p) => p.nome).filter((n) => n === atual || !usados.includes(n))
+  if (atual && !nomes.includes(atual)) nomes.unshift(atual)
+  return nomes.map((n) => ({ valor: n, rotulo: n }))
+}
 
 interface HorarioEditado {
   nome: string
@@ -105,26 +126,42 @@ function FormularioDeEspaco({ espaco, aoTerminar }: { espaco: Espaco | null; aoT
   })
   const mudar = (i: number, campo: keyof HorarioEditado, valor: string) =>
     setHorarios(horarios.map((h, j) => (j === i ? { ...h, [campo]: valor } : h)))
+  /** Escolher o período sugere as horas, sem apagar horas que a gestão já ajustou à mão. */
+  function escolherPeriodo(i: number, nome: string) {
+    setHorarios(horarios.map((h, j) => {
+      if (j !== i) return h
+      const anterior = PERIODOS.find((p) => p.nome === h.nome)
+      const sugerido = PERIODOS.find((p) => p.nome === nome)
+      const horasDoAnterior = (!h.inicio && !h.fim) || (anterior && h.inicio === anterior.inicio && h.fim === anterior.fim)
+      return sugerido && horasDoAnterior ? { nome, inicio: sugerido.inicio, fim: sugerido.fim } : { ...h, nome }
+    }))
+  }
   return (
     <Cartao titulo={espaco ? `Editar ${espaco.nome}` : 'Cadastrar espaço'}>
       <form className="space-y-4" onSubmit={(e: FormEvent) => { e.preventDefault(); salvar.mutate() }}>
         <div className="grid gap-3 md:grid-cols-2">
           <Campo rotulo="Nome" required maxLength={100} value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Salão de festas" />
-          <Campo rotulo="Aluguel por reserva (R$)" inputMode="decimal" value={aluguel} onChange={(e) => setAluguel(e.target.value)}
+          <CampoDinheiro rotulo="Aluguel por reserva (R$)" valor={aluguel} aoMudar={(v) => setAluguel(v)}
             ajuda="Vazio ou zero: sem aluguel. Com valor, a reserva vira cobrança da unidade." />
           <Campo rotulo="Descrição (opcional)" value={descricao} onChange={(e) => setDescricao(e.target.value)} maxLength={2000} />
-          <Campo rotulo="Capacidade (pessoas, opcional)" type="number" min={1} value={capacidade} onChange={(e) => setCapacidade(e.target.value)} />
+          <CampoNumero rotulo="Capacidade (pessoas, opcional)" min={1} valor={capacidade} aoMudar={(v) => setCapacidade(v)} />
         </div>
         <fieldset className="space-y-2">
           <legend className="mb-1 text-sm font-semibold text-slate-700">Horários que podem ser reservados</legend>
-          <p className="text-xs text-slate-500">Ex.: um só "Dia inteiro", ou "Almoço" e "Noite". Os horários não podem se sobrepor.</p>
+          <p className="text-xs text-slate-500">
+            Ex.: um só "Dia inteiro", ou "Almoço" e "Noite". Ao escolher, as horas vêm sugeridas e podem ser ajustadas. Os horários
+            não podem se sobrepor.
+          </p>
           {horarios.map((h, i) => (
             <div key={i} className="grid grid-cols-[1fr_auto_auto] items-end gap-2 md:grid-cols-[2fr_1fr_1fr_auto]">
               <div className="col-span-3 md:col-span-1">
-                <Campo rotulo={`Horário ${i + 1}`} required value={h.nome} onChange={(e) => mudar(i, 'nome', e.target.value)} maxLength={50} />
+                <Selecao rotulo={`Horário ${i + 1}`} required value={h.nome} vazio="Escolha…"
+                  onChange={(e) => escolherPeriodo(i, e.target.value)}
+                  opcoes={opcoesDePeriodo(h.nome, horarios.filter((_, j) => j !== i).map((o) => o.nome))} />
               </div>
               <Campo rotulo="Das" type="time" required value={h.inicio} onChange={(e) => mudar(i, 'inicio', e.target.value)} />
-              <Campo rotulo="Às" type="time" required value={h.fim} onChange={(e) => mudar(i, 'fim', e.target.value)} />
+              <Campo rotulo="Às" type="time" required value={h.fim} onChange={(e) => mudar(i, 'fim', e.target.value)}
+                ref={(campo) => campo?.setCustomValidity(h.inicio && h.fim && h.fim <= h.inicio ? 'O fim precisa ser depois do início.' : '')} />
               <button type="button" className="min-h-11 px-2 text-sm text-red-700 underline disabled:text-slate-300" disabled={horarios.length === 1}
                 onClick={() => setHorarios(horarios.filter((_, j) => j !== i))}>Tirar</button>
             </div>
@@ -136,13 +173,13 @@ function FormularioDeEspaco({ espaco, aoTerminar }: { espaco: Espaco | null; aoT
         <fieldset className="space-y-3">
           <legend className="mb-1 text-sm font-semibold text-slate-700">Regras</legend>
           <div className="grid gap-3 md:grid-cols-2">
-            <Campo rotulo="Antecedência mínima (dias)" type="number" min={0} value={minima} onChange={(e) => setMinima(e.target.value)}
+            <CampoNumero rotulo="Antecedência mínima (dias)" min={0} valor={minima} aoMudar={(v) => setMinima(v)}
               ajuda="0: pode reservar para o mesmo dia." />
-            <Campo rotulo="Reservar até quantos dias à frente" type="number" min={0} value={maxima} onChange={(e) => setMaxima(e.target.value)} />
-            <Campo rotulo="Limite por mês, por unidade" type="number" min={1} value={limite} onChange={(e) => setLimite(e.target.value)}
+            <CampoNumero rotulo="Reservar até quantos dias à frente" min={0} valor={maxima} aoMudar={(v) => setMaxima(v)} />
+            <CampoNumero rotulo="Limite por mês, por unidade" min={1} valor={limite} aoMudar={(v) => setLimite(v)}
               ajuda="Vazio: sem limite." />
-            <Campo rotulo="Cancelar sem custo até quantos dias antes" type="number" min={0} value={diasParaCancelar}
-              onChange={(e) => setDiasParaCancelar(e.target.value)} ajuda="Depois disso, o aluguel continua devido. 0: até o próprio dia." />
+            <CampoNumero rotulo="Cancelar sem custo até quantos dias antes" min={0} valor={diasParaCancelar}
+              aoMudar={(v) => setDiasParaCancelar(v)} ajuda="Depois disso, o aluguel continua devido. 0: até o próprio dia." />
           </div>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={bloqueia} onChange={(e) => setBloqueia(e.target.checked)} className="h-5 w-5 accent-marca-700" />
